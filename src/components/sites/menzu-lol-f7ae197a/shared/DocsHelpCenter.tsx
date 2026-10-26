@@ -428,8 +428,10 @@ export function DocsHelpCenter({
           ) : null}
 
           {/* 16px, a step above the 15px questions it heads (the owner,
-              02/10/2026): at 14px it read as a caption, not the list's title. */}
-          <h2 className="flex items-center gap-2.5 text-base font-semibold text-white">
+              02/10/2026): at 14px it read as a caption, not the list's title.
+              Bold since the questions grew to 16px on a computer and stood
+              level with it (26/10/2026, lab 3200). */}
+          <h2 className="flex items-center gap-2.5 text-base font-bold text-white">
             <span aria-hidden className="h-4 w-0.5 rounded-full bg-[var(--menzu-accent)]" />
             {heading}
           </h2>

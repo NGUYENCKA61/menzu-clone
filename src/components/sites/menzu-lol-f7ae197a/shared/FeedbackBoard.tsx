@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { pageCount, PER_PAGE } from "@/lib/paging";
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase } from "@/lib/displayCase";
 
 import { ListPager } from "./AccountListChrome";
 import { PictureLightbox } from "./PictureGallery";
@@ -226,7 +226,9 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
               owner, 01/10/2026: "bổ sung thông tin mua key bản gì game gì";
               07/10/2026: "bỏ nhãn 30 ngày và dấu ." → "đã mua hack valorant
               bản ..."). The tier chip and the game after a dot came off: the
-              tool's own name already says the game. */}
+              tool's own name already says the game. The name is written as
+              the category cards and the home page's reviews write it
+              (26/10/2026, lab 3200: "rà soát kỹ đi"). */}
           {item.purchase ? (
             <p className="mt-2 flex min-w-0 items-center gap-1.5 text-[12px] text-neutral-500">
               <span className="shrink-0">Đã mua</span>
@@ -234,7 +236,7 @@ function ReviewCard({ item }: { item: FeedbackItem }) {
                 href={item.purchase.href}
                 className="min-w-0 truncate font-semibold text-neutral-200 transition-colors hover:text-white sm:max-w-[520px]"
               >
-                {sentenceCase(item.purchase.product)}
+                {titleCase(item.purchase.product)}
               </Link>
             </p>
           ) : null}

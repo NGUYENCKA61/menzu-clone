@@ -12,7 +12,7 @@ import { SOFTWARE_STATUS, type SoftwareStatusValue } from "@/lib/softwareStatus"
 
 import { StatusSubscribeButton } from "./StatusSubscribeButton";
 import { StatusToast } from "./StatusToast";
-import { sentenceCase } from "@/lib/displayCase";
+import { shelfTitle, titleCase } from "@/lib/displayCase";
 
 export interface StatusToolView {
   code: string;
@@ -156,7 +156,7 @@ function shelve(tools: StatusToolView[]): Shelf[] {
     if (!shelf) {
       shelf = {
         slug: tool.categorySlug,
-        name: sentenceCase(tool.categoryName),
+        name: shelfTitle(tool.categoryName),
         logoUrl: tool.categoryLogoUrl,
         imageUrl: tool.categoryImageUrl,
         tools: [],
@@ -296,12 +296,15 @@ export function StatusSubscribeSearch({
                 </span>
               ) : null}
               {/* The name, the count and the rule in the history tab's day
-                  heading's sizes and colours, 15px over a 13px count and the
-                  site's line, where they were 13px, 12px and a fainter rule
-                  (18/10/2026, "xét sự đồng bộ luôn"). */}
+                  heading's sizes, colours and weight, 15px over a 13px count
+                  and the site's line, where they were 13px, 12px and a
+                  fainter rule (18/10/2026, "xét sự đồng bộ luôn"). The game
+                  is named as its tile names it, and the tools below are
+                  written and weighed as the history tab's (26/10/2026, lab
+                  3200: "rà soát kỹ đi"; sentence case and 600 before). */}
               <Link
                 href={categoryHref(shelf.slug)}
-                className={`group inline-flex items-center gap-1.5 font-semibold transition-colors hover:text-[var(--menzu-accent)] ${
+                className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors hover:text-[var(--menzu-accent)] ${
                   old ? "text-[13px] text-white" : "text-[15px] text-frost"
                 }`}
               >
@@ -411,9 +414,9 @@ export function StatusSubscribeSearch({
                         // text column is narrow enough that half these names
                         // would end in "…" and stop telling the reader which
                         // tool it is.
-                        className="line-clamp-2 text-[15px] font-semibold leading-snug text-frost transition-colors hover:text-white"
+                        className="line-clamp-2 text-[15px] font-extrabold leading-snug text-frost transition-colors hover:text-white"
                       >
-                        {sentenceCase(tool.name)}
+                        {titleCase(tool.name)}
                       </Link>
                       {/* The history tab's chip, dot and all, so a state
                           reads the same on both tabs (18/10/2026). */}

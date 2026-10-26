@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Bell } from "lucide-react";
-import { titleCase } from "@/lib/displayCase";
+import { shelfTitle, titleCase } from "@/lib/displayCase";
 
 import { SimplePage } from "@/components/sites/menzu-lol-f7ae197a/shared/SimplePage";
 import {
@@ -270,10 +270,11 @@ export default async function AnnouncementsPage({
               // screenshot per change made the history screens long), the time,
               // the state and the game on one line, the tool's name under them,
               // the shop's note under that. The rail and dots are gone; the
-              // times already say the order. Names and games are written, and
-              // the name weighed, as Lịch sử mua and the category cards do
-              // (the owner, 26/10/2026, lab 3200: "làm đi"; sentence case and
-              // 700 before).
+              // times already say the order. The name is written and weighed
+              // as Lịch sử mua and the category cards write it, the game as
+              // its tile on the home page names it (the owner, 26/10/2026, lab
+              // 3200: "làm đi", "nó đồng bộ với tên danh mục game ấy";
+              // sentence case and 700 before).
               <div className="flex flex-col gap-8">
                 {groupByDay(events).map((group) => (
                   <section key={group.key} aria-label={dayLabel(group.key, now)}>
@@ -289,7 +290,13 @@ export default async function AnnouncementsPage({
                     <ol className="flex flex-col gap-3">
                       {group.items.map((event) => {
                         const state = SOFTWARE_STATUS[event.status];
-                        const name = titleCase(event.productName);
+                        // A whole-category row is the game's name and the
+                        // count, not a tool's: title case would have raised
+                        // "cả danh mục (5 tool)" along with it.
+                        const name =
+                          event.scope === "category"
+                            ? `${shelfTitle(event.categoryName)} · cả danh mục (${event.toolCount} tool)`
+                            : titleCase(event.productName);
                         const head = (
                           <>
                             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
@@ -306,7 +313,7 @@ export default async function AnnouncementsPage({
                                 {state.label}
                               </span>
                               <span className="text-[13px] text-dim">
-                                {event.scope === "category" ? "Cả danh mục" : titleCase(event.categoryName)}
+                                {event.scope === "category" ? "Cả danh mục" : shelfTitle(event.categoryName)}
                               </span>
                             </div>
                             {/* line-clamp-2 alone: a "block" beside it undid the
