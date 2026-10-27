@@ -404,7 +404,7 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${RENT}`}
+                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent-dark)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] ${RENT}`}
               >
                 Mua ngay
               </Link>
@@ -524,7 +524,10 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
+              // One step deeper, settled ("chốt màu này"): the hover red as the resting colour and the
+              // bright accent under the pointer (the owner, 27/10/2026: "màu đỏ này sao
+              // chói quá ta", then "thử 1 đi").
+              className={`bg-[var(--menzu-accent-dark)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:opacity-50 ${RENT}`}
             >
               {/* "Mua ngay", the tool page's word (the owner, 27/10/2026:
                   "thuê ngay đổi thành chữ mua ngay"). */}
