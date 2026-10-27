@@ -524,7 +524,11 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
+              // TRIAL: grey, the old shop's "MUA NGAY" colours measured on
+              // thichthihack.com (#23262d, a 2px #2a2b37 edge, #cfcdcd
+              // words), lighter under the pointer (the owner, 27/10/2026:
+              // "mua ngay màu xám thử"; it was the accent red).
+              className={`border-2 border-[#2a2b37] bg-[#23262d] text-[12px] font-semibold text-[#cfcdcd] transition-colors hover:bg-[#2c3039] hover:text-white disabled:opacity-50 ${RENT}`}
             >
               {/* "Mua ngay", the tool page's word (the owner, 27/10/2026:
                   "thuê ngay đổi thành chữ mua ngay"). */}
