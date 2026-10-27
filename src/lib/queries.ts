@@ -512,13 +512,23 @@ function softwareWhere(categoryId: string, filters: CategoryFilters) {
   // single AND rather than spread as keys: two of them are ORs, and a second
   // `OR` key would silently replace the first.
   const and: Prisma.ProductWhereInput[] = [];
+  // The shelf's one search bar (27/10/2026: "1 thanh tìm kiếm dài duy
+  // nhất"): every word typed must appear in the tool's name or code or
+  // anywhere it describes itself, as the feature search below reads, so a
+  // version ("OBV") and a feature ("aimbot") are found from the same field.
   if (name) {
-    and.push({
-      OR: [
-        { name: { contains: name, mode: "insensitive" } },
-        { code: { contains: name, mode: "insensitive" } },
-      ],
-    });
+    for (const word of name.split(/[\s,]+/).filter(Boolean)) {
+      and.push({
+        OR: [
+          { name: { contains: word, mode: "insensitive" } },
+          { code: { contains: word, mode: "insensitive" } },
+          { summary: { contains: word, mode: "insensitive" } },
+          { description: { contains: word, mode: "insensitive" } },
+          { features: { contains: word, mode: "insensitive" } },
+          { featuresNote: { contains: word, mode: "insensitive" } },
+        ],
+      });
+    }
   }
   // "Tìm chức năng": every word typed must appear somewhere the tool
   // describes itself — its name, its short or long description, its own

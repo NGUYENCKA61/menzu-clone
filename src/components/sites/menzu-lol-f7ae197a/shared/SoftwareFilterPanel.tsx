@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Clock, Crosshair, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Loader2, Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -12,7 +12,6 @@ import {
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
-  SEARCH_SHELL_CLASS,
   SEGMENT_IDLE,
   SEGMENT_PICKED,
   SEGMENTS_CLASS,
@@ -98,8 +97,10 @@ export function SoftwareFilterPanel({
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const [nameQuery, setNameQuery] = useState(params.get("pm") ?? "");
-  const [featureQuery, setFeatureQuery] = useState(params.get("cn") ?? "");
+  // One search for names and features alike (the owner, 27/10/2026: "làm
+  // lại thành 1 thanh tìm kiếm dài duy nhất"); an older link's feature
+  // search (cn) opens in it.
+  const [nameQuery, setNameQuery] = useState(params.get("pm") ?? params.get("cn") ?? "");
   const status = (params.get("tt") as StatusValue) ?? "all";
   const sort = (params.get("pmsort") as SortValue) ?? "newest";
   const runs = (params.get("hd") as RunsValue) ?? "all";
@@ -142,41 +143,27 @@ export function SoftwareFilterPanel({
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    apply({ pm: nameQuery.trim(), cn: featureQuery.trim() });
+    apply({ pm: nameQuery.trim(), cn: "" });
   }
 
   return (
     <form onSubmit={handleSubmit} aria-busy={isPending} className="flex flex-col gap-3 w-full">
-      {/* Split 6/4 like the account row above: the name is what most people
-          arrive knowing, the feature is what they fall back on. */}
+      {/* One long field for a tool's name or what it does, then the
+          button (the owner, 27/10/2026: "làm lại thành 1 thanh tìm kiếm
+          dài duy nhất"); the feature field beside it is gone, its search
+          folded into this one (lib/queries softwareWhere). */}
       <div className="flex flex-col md:flex-row gap-2.5">
-        <div className="flex-[6] relative min-w-0">
+        <div className="flex-1 relative min-w-0">
           <ScopeSearchField
             value={nameQuery}
             onChange={setNameQuery}
-            placeholder={hint}
+            placeholder={`${hint.replace(/(…|\.\.\.)$/, "")}, Aimbot, ESP…`}
             busy={isPending}
             // The breathing outline without the gold pill: the pill was tried
             // here and taken back off, the glow was asked to stay — breathing
             // purple into red rather than the account banner's red into gold.
             glow="brand"
           />
-        </div>
-
-        <div className="flex-[4] relative min-w-0">
-          <div className={SEARCH_SHELL_CLASS}>
-            {/* As big as the reticle in the field beside it, on trial
-                (24/10/2026, "cho kích thước icon bên phải bằng kích thước
-                icon bên trái đi cho đồng bộ thử"); it was 15px. */}
-            <Crosshair size={22} className="text-neutral-500 shrink-0" />
-            <input
-              type="text"
-              value={featureQuery}
-              onChange={(event) => setFeatureQuery(event.target.value)}
-              placeholder="Tìm chức năng (Aimbot, ESP…)"
-              className="flex-1 bg-transparent outline-none text-white placeholder-neutral-500 text-sm cursor-text text-ellipsis"
-            />
-          </div>
         </div>
 
         <button
