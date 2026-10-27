@@ -62,7 +62,10 @@ export function CategoryHero({
 
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
-        <h1 className="mb-4 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+        {/* TRIAL: the shop's line sits closer under the name, 4px where it
+            was 16px (the owner, 27/10/2026: "viết phần mô tả sát lại xem
+            ntn"). */}
+        <h1 className="mb-1 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
           {/* As the home page's tile names it (23/10/2026). */}
           {shelfTitle(name)}
         </h1>
