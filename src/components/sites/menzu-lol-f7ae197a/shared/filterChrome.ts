@@ -49,7 +49,7 @@ export const CHIP_ACTIVE = `press ${CHIP_SHAPE} ${CHIP_PICKED}`;
 export const SEGMENTS_CLASS =
   "inline-flex h-10 items-center gap-0.5 rounded-xl border border-neutral-700/30 bg-neutral-800/40 p-1";
 
-const SEGMENT_SHAPE =
+export const SEGMENT_SHAPE =
   "inline-flex h-8 min-w-[72px] items-center justify-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[11px] font-bold transition-all";
 
 export const SEGMENT_IDLE = `press ${SEGMENT_SHAPE} border-transparent text-neutral-400 hover:text-neutral-200`;

@@ -9,11 +9,13 @@ import { launcherLabel } from "@/lib/toolFilters";
 import {
   CHIP_ACTIVE,
   CHIP_INACTIVE,
+  CHIP_SHAPE,
   GROUP_DIVIDER,
   GROUP_LABEL_CLASS,
   PANEL_CLASS,
   SEGMENT_IDLE,
   SEGMENT_PICKED,
+  SEGMENT_SHAPE,
   SEGMENTS_CLASS,
 } from "./filterChrome";
 import { ScopeSearchField } from "./ScopeSearchField";
@@ -70,11 +72,16 @@ const RUNS_OPTIONS = [
  */
 const B_FIELD =
   "group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/5 px-4 ring-1 ring-inset ring-white/10 transition-shadow focus-within:ring-[var(--menzu-accent)]/60";
-const B_CHIP =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors";
-const B_CHIP_IDLE = "bg-white/[0.02] text-mist ring-1 ring-inset ring-white/[0.06] hover:text-frost hover:ring-white/20";
-const B_CHIP_ACTIVE = "bg-white/[0.12] text-frost ring-1 ring-inset ring-white/25";
-const B_GROUP_LABEL = "mr-0.5 text-[13px] text-dim";
+// B's chips and wells: the default panel's shapes, the home chips' colours
+// (a near-clear fill and a faint rim; the picked one a lighter well with a
+// brighter rim, no red).
+const B_IDLE_COLOURS = "border-white/[0.06] bg-white/[0.02] text-mist hover:border-white/20 hover:text-frost";
+const B_PICKED_COLOURS = "border-white/25 bg-white/[0.12] text-frost";
+const B_PILL = `press ${CHIP_SHAPE} ${B_IDLE_COLOURS}`;
+const B_PILL_ACTIVE = `press ${CHIP_SHAPE} ${B_PICKED_COLOURS}`;
+const B_SEGMENTS = "inline-flex h-10 items-center gap-0.5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-1";
+const B_SEGMENT = `press ${SEGMENT_SHAPE} border-transparent text-mist hover:text-frost`;
+const B_SEGMENT_ACTIVE = `press ${SEGMENT_SHAPE} ${B_PICKED_COLOURS}`;
 const noSubscribe = () => () => {};
 function readOptionB(): boolean {
   if (process.env.NODE_ENV === "production") return false;
@@ -176,10 +183,12 @@ export function SoftwareFilterPanel({
     typingTimer.current = setTimeout(() => apply({ pm: value.trim(), cn: "" }), 450);
   }
 
-  if (optionB) {
-    const chip = (on: boolean) => `${B_CHIP} ${on ? B_CHIP_ACTIVE : B_CHIP_IDLE}`;
-    return (
-      <form onSubmit={handleSubmit} aria-busy={isPending} className="flex w-full flex-col gap-4">
+  // B keeps the panel below as it is and wears the home chips' colours; its
+  // field is the home game list's (above).
+  const K = optionB
+    ? { pill: B_PILL, pillActive: B_PILL_ACTIVE, segments: B_SEGMENTS, segment: B_SEGMENT, segmentActive: B_SEGMENT_ACTIVE }
+    : { pill: PILL, pillActive: PILL_ACTIVE, segments: SEGMENTS, segment: SEGMENT, segmentActive: SEGMENT_ACTIVE };
+  const bField = (
         <label className={B_FIELD}>
           {isPending ? (
             <Loader2 size={18} aria-hidden className="relative shrink-0 animate-spin text-neutral-200 motion-reduce:animate-none" />
@@ -211,85 +220,7 @@ export function SoftwareFilterPanel({
             </button>
           ) : null}
         </label>
-
-        <div role="group" aria-label="Bộ lọc" className="flex flex-wrap items-center gap-x-2.5 gap-y-3">
-          <span className={B_GROUP_LABEL}>Trạng thái</span>
-          {STATUS_OPTIONS.map((option) => (
-            <button
-              key={`tt-${option.value}`}
-              type="button"
-              aria-pressed={shownStatus === option.value}
-              onClick={() =>
-                startTransition(() => {
-                  showStatus(option.value);
-                  apply({ tt: option.value === "all" ? "" : option.value });
-                })
-              }
-              className={chip(shownStatus === option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
-          <span className={`${B_GROUP_LABEL} ml-3`}>Hoạt động</span>
-          {RUNS_OPTIONS.map((option) => (
-            <button
-              key={`hd-${option.value}`}
-              type="button"
-              aria-pressed={shownRuns === option.value}
-              onClick={() =>
-                startTransition(() => {
-                  showRuns(option.value);
-                  apply({ hd: option.value === "all" ? "" : option.value });
-                })
-              }
-              className={chip(shownRuns === option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
-          {launchers.length > 0 ? (
-            <>
-              <span className={`${B_GROUP_LABEL} ml-3`}>Nền tảng</span>
-              {["", ...launchers.map((key) => key.toLowerCase())].map((value) => (
-                <button
-                  key={`nt-${value || "all"}`}
-                  type="button"
-                  aria-pressed={shownLauncher === value}
-                  onClick={() =>
-                    startTransition(() => {
-                      showLauncher(value);
-                      apply({ nt: value });
-                    })
-                  }
-                  className={chip(shownLauncher === value)}
-                >
-                  {value ? launcherLabel(value.toUpperCase()) : "Tất cả"}
-                </button>
-              ))}
-            </>
-          ) : null}
-          <span className={`${B_GROUP_LABEL} ml-3`}>Sắp xếp</span>
-          {SORT_OPTIONS.map((option) => (
-            <button
-              key={`pmsort-${option.value}`}
-              type="button"
-              aria-pressed={shownSort === option.value}
-              onClick={() =>
-                startTransition(() => {
-                  showSort(option.value);
-                  apply({ pmsort: option.value === "newest" ? "" : option.value });
-                })
-              }
-              className={chip(shownSort === option.value)}
-            >
-              {option.value === "newest" ? <Clock size={16} aria-hidden className="shrink-0" /> : null}
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </form>
-    );
-  }
+  );
 
   return (
     <form onSubmit={handleSubmit} aria-busy={isPending} className="flex flex-col gap-3 w-full">
@@ -297,6 +228,7 @@ export function SoftwareFilterPanel({
           button (the owner, 27/10/2026: "làm lại thành 1 thanh tìm kiếm
           dài duy nhất"); the feature field beside it is gone, its search
           folded into this one (lib/queries softwareWhere). */}
+      {optionB ? bField : (
       <div className="flex flex-col md:flex-row gap-2.5">
         <div className="flex-1 relative min-w-0">
           <ScopeSearchField
@@ -325,6 +257,7 @@ export function SoftwareFilterPanel({
           Tìm kiếm
         </button>
       </div>
+      )}
 
       {/* On a phone the chip groups fold behind one row: two search boxes,
           three rows of chips and a full-width button took the whole first
@@ -377,7 +310,7 @@ export function SoftwareFilterPanel({
                       apply({ tt: option.value === "all" ? "" : option.value });
                     })
                   }
-                  className={shownStatus === option.value ? PILL_ACTIVE : PILL}
+                  className={shownStatus === option.value ? K.pillActive : K.pill}
                 >
                   {option.label}
                 </button>
@@ -389,7 +322,7 @@ export function SoftwareFilterPanel({
 
           <div>
             <span className={GROUP_LABEL_CLASS}>Hoạt động</span>
-            <div className={SEGMENTS}>
+            <div className={K.segments}>
               {RUNS_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -401,7 +334,7 @@ export function SoftwareFilterPanel({
                       apply({ hd: option.value === "all" ? "" : option.value });
                     })
                   }
-                  className={shownRuns === option.value ? SEGMENT_ACTIVE : SEGMENT}
+                  className={shownRuns === option.value ? K.segmentActive : K.segment}
                 >
                   {option.label}
                 </button>
@@ -429,7 +362,7 @@ export function SoftwareFilterPanel({
                           apply({ nt: value });
                         })
                       }
-                      className={shownLauncher === value ? PILL_ACTIVE : PILL}
+                      className={shownLauncher === value ? K.pillActive : K.pill}
                     >
                       {value ? launcherLabel(value.toUpperCase()) : "Tất cả"}
                     </button>
@@ -443,7 +376,7 @@ export function SoftwareFilterPanel({
 
           <div>
             <span className={GROUP_LABEL_CLASS}>Sắp xếp</span>
-            <div className={SEGMENTS}>
+            <div className={K.segments}>
               {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -455,7 +388,7 @@ export function SoftwareFilterPanel({
                       apply({ pmsort: option.value === "newest" ? "" : option.value });
                     })
                   }
-                  className={shownSort === option.value ? SEGMENT_ACTIVE : SEGMENT}
+                  className={shownSort === option.value ? K.segmentActive : K.segment}
                 >
                   {option.value === "newest" ? <Clock size={12} aria-hidden /> : null}
                   {option.label}
@@ -467,6 +400,7 @@ export function SoftwareFilterPanel({
       </div>
       </div>
 
+      {optionB ? null : (
       <button
         type="submit"
         className="press md:hidden flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--brand)] text-[14px] font-semibold text-white hover:bg-[var(--brand-dark)]"
@@ -478,6 +412,7 @@ export function SoftwareFilterPanel({
         )}
         Tìm kiếm
       </button>
+      )}
     </form>
   );
 }
