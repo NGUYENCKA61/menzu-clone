@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronDown, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { CardImage } from "@/components/sites/menzu-lol-f7ae197a/shared/CardImage";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { sentenceCase, titleCase } from "@/lib/displayCase";
 import { shortBlurb } from "@/lib/shortBlurb";
@@ -117,33 +117,7 @@ export function SoftwareCard({
 }) {
   const [packageId, setPackageId] = useState("");
   const [hint, setHint] = useState(false);
-  const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close the tier dropdown on an outside click or Escape. Bound only while it
-  // is open, off a document listener rather than a fixed backdrop — the card's
-  // hover transform would otherwise trap a fixed overlay inside the card.
-  useEffect(() => {
-    if (!open) return;
-    const onPointer = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setOpen(false);
-      // The trigger takes focus back; it used to fall to <body>.
-      dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
 
   /**
    * A free tool (the shop's 1đ placeholder tier) gets its own card (the
@@ -170,18 +144,6 @@ export function SoftwareCard({
   const FREE_BUTTON =
     "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
-  // One dropdown row. Same 11px/Inter as the trigger and the buttons, so the
-  // open list matches the card exactly (the whole reason for a custom picker
-  // over a native select). The chosen row is filled red; the rest sit light
-  // grey and turn red on hover.
-  const optionCls = (selected: boolean) =>
-    `block w-full whitespace-nowrap rounded-[7px] px-3 py-2 text-left transition-colors ${
-      old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
-    } ${
-      selected
-        ? "bg-[var(--menzu-accent)] text-white"
-        : "text-neutral-200 hover:bg-[var(--menzu-accent)]/10"
-    }`;
   // The rent button at the picker's and "Xem chi tiết"'s height and corners.
   const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
   // The pills on the picture keep their dark glass, for a photo under them,
@@ -209,10 +171,6 @@ export function SoftwareCard({
     // viền đỏ ngoài khi rê").
     // At rest the edge is white 10%, a step above the home tiles' 6%: the
     // product cards only (24/10/2026, "lên viền cho card sản phẩm ... thôi").
-    // The hover lift is a transform, which makes the card its own stacking
-    // context: the open tier list, however high its z-index, could never rise
-    // above the cards and sections drawn after this one. While the list is
-    // open the whole card steps up a layer instead.
     // tool-card, tool-status, tool-status-line and tool-more are hooks for the
     // light trial "moi" (theme-light.css, part 6); no style of their own.
     <div
@@ -220,7 +178,7 @@ export function SoftwareCard({
         old
           ? "lab-notch border border-line hover:border-line-strong"
           : "rounded-[14px] border border-white/10 lift-card hover:-translate-y-1 hover:border-[var(--menzu-accent)]/50 hover:shadow-[0_15px_40px_#00000088]"
-      } ${open ? "z-40" : ""}`}
+      }`}
     >
       {/* Picture flush to the card's edges. The shop's image when set; otherwise
           the reference's dark gradient, under the name. */}
@@ -437,95 +395,36 @@ export function SoftwareCard({
           ) : (
           <>
           <div className="grid grid-cols-2 gap-2">
-            {/* Custom picker: a native <select>'s open list is drawn by the OS
-                in its own font and size, so it never matches the card. This one
-                is real elements — same 11px Inter throughout — and carries the
-                reference's red styling. State and handoff are unchanged. */}
-            <div ref={dropdownRef} className="relative">
-              <button
-                type="button"
-                disabled={!hasPackages}
-                aria-haspopup="listbox"
-                aria-expanded={open}
-                // The visible words come first, then which tool they belong
-                // to. An aria-label that does not begin with the text on the
-                // button leaves anyone driving the page by voice unable to
-                // say what they can see — "chọn gói" was the label while the
-                // button read "-- Chọn gói --" or a tier and a price.
-                aria-label={`${
-                  chosen
-                    ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
-                    : hasPackages
-                      ? "Chọn gói"
-                      : "Chưa có gói"
-                } - ${software.name}`}
-                onClick={() => hasPackages && setOpen((o) => !o)}
-                className={`flex h-[42px] w-full items-center justify-between gap-1 rounded-[10px] border bg-white/[0.02] px-2.5 outline-none transition-colors duration-200 hover:border-[var(--menzu-accent)]/45 hover:text-white focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 aria-expanded:border-[var(--menzu-accent)]/45 aria-expanded:text-white disabled:opacity-50 ${
-                  old ? "text-[11px] font-extrabold" : "text-[12px] font-semibold"
-                } ${
-                  chosen
-                    ? "border-[var(--menzu-accent)]/45 text-white"
-                    : "border-[#292a30] text-[#aaa]"
-                }`}
-              >
-                <span className="truncate">
-                  {chosen
-                    ? `${chosen.label} - ${formatVnd(chosen.price)}đ`
-                    : hasPackages
-                      ? "-- Chọn gói --"
-                      : "Chưa có gói"}
-                </span>
-                <ChevronDown
-                  size={14}
-                  aria-hidden
-                  className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              {open ? (
-                <div
-                    role="listbox"
-                    className="drop-in absolute left-0 top-[calc(100%+6px)] z-50 min-w-full w-max max-w-[230px] overflow-hidden rounded-[10px] border border-[var(--menzu-accent)]/40 bg-[#160b0e] p-1.5 shadow-[0_18px_40px_#0009]"
-                  >
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={packageId === ""}
-                      onClick={() => {
-                        setPackageId("");
-                        setHint(false);
-                        setOpen(false);
-                        dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
-                      }}
-                      className={`mb-1 ${optionCls(packageId === "")}`}
-                    >
-                      -- Chọn gói --
-                    </button>
-                    {software.packages.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        role="option"
-                        aria-selected={p.id === packageId}
-                        onClick={() => {
-                          setPackageId(p.id);
-                          setHint(false);
-                          setOpen(false);
-                          dropdownRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus({ preventScroll: true });
-                        }}
-                        className={optionCls(p.id === packageId)}
-                      >
-                        {p.label} - {formatVnd(p.price)}đ
-                        {p.listPrice ? (
-                          <span className="ml-1.5 text-[11px] text-[#8a8c94] line-through">
-                            {formatVnd(p.listPrice)}đ
-                          </span>
-                        ) : null}
-                      </button>
-                    ))}
-                </div>
-              ) : null}
-            </div>
+            {/* The old shop's own picker (the owner, 27/10/2026: "dùng nút
+                chọn gói web thichthihack.com cũ đi", "nút chọn gói trang chi
+                tiết danh mục", "card sản phẩm"): a native <select> with no
+                box, "--Chọn gói--" centred over one faint line that lights
+                in the accent on focus, each tier written as the old site
+                writes it, price / duration. The card's own font, a dark list
+                where the OS draws it (color-scheme). Nothing is chosen on
+                arrival, as there, and "Thuê ngay" asks for a tier first. */}
+            <select
+              value={packageId}
+              disabled={!hasPackages}
+              onChange={(e) => {
+                setPackageId(e.target.value);
+                setHint(false);
+              }}
+              aria-label={`Chọn gói - ${software.name}`}
+              className={`h-[42px] w-full min-w-0 cursor-pointer truncate border-0 border-b bg-transparent px-1 text-center outline-none transition-colors duration-200 [color-scheme:dark] hover:border-white/30 focus:border-[var(--menzu-accent)] disabled:cursor-default disabled:opacity-50 ${
+                old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
+              } ${chosen ? "border-white/25 text-white" : "border-white/10 text-[#aaa]"}`}
+            >
+              <option value="" className="bg-raise text-[#aaa]">
+                {hasPackages ? "--Chọn gói--" : "Chưa có gói"}
+              </option>
+              {software.packages.map((p) => (
+                <option key={p.id} value={p.id} className="bg-raise text-white">
+                  {formatVnd(p.price)}đ / {p.label}
+                  {p.listPrice ? ` (giá gốc ${formatVnd(p.listPrice)}đ)` : ""}
+                </option>
+              ))}
+            </select>
 
             <button
               type="button"
