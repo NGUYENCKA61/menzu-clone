@@ -348,19 +348,19 @@ export function SiteHeaderClient({
               tablet header — menu button, strip of quick links, search —
               which already fits. MobileDrawer switches on the same line. */}
           <div className="hidden xl:flex items-center gap-5 h-full">
-            {/* TRIAL: the word "Trang chủ" becomes the shop's name as a
-                wordmark, THICHTHI in the accent and HACK in white (the
-                owner, 27/10/2026: "chữ này đổi thành logo chữ THICHTHIHACK
-                đi THICHTHI màu đỏ HACK màu trắng"). It starts on the page's
-                left edge as the logo did, still the home link, named
-                "Trang chủ" for screen readers. */}
+            {/* TRIAL: the word "Trang chủ" becomes a wordmark, now "KWIN" in
+                the accent, as the footer's "Designed & developed by KWIN"
+                (the owner, 27/10/2026: "chữ này đổi thành logo chữ
+                THICHTHIHACK đi THICHTHI màu đỏ HACK màu trắng", then "đổi
+                này thành KWIN đi"; the THICHTHI/HACK version is c0e03729).
+                It starts on the page's left edge as the logo did, still the
+                home link, named "Trang chủ" for screen readers. */}
             <Link
               href="/"
               aria-label="Trang chủ"
-              className="mr-2 flex items-center whitespace-nowrap font-display text-[20px] font-black leading-none tracking-[-0.02em] transition-opacity hover:opacity-85"
+              className="mr-2 flex items-center whitespace-nowrap font-display text-[20px] font-black leading-none tracking-[-0.02em] text-[var(--menzu-accent)] transition-opacity hover:opacity-85"
             >
-              <span className="text-[var(--menzu-accent)]">THICHTHI</span>
-              <span className="text-white">HACK</span>
+              KWIN
             </Link>
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
