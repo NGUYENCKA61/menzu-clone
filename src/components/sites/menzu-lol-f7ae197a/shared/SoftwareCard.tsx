@@ -144,12 +144,8 @@ export function SoftwareCard({
   const FREE_BUTTON =
     "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
-  // The rent button at the picker's and "Xem chi tiết"'s height. TRIAL:
-  // both take the old shop's "MUA NGAY" corners, 3px, measured on
-  // thichthihack.com (the owner, 27/10/2026: "bo vuông thử", "bo vuông mỗi
-  // nút xem chi tiết", then "bo như nút mua ngay ở web thichthihack 2 nút
-  // thử"; they were 10px).
-  const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[3px]";
+  // The rent button at the picker's and "Xem chi tiết"'s height and corners.
+  const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
   // The pills on the picture keep their dark glass, for a photo under them,
   // and take the site's chip shape: 8px corners like the home tile's "Top
   // tháng" and the state chips, semibold words (19/10/2026, "làm thử").
@@ -456,7 +452,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[3px] border border-[var(--menzu-accent)]/40 bg-transparent text-[12px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[12px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
           >
             Xem chi tiết
           </Link>
