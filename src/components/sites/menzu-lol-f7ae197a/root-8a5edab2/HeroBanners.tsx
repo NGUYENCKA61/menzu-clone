@@ -220,7 +220,7 @@ export function HeroBanners({
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={primaryHref}
-              className={`${CTA} bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`}
+              className={`${CTA} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`}
             >
               <ShoppingBag size={15} aria-hidden />
               {primaryLabel}

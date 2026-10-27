@@ -144,7 +144,7 @@ export function AssistantChat() {
           type="submit"
           disabled={busy || !draft.trim()}
           aria-label="Gửi"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-dark)] text-white transition-colors hover:bg-[var(--brand)] disabled:opacity-40"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand)] text-white transition-colors hover:bg-[var(--brand-dark)] disabled:opacity-40"
         >
           <SendHorizontal size={15} />
         </button>

@@ -538,7 +538,7 @@ export function AccountBuyPanel({
           type="button"
           disabled={soldOut || gated}
           onClick={openDialog}
-          className="press w-full h-14 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:opacity-50 text-[14px] font-semibold text-white"
+          className="press w-full h-14 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[14px] font-semibold text-white"
         >
           Mua ngay
         </button>

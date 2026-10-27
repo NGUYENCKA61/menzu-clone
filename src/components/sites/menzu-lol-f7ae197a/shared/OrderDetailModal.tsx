@@ -635,7 +635,7 @@ export function OrderDetailModal({
           ref={setTrigger}
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent-dark)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Receipt className="h-3.5 w-3.5" />
           Xem đơn hàng
@@ -1258,7 +1258,7 @@ export function OrderDetailModal({
                             // must take.
                             warrantyAction.kind === "status"
                               ? "border border-[var(--menzu-accent)]/70 bg-transparent text-white hover:bg-[var(--menzu-accent)]/10"
-                              : "bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]"
+                              : "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                           }`}
                         >
                           <WarrantyIcon className="h-4 w-4" />
@@ -1557,7 +1557,7 @@ function LoginRevealDialog({ code, onClose }: { code: string; onClose: () => voi
             type="button"
             onClick={take}
             disabled={!recording || busy}
-            className="press h-11 rounded-[10px] bg-[var(--menzu-accent-dark)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
+            className="press h-11 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-neutral-500 sm:h-10"
           >
             {busy ? "Đang mở…" : "Xác nhận lấy thông tin"}
           </button>

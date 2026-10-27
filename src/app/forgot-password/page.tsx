@@ -99,7 +99,7 @@ export default async function ForgotPasswordPage({
                     rel="noreferrer"
                     className={`${ACTION} ${
                       index === 0
-                        ? "bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]"
+                        ? "bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
                         : "border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
                     }`}
                   >

@@ -72,7 +72,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <p className="mt-2 text-[14px] leading-relaxed text-neutral-300">{done}</p>
         <Link
           href="/login"
-          className="mt-7 flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent-dark)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
+          className="mt-7 flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           Đăng nhập ngay
         </Link>
@@ -138,7 +138,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
+        className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors"
       >
         {pending ? "Đang đổi…" : "Đặt mật khẩu mới"}
       </button>

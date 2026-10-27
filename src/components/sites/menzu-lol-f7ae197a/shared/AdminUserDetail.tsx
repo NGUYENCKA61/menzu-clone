@@ -49,7 +49,7 @@ const FIELD =
   "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
 const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors";
 const HINT = "text-[11px] text-neutral-500 leading-relaxed";
 
 function formatVnd(n: number): string {

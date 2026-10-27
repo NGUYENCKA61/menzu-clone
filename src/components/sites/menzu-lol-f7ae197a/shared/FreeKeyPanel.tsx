@@ -387,7 +387,7 @@ export function FreeKeyPanel({
               !tier
             }
             onClick={() => void start()}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:opacity-50 text-[16px] font-semibold text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 text-[16px] font-semibold text-white"
           >
             {phase.kind === "busy" ? (
               <Loader2
@@ -407,7 +407,7 @@ export function FreeKeyPanel({
         ) : (
           <Link
             href={loginHref}
-            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] text-[16px] font-semibold text-white"
+            className="press flex w-full h-14 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-[16px] font-semibold text-white"
           >
             <KeyRound size={16} aria-hidden />
             Đăng nhập để lấy key

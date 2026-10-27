@@ -156,9 +156,9 @@ const TONES: Record<
     image: "object-cover",
     title: "group-hover:text-[var(--menzu-accent)]",
     buttonEdge:
-      "bg-[var(--menzu-accent-dark)] group-hover:bg-[var(--menzu-accent)]",
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
     buttonFace:
-      "bg-[var(--menzu-accent-dark)] group-hover:bg-[var(--menzu-accent)]",
+      "bg-[var(--menzu-accent)] group-hover:bg-[var(--menzu-accent-dark)]",
   },
 };
 
@@ -538,7 +538,7 @@ function BentoTile({
           </p>
         ) : null}
         {lead ? (
-          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-xl bg-[var(--menzu-accent-dark)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent)]">
+          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
             Xem ngay
             <ChevronRight size={12} aria-hidden />
           </span>

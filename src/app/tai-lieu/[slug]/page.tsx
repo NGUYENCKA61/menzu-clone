@@ -314,7 +314,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
                     href={tool.downloadUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`${BUTTON} w-full bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)] sm:w-auto`}
+                    className={`${BUTTON} w-full bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)] sm:w-auto`}
                   >
                     <Download size={15} aria-hidden />
                     {tool.downloadName ?? DEFAULT_DOWNLOAD_NAME}
@@ -485,7 +485,7 @@ export default async function ToolDocsPage({ params }: PageProps) {
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/orders"
-                  className={`${BUTTON} bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`}
+                  className={`${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`}
                 >
                   <LifeBuoy size={15} aria-hidden />
                   Gửi yêu cầu bảo hành

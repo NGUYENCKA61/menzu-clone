@@ -562,7 +562,7 @@ export function SecurityPanel({
                       cooldown > 0 ||
                       (!locked && (!emailValue.trim() || alreadyProved))
                     }
-                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                   >
                     {emailBusy === "send" ? (
                       <Loader2
@@ -627,7 +627,7 @@ export function SecurityPanel({
                       type="button"
                       onClick={verifyOtp}
                       disabled={emailBusy !== null || otp.length !== 6}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
+                      className="flex items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-white/5 text-white text-[14px] font-semibold px-5 py-3 whitespace-nowrap transition-colors disabled:text-neutral-500"
                     >
                       {emailBusy === "verify" ? (
                         <Loader2
@@ -711,7 +711,7 @@ export function SecurityPanel({
                 <button
                   type="submit"
                   disabled={pwBusy}
-                  className="w-full h-12 bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:bg-[var(--menzu-accent)]/50 text-white font-semibold rounded-xl text-[14px] transition-colors flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:bg-[var(--menzu-accent)]/50 text-white font-semibold rounded-xl text-[14px] transition-colors flex items-center justify-center gap-2"
                 >
                   {pwBusy ? (
                     <Loader2

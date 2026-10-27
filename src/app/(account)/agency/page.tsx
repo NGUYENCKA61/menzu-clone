@@ -155,7 +155,7 @@ export default async function AgencyPage() {
                     href={channel.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="h-11 px-5 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] transition-colors text-[14px] font-semibold text-white inline-flex items-center justify-center"
+                    className="h-11 px-5 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[14px] font-semibold text-white inline-flex items-center justify-center"
                   >
                     {channel.label}
                   </a>

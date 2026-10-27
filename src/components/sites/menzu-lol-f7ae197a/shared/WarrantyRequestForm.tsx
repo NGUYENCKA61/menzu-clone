@@ -359,7 +359,7 @@ export function WarrantyRequestForm({
           type="button"
           onClick={submit}
           disabled={busy || !ready}
-          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]"
         >
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />

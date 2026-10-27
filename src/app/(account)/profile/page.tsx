@@ -387,7 +387,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                     // (the agency desk's own Nạp tiền, /security's submit).
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border px-3 text-[14px] font-semibold transition-colors ${
                       primary
-                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`
+                        ? `${DOORS.length > 2 ? "col-span-2 sm:col-span-1 " : ""}border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`
                         : "border-white/10 bg-white/[0.04] text-white hover:border-white/25 hover:bg-white/[0.08]"
                     }`}
                   >

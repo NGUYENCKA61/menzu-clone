@@ -259,7 +259,7 @@ const FIELD =
 const LABEL =
   "block text-[12px] font-semibold text-neutral-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
 
 /** The detection pill customers see on the storefront card. */
 const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {

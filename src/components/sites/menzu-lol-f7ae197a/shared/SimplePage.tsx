@@ -121,7 +121,7 @@ export function NotCapturedYet({ note }: { note?: string }) {
       </p>
       <Link
         href="/"
-        className="mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] transition-colors text-[14px] font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[14px] font-semibold text-white"
       >
         Về trang chủ
       </Link>

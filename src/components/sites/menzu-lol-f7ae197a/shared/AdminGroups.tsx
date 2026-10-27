@@ -224,7 +224,7 @@ export function AdminGroups({
               setNewName("");
             }
           }}
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent-dark)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
         >
           <Plus size={14} />
           Thêm nhóm

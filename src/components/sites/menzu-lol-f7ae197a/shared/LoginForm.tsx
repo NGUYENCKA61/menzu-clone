@@ -348,7 +348,7 @@ export function LoginForm({
                       type="submit"
                       disabled={pending || code.length !== 6}
                       aria-busy={pending}
-                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent-dark)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-wait disabled:opacity-70"
+                      className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-wait disabled:opacity-70"
                     >
                       {pending ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
                       {pending ? "Đang kiểm tra…" : "Xác nhận"}
@@ -456,7 +456,7 @@ export function LoginForm({
                       (Boolean(turnstileSiteKey) && captchaNeeded && !captcha)
                     }
                     aria-busy={pending}
-                    className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors ${
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-4 text-[15px] transition-colors ${
                       turnstileSiteKey && captchaNeeded ? "mt-5" : "mt-7"
                     }`}
                   >

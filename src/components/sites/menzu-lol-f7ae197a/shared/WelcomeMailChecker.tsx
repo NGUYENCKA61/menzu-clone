@@ -103,7 +103,7 @@ export function WelcomeMailChecker() {
           />
           <button
             type="submit"
-            className="w-full rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] text-white font-semibold py-3.5 text-[14px] transition-colors"
+            className="w-full rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] text-white font-semibold py-3.5 text-[14px] transition-colors"
           >
             Kiểm tra ngay
           </button>

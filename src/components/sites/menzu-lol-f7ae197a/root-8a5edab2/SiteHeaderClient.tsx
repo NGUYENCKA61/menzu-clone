@@ -418,7 +418,7 @@ export function SiteHeaderClient({
               // lab's sentence case, as the rest of this header does. On a
               // phone it sits 2px tighter inside and 4px closer to the basket
               // (px-3, gap-1.5, the row's gap-2), the room the word needs.
-              className="flex items-center gap-1.5 sm:gap-2 h-9 px-3 sm:px-4 rounded-[10px] bg-[var(--brand-dark)] hover:bg-[var(--brand)] transition-colors duration-200 shrink-0"
+              className="flex items-center gap-1.5 sm:gap-2 h-9 px-3 sm:px-4 rounded-[10px] bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors duration-200 shrink-0"
             >
               <User size={16} />
               {/* Under 390px the header has no room for the word: with the

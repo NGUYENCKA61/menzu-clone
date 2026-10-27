@@ -163,7 +163,7 @@ export default async function AgencyDashboardPage() {
       action={
         <Link
           href="/wallet"
-          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
         >
           <Wallet size={14} />
           Nạp tiền

@@ -145,7 +145,7 @@ function FeaturedCarousel({ items, old = false }: { items: DocCard[]; old?: bool
                       (the owner, 02/10/2026: "bỏ hết thử"); the article page
                       and the shelf cards still carry them. */}
                   <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
-                    <span className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent)]">
+                    <span className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-2.5 text-[14px] font-semibold text-white transition-colors group-hover:bg-[var(--menzu-accent-dark)]">
                       Xem chi tiết
                       <ArrowRight size={12} aria-hidden />
                     </span>

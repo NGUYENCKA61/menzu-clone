@@ -379,7 +379,7 @@ export function AdminMarketing({
               </div>
             ) : null}
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Tạo mã
               </button>
@@ -540,7 +540,7 @@ export function AdminMarketing({
               <input id="s-end" type="datetime-local" required value={sEnd} onChange={(e) => setSEnd(e.target.value)} className={FIELD} />
             </div>
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Lên lịch
               </button>

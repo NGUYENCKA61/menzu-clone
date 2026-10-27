@@ -204,7 +204,7 @@ export function AdminWeaponImages({
           <button
             type="submit"
             disabled={busy}
-            className="h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
+            className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
           >
             {busy ? "Đang xử lý…" : "Tải từ link"}
           </button>
@@ -299,7 +299,7 @@ export function AdminWeaponImages({
             type="button"
             disabled={busy || pick === hotPickSkin}
             onClick={saveHotPick}
-            className="h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors"
+            className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors"
           >
             Lưu
           </button>

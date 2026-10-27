@@ -210,7 +210,7 @@ export function AdminPackageKeys({
               type="button"
               disabled={busy || uniquePending === 0}
               onClick={addKeys}
-              className="h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
             >
               {busy ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
               Thêm {uniquePending > 0 ? `${uniquePending} key` : "key"}

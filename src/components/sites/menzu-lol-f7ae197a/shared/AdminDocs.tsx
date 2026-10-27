@@ -369,7 +369,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
             className={`h-10 px-4 rounded-xl text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
               creating
                 ? "border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10"
-                : "bg-[var(--brand-dark)] hover:bg-[var(--brand)] text-white"
+                : "bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-white"
             }`}
           >
             {creating ? <X size={14} /> : <Plus size={14} />}
@@ -428,7 +428,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               type="button"
               disabled={pending || !newTitle.trim()}
               onClick={create}
-              className="h-[42px] px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[42px] px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} />
               {pending ? "Đang tạo…" : "Tạo"}

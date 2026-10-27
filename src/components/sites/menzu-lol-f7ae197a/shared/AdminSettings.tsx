@@ -2933,7 +2933,7 @@ export function AdminSettings({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent-dark)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] ${
+                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${
                       uploading ? "opacity-70 cursor-wait" : ""
                     }`}
                   >
@@ -3786,7 +3786,7 @@ export function AdminSettings({
         <button
           type="submit"
           disabled={busy}
-          className="h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 transition-colors text-[13px] font-semibold text-white"
+          className="h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang lưu…" : "Lưu cấu hình"}
         </button>

@@ -43,7 +43,7 @@ export default async function FreeKeyPage({
 
   const BUTTON =
     "inline-flex h-11 items-center gap-2 rounded-xl px-5 text-[13px] font-semibold transition-colors";
-  const PRIMARY = `${BUTTON} bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`;
+  const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
   const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
 
   return (

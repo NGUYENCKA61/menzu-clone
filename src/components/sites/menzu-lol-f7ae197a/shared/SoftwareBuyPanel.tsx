@@ -454,7 +454,7 @@ export function SoftwareBuyPanel({
           type="button"
           disabled={busy || !chosen || !software.inStock || locked || gated}
           onClick={() => setConfirming(true)}
-          className="press h-14 w-full rounded-2xl bg-[var(--menzu-accent-dark)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost"
+          className="press h-14 w-full rounded-2xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-frost"
         >
           Mua ngay
         </button>

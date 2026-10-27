@@ -205,7 +205,7 @@ export function SpinWheel({
           disabled={spinning || !affordable || !canSpin}
           onClick={spin}
           // LAB: the hub is the page's one action, so it wears the shop's red.
-          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-accent-dark)] text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:bg-neutral-700 disabled:text-neutral-400"
+          className="absolute left-1/2 top-1/2 z-10 grid h-[27%] w-[27%] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-4 border-[#0b0b10] bg-[var(--menzu-accent)] text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:bg-neutral-700 disabled:text-neutral-400"
         >
           <span className="flex items-center justify-center text-[15px] font-semibold leading-none sm:text-[15px]">
             {spinning ? (
