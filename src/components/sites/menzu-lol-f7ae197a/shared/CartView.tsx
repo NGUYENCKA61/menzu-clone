@@ -34,7 +34,7 @@ import {
 import { formatVnd } from "./productData";
 import { ErrorModal } from "./ErrorModal";
 import { TopUpDialog } from "./TopUpDialog";
-import { sentenceCase } from "@/lib/displayCase";
+import { sentenceCase, titleCase } from "@/lib/displayCase";
 import {
   VOUCHER_APPLIED,
   VOUCHER_TOGGLE,
@@ -781,9 +781,12 @@ export function CartView({
               <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <Link
                   href={line.href}
-                  className="line-clamp-2 text-[15px] font-semibold leading-snug text-frost transition-colors hover:text-white sm:text-[17px]"
+                  className="line-clamp-2 font-display text-[16px] font-extrabold leading-snug text-white transition-colors hover:text-white/80"
                 >
-                  {sentenceCase(line.name)}
+                  {/* The orders list's name: every cart line is a tool (it
+                      always has a package), so title case, 16/800 white (the
+                      owner, 27/10/2026: "làm đi" to syncing the cart). */}
+                  {titleCase(line.name)}
                 </Link>
                 {/* The same neutral chip the orders list, the receipt and the
                     warranty desk use for a tier — alone: the "N đ / bản" beside
@@ -871,7 +874,7 @@ export function CartView({
       {/* Flat, like the panels on the account pages: no warm tint, no glow,
           no red bar — the red left in here is the button's. */}
       <aside className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-5 lg:sticky lg:top-28">
-        <h2 className="relative text-[18px] font-bold text-white">
+        <h2 className="relative text-[18px] font-extrabold text-white">
           Tóm tắt đơn hàng
         </h2>
 
