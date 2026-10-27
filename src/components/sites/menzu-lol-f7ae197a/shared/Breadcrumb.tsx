@@ -74,13 +74,14 @@ export function Breadcrumb({
       {/* Named for assistive tech on both, as the ARIA pattern asks; only
           the one the breakpoint shows is announced (the SEO review, round
           2, C12). */}
-      {/* TRIAL: the desktop trail's pill kept, see-through (the owner,
-          27/10/2026: "bỏ phần card bo chỗ đó đi thử", then "card bo trong
-          suốt đi"): its shape and faint edge, no fill, shadow or blur. It
-          was bg-panel/80, shadow-lg and backdrop-blur-md as well. */}
+      {/* TRIAL: the desktop trail's pill with a light fill (the owner,
+          27/10/2026: "bỏ phần card bo chỗ đó đi thử", "card bo trong suốt
+          đi", then "nền nhẹ thử"): its shape and faint edge on white at 4%,
+          no shadow or blur. It was bg-panel/80, shadow-lg and
+          backdrop-blur-md. */}
       <nav
         aria-label="Breadcrumb"
-        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 border border-white/10 hover:border-white/20 rounded-full text-[13px] font-medium text-mist leading-normal transition-all group/nav w-fit ${margin}`}
+        className={`hidden sm:inline-flex items-center flex-wrap gap-x-3 gap-y-2 px-4 py-2.5 bg-white/[0.04] border border-white/10 hover:border-white/20 rounded-full text-[13px] font-medium text-mist leading-normal transition-all group/nav w-fit ${margin}`}
       >
         <BreadcrumbTrail items={items} />
       </nav>
