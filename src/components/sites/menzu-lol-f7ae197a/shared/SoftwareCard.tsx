@@ -398,7 +398,7 @@ export function SoftwareCard({
             {/* The old shop's own picker (the owner, 27/10/2026: "dùng nút
                 chọn gói web thichthihack.com cũ đi", "nút chọn gói trang chi
                 tiết danh mục", "card sản phẩm"): a native <select> with no
-                box, "--Chọn gói--" centred over one faint line that lights
+                box, "Chọn gói" centred over one faint line that lights
                 in the accent on focus, each tier written as the old site
                 writes it, price / duration. The card's own font, a dark list
                 where the OS draws it (color-scheme). Nothing is chosen on
@@ -415,8 +415,10 @@ export function SoftwareCard({
                 old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
               } ${chosen ? "border-white/25 text-white" : "border-white/10 text-[#aaa]"}`}
             >
+              {/* Without the old site's dashes (the owner, 27/10/2026:
+                  "bỏ -- đi"). */}
               <option value="" className="bg-raise text-[#aaa]">
-                {hasPackages ? "--Chọn gói--" : "Chưa có gói"}
+                {hasPackages ? "Chọn gói" : "Chưa có gói"}
               </option>
               {software.packages.map((p) => (
                 <option key={p.id} value={p.id} className="bg-raise text-white">
