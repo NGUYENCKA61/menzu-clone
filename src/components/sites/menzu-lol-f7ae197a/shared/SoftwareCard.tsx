@@ -466,44 +466,51 @@ export function SoftwareCard({
                 />
               </button>
 
-              {/* TRIAL, set beside 478f5690 for the owner to compare ("lùi
-                  lại tui so sánh thử"): the list in the site's own card look,
-                  the raised tone, a faint edge, the buttons' 10px corners,
-                  6px under the picker, rows left-aligned, no "Chọn gói" row,
-                  the chosen one filled red. */}
+              {/* Laid out as the browser's own list was ("bố cục như nãy đi
+                  chỉ là màu khác thôi", "card vuông giống vậy đó"): a square
+                  box as wide as the picker, straight under it, "Chọn gói"
+                  first, every row centred. Only the colours are the site's:
+                  a black ground, the chosen and the pointed row red. */}
               {open ? (
                 <div
                   role="listbox"
                   aria-label={`Chọn gói - ${software.name}`}
-                  className="drop-in absolute left-0 top-[calc(100%+6px)] z-50 w-max min-w-full max-w-[240px] overflow-hidden rounded-[10px] border border-white/10 bg-raise p-1.5 shadow-[0_18px_40px_#0009]"
+                  className="absolute inset-x-0 top-full z-50 overflow-hidden border border-white/20 bg-[#0b0b0e] py-0.5 shadow-[0_12px_28px_#000a]"
                 >
-                  {software.packages.map((p) => {
-                    const selected = p.id === packageId;
+                  {[
+                    { id: "", text: "Chọn gói", listPrice: undefined as number | undefined },
+                    ...software.packages.map((p) => ({
+                      id: p.id,
+                      text: `${formatVnd(p.price)}đ / ${p.label}`,
+                      listPrice: p.listPrice,
+                    })),
+                  ].map((row) => {
+                    const selected = row.id === packageId;
                     return (
                       <button
-                        key={p.id}
+                        key={row.id || "none"}
                         type="button"
                         role="option"
                         aria-selected={selected}
                         onClick={() => {
-                          setPackageId(p.id);
+                          setPackageId(row.id);
                           setHint(false);
                           setOpen(false);
                           pickerRef.current
                             ?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')
                             ?.focus({ preventScroll: true });
                         }}
-                        className={`flex w-full items-baseline justify-between gap-3 whitespace-nowrap rounded-[7px] px-3 py-2 text-left text-[13px] font-semibold transition-colors ${
-                          selected ? "bg-[var(--menzu-accent)] text-white" : "text-neutral-200 hover:bg-white/[0.06]"
+                        className={`block w-full whitespace-nowrap px-2 py-1 text-center text-[13px] font-semibold transition-colors ${
+                          selected
+                            ? "bg-[var(--menzu-accent)] text-white"
+                            : `${row.id ? "text-white" : "text-[#aaa]"} hover:bg-[var(--menzu-accent)]/70 hover:text-white`
                         }`}
                       >
-                        <span>
-                          {formatVnd(p.price)}đ / {p.label}
-                        </span>
+                        {row.text}
                         {/* A tier on flash sale: its shelf price, crossed out. */}
-                        {p.listPrice ? (
-                          <span className={`text-[11px] line-through ${selected ? "text-white/70" : "text-[#8a8c94]"}`}>
-                            {formatVnd(p.listPrice)}đ
+                        {row.listPrice ? (
+                          <span className={`ml-1.5 text-[11px] line-through ${selected ? "text-white/70" : "text-[#8a8c94]"}`}>
+                            {formatVnd(row.listPrice)}đ
                           </span>
                         ) : null}
                       </button>
