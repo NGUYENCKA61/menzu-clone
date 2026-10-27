@@ -55,9 +55,6 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
   );
 }
 
-/** TRIAL switch: false hides every visible breadcrumb (see Breadcrumb). */
-const SHOW_TRAIL = false;
-
 /**
  * Page breadcrumb trail. Live site renders two sibling <nav> elements — a
  * pill-shaped desktop version and a plain mobile version — toggled purely
@@ -76,10 +73,6 @@ export function Breadcrumb({
   items: Crumb[];
   margin?: "mb-6 sm:mb-8" | "mb-6" | "mb-0";
 }) {
-  // TRIAL: no visible trail anywhere (the owner, 27/10/2026: "giờ thử nè bỏ
-  // nhãn", once the bar's wordmark leads home). The pages' structured-data
-  // trail (breadcrumbJsonLd) is separate and stays. Undo: set back to true.
-  if (!SHOW_TRAIL) return null;
   return (
     <>
       {/* Named for assistive tech on both, as the ARIA pattern asks; only
