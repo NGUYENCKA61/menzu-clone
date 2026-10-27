@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronDown, Clock, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Clock, Loader2, Search, SlidersHorizontal, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useRef, useState, useSyncExternalStore, useTransition } from "react";
 
 import { launcherLabel } from "@/lib/toolFilters";
 
@@ -59,6 +59,27 @@ const RUNS_OPTIONS = [
   { value: "nha", label: "Máy nhà" },
   { value: "net", label: "Máy nét" },
 ] as const;
+
+/*
+ * LAB: option B, ?timkiem=b (the owner, 27/10/2026: "thêm 1 phương án thanh
+ * tìm kiếm dài và đồng bộ với thanh tìm kiếm trang chủ và bộ lọc"): the home
+ * page game list's search field and chips (RowSearch), copied class for
+ * class: one long field that filters as you type, no button, and the chips
+ * in one row. Read from the address in the browser only, so the server's
+ * HTML and a production build always show the default.
+ */
+const B_FIELD =
+  "group/search relative isolate flex h-12 w-full items-center gap-3 rounded-[10px] bg-white/5 px-4 ring-1 ring-inset ring-white/10 transition-shadow focus-within:ring-[var(--menzu-accent)]/60";
+const B_CHIP =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-[10px] px-4 text-[14px] font-semibold transition-colors";
+const B_CHIP_IDLE = "bg-white/[0.02] text-mist ring-1 ring-inset ring-white/[0.06] hover:text-frost hover:ring-white/20";
+const B_CHIP_ACTIVE = "bg-white/[0.12] text-frost ring-1 ring-inset ring-white/25";
+const B_GROUP_LABEL = "mr-0.5 text-[13px] text-dim";
+const noSubscribe = () => () => {};
+function readOptionB(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  return new URLSearchParams(window.location.search).get("timkiem") === "b";
+}
 
 type StatusValue = (typeof STATUS_OPTIONS)[number]["value"];
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
@@ -144,6 +165,130 @@ export function SoftwareFilterPanel({
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     apply({ pm: nameQuery.trim(), cn: "" });
+  }
+
+  const optionB = useSyncExternalStore(noSubscribe, readOptionB, () => false);
+  /** Option B searches as the words are typed, a beat after the last key. */
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function typeB(value: string) {
+    setNameQuery(value);
+    if (typingTimer.current) clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => apply({ pm: value.trim(), cn: "" }), 450);
+  }
+
+  if (optionB) {
+    const chip = (on: boolean) => `${B_CHIP} ${on ? B_CHIP_ACTIVE : B_CHIP_IDLE}`;
+    return (
+      <form onSubmit={handleSubmit} aria-busy={isPending} className="flex w-full flex-col gap-4">
+        <label className={B_FIELD}>
+          {isPending ? (
+            <Loader2 size={18} aria-hidden className="relative shrink-0 animate-spin text-neutral-200 motion-reduce:animate-none" />
+          ) : (
+            <Search
+              size={18}
+              aria-hidden
+              className="relative shrink-0 text-neutral-200 transition-colors group-focus-within/search:text-[var(--menzu-accent)]"
+            />
+          )}
+          <input
+            suppressHydrationWarning
+            type="search"
+            value={nameQuery}
+            onChange={(event) => typeB(event.target.value)}
+            placeholder={`${hint.replace(/(…|\.\.\.)$/, "")}, Aimbot, ESP…`}
+            autoComplete="off"
+            aria-label="Tìm bản hack hoặc chức năng"
+            className="relative min-w-0 flex-1 bg-transparent text-[15px] text-frost outline-none placeholder:text-dim [&::-webkit-search-cancel-button]:hidden"
+          />
+          {nameQuery ? (
+            <button
+              type="button"
+              onClick={() => typeB("")}
+              aria-label="Xoá tìm kiếm"
+              className="relative shrink-0 rounded-md p-0.5 text-neutral-500 transition-colors hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          ) : null}
+        </label>
+
+        <div role="group" aria-label="Bộ lọc" className="flex flex-wrap items-center gap-x-2.5 gap-y-3">
+          <span className={B_GROUP_LABEL}>Trạng thái</span>
+          {STATUS_OPTIONS.map((option) => (
+            <button
+              key={`tt-${option.value}`}
+              type="button"
+              aria-pressed={shownStatus === option.value}
+              onClick={() =>
+                startTransition(() => {
+                  showStatus(option.value);
+                  apply({ tt: option.value === "all" ? "" : option.value });
+                })
+              }
+              className={chip(shownStatus === option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+          <span className={`${B_GROUP_LABEL} ml-3`}>Hoạt động</span>
+          {RUNS_OPTIONS.map((option) => (
+            <button
+              key={`hd-${option.value}`}
+              type="button"
+              aria-pressed={shownRuns === option.value}
+              onClick={() =>
+                startTransition(() => {
+                  showRuns(option.value);
+                  apply({ hd: option.value === "all" ? "" : option.value });
+                })
+              }
+              className={chip(shownRuns === option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+          {launchers.length > 0 ? (
+            <>
+              <span className={`${B_GROUP_LABEL} ml-3`}>Nền tảng</span>
+              {["", ...launchers.map((key) => key.toLowerCase())].map((value) => (
+                <button
+                  key={`nt-${value || "all"}`}
+                  type="button"
+                  aria-pressed={shownLauncher === value}
+                  onClick={() =>
+                    startTransition(() => {
+                      showLauncher(value);
+                      apply({ nt: value });
+                    })
+                  }
+                  className={chip(shownLauncher === value)}
+                >
+                  {value ? launcherLabel(value.toUpperCase()) : "Tất cả"}
+                </button>
+              ))}
+            </>
+          ) : null}
+          <span className={`${B_GROUP_LABEL} ml-3`}>Sắp xếp</span>
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={`pmsort-${option.value}`}
+              type="button"
+              aria-pressed={shownSort === option.value}
+              onClick={() =>
+                startTransition(() => {
+                  showSort(option.value);
+                  apply({ pmsort: option.value === "newest" ? "" : option.value });
+                })
+              }
+              className={chip(shownSort === option.value)}
+            >
+              {option.value === "newest" ? <Clock size={16} aria-hidden className="shrink-0" /> : null}
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </form>
+    );
   }
 
   return (
