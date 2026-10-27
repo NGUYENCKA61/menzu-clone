@@ -36,9 +36,17 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
                 href={item.href}
                 className={CRUMB_LINK_CLASS}
                 aria-current={isLast ? "page" : undefined}
+                // TRIAL: the home crumb is the house alone (the owner,
+                // 27/10/2026: "thử đổi này sang ngôi nhà thôi thử"); its
+                // name stays for screen readers and as the hover tip.
+                title={isFirst && !isLast ? sentenceCase(item.label) : undefined}
               >
-                {isFirst && <House size={12} />}
-                {sentenceCase(item.label)}
+                {isFirst && <House size={isLast ? 12 : 14} aria-hidden />}
+                {isFirst && !isLast ? (
+                  <span className="sr-only">{sentenceCase(item.label)}</span>
+                ) : (
+                  sentenceCase(item.label)
+                )}
               </SiteLink>
             ) : (
               <span className={CRUMB_CURRENT_CLASS} aria-current={isLast ? "page" : undefined}>
