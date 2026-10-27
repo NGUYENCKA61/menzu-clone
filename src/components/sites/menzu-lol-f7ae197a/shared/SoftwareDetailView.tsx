@@ -100,7 +100,12 @@ export function SoftwareDetailView({
               wanted air. product-top is a hook for the light trial "moi"
               (theme-light.css, part 6); it carries no style of its own. */}
           <div className="product-top max-w-[1320px] mx-auto px-4 lg:px-6 pt-8">
+            {/* TRIAL: 32px under the trail on a product page from sm, level
+                with the 31px above it; other pages keep 24px (the owner,
+                27/10/2026: "xem lại khoảng cách này có quá hẹp", then the
+                category page shown: only here). */}
             <Breadcrumb
+              margin="mb-6 sm:mb-8"
               items={[
                 { label: "Trang chủ", href: "/" },
                 {

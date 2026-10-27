@@ -65,10 +65,7 @@ function BreadcrumbTrail({ items }: { items: Crumb[] }) {
  */
 export function Breadcrumb({
   items,
-  // TRIAL: 32px under the trail from sm, level with the 31px above it
-  // (the owner, 27/10/2026: "xem lại khoảng cách này có quá hẹp", "thử
-  // trong 5p"); a phone keeps 24px. Was mb-6 everywhere.
-  margin = "mb-6 sm:mb-8",
+  margin = "mb-6",
 }: {
   items: Crumb[];
   margin?: "mb-6 sm:mb-8" | "mb-6" | "mb-0";

@@ -111,7 +111,10 @@ export async function AccountDetailView({
               empty band before the footer (the owner, 13/10/2026, UI
               consistency review). */}
           <div className="max-w-[1320px] mx-auto px-4 lg:px-6 pt-8 pb-16">
+            {/* TRIAL: 32px under the trail from sm, as on a tool page (the
+                owner, 27/10/2026). */}
             <Breadcrumb
+              margin="mb-6 sm:mb-8"
               items={[
                 { label: "Trang chủ", href: "/" },
                 {
