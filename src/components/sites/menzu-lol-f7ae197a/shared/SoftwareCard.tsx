@@ -144,10 +144,10 @@ export function SoftwareCard({
   const FREE_BUTTON =
     "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
 
-  // The rent button at the picker's and "Xem chi tiết"'s height and corners.
-  // TRIAL: square corners on both (the owner, 27/10/2026: "bo vuông thử";
-  // they were 10px).
-  const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-none";
+  // The rent button at the picker's and "Xem chi tiết"'s height, 10px
+  // corners. TRIAL: only "Xem chi tiết" goes square (the owner, 27/10/2026:
+  // "bo vuông thử", then "bo vuông mỗi nút xem chi tiết").
+  const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
   // The pills on the picture keep their dark glass, for a photo under them,
   // and take the site's chip shape: 8px corners like the home tile's "Top
   // tháng" and the state chips, semibold words (19/10/2026, "làm thử").
