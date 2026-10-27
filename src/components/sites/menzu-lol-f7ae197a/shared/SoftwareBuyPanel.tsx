@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Headphones, Loader2, Minus, Plus, RefreshCw, ShieldCheck, Zap } from "lucide-react";
 
 import type { ProductBadge } from "@/lib/productBadges";
 import type { ProductFeature } from "@/lib/productFeatures";
@@ -171,30 +171,6 @@ export function SoftwareBuyPanel({
 
   const total = (chosen?.price ?? 0) * quantity;
 
-  // The tier drop-down: open or shut, closed by a click outside it or by
-  // Escape (focus back on its button), bound only while it is open.
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!pickerOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) setPickerOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setPickerOpen(false);
-      pickerRef.current
-        ?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')
-        ?.focus({ preventScroll: true });
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [pickerOpen]);
-
   // Changing the tier clears whatever the last action said — a "đã thêm vào
   // giỏ" line about the other tier would argue with the price above it.
   function pickPackage(id: string) {
@@ -337,93 +313,28 @@ export function SoftwareBuyPanel({
           <span className={`${SMALL_CAPS_LABEL} ml-1 block`}>
             Chọn gói
           </span>
-          {/* One drop-down, as thichthihack.com picks a tier (the owner,
-              27/10/2026: "đổi nút chọn gói kiểu thichthihack.com"), where a
-              row of pills stood. Real elements rather than a native
-              <select>, as the category card's picker: the OS draws a native
-              list in its own font. The first tier stays chosen on arrival,
+          {/* The old shop's own picker (the owner, 27/10/2026: "đổi nút chọn
+              gói kiểu thichthihack.com", then "dùng nút chọn gói web
+              thichthihack.com cũ đi"): a native <select> with no box, the
+              words centred over one faint line that lights in the accent on
+              focus, each tier written as the old site writes it, price /
+              duration. The page's own font, and a dark list (color-scheme)
+              where the OS draws it. The first tier stays chosen on arrival,
               so the price below is there from the start. */}
-          <div ref={pickerRef} className="relative">
-            <button
-              type="button"
-              aria-haspopup="listbox"
-              aria-expanded={pickerOpen}
-              aria-label={`${chosen ? `${chosen.label} - ${formatVnd(chosen.price)}đ` : "Chọn gói"} - chọn gói khác`}
-              onClick={() => setPickerOpen((o) => !o)}
-              className={`flex h-12 w-full items-center justify-between gap-3 rounded-xl border bg-white/[0.03] px-4 outline-none transition-colors duration-200 hover:border-white/25 focus-visible:ring-2 focus-visible:ring-[var(--menzu-accent)]/40 ${
-                pickerOpen ? "border-[var(--menzu-accent)]/60" : "border-white/10"
-              }`}
-            >
-              <span className="flex min-w-0 items-baseline gap-2.5">
-                <span className="truncate text-[15px] font-bold text-white">
-                  {chosen ? chosen.label : "-- Chọn gói --"}
-                </span>
-                {/* A tier on flash sale: its shelf price crossed out, then
-                    the price the buyer pays. */}
-                {chosen?.listPrice ? (
-                  <span className="whitespace-nowrap text-[12px] font-semibold text-neutral-500 line-through">
-                    {formatVnd(chosen.listPrice)}đ
-                  </span>
-                ) : null}
-                {chosen ? (
-                  <span className="whitespace-nowrap text-[15px] font-bold text-[var(--menzu-accent)]">
-                    {formatVnd(chosen.price)}đ
-                  </span>
-                ) : null}
-              </span>
-              <ChevronDown
-                size={18}
-                aria-hidden
-                className={`shrink-0 text-neutral-400 transition-transform duration-200 ${pickerOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {pickerOpen ? (
-              <div
-                role="listbox"
-                aria-label="Chọn gói"
-                className="drop-in absolute inset-x-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-xl border border-white/10 bg-raise p-1.5 shadow-[0_18px_40px_#0009]"
-              >
-                {software.packages.map((p) => {
-                  const selected = p.id === packageId;
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      role="option"
-                      aria-selected={selected}
-                      onClick={() => {
-                        pickPackage(p.id);
-                        setPickerOpen(false);
-                        pickerRef.current
-                          ?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')
-                          ?.focus({ preventScroll: true });
-                      }}
-                      className={`flex w-full items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 text-left transition-colors ${
-                        selected ? "bg-[var(--menzu-accent)] text-white" : "text-neutral-200 hover:bg-white/[0.06]"
-                      }`}
-                    >
-                      <span className="text-[14px] font-semibold">{p.label}</span>
-                      <span className="flex items-baseline gap-2 whitespace-nowrap">
-                        {p.listPrice ? (
-                          <span
-                            className={`text-[12px] font-semibold line-through ${selected ? "text-white/70" : "text-neutral-500"}`}
-                          >
-                            {formatVnd(p.listPrice)}đ
-                          </span>
-                        ) : null}
-                        <span
-                          className={`text-[14px] font-bold ${selected ? "text-white" : "text-[var(--menzu-accent)]"}`}
-                        >
-                          {formatVnd(p.price)}đ
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-          </div>
+          <select
+            value={packageId}
+            onChange={(e) => pickPackage(e.target.value)}
+            aria-label="Chọn gói"
+            className="w-full cursor-pointer border-0 border-b border-white/15 bg-transparent px-0 py-2.5 text-center text-[15px] font-semibold text-white outline-none transition-colors duration-200 [color-scheme:dark] hover:border-white/30 focus:border-[var(--menzu-accent)]"
+          >
+            {chosen ? null : <option value="">--Chọn gói--</option>}
+            {software.packages.map((p) => (
+              <option key={p.id} value={p.id} className="bg-raise text-white">
+                {formatVnd(p.price)}đ / {p.label}
+                {p.listPrice ? ` (giá gốc ${formatVnd(p.listPrice)}đ)` : ""}
+              </option>
+            ))}
+          </select>
         </div>
       ) : null}
 
