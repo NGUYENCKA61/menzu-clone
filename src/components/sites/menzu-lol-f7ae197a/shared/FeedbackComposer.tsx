@@ -473,7 +473,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
               <div
                 className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
                   anonymous
-                    ? "bg-[var(--menzu-accent)] border-[var(--menzu-accent)]"
+                    ? "bg-[var(--menzu-accent-dark)] border-[var(--menzu-accent-dark)]"
                     : "bg-neutral-900 border-neutral-700 group-hover:border-neutral-500"
                 }`}
               >

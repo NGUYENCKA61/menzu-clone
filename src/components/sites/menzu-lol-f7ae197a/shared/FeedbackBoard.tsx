@@ -322,7 +322,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         title="Mới nhất"
         onClick={() => onChange(false)}
         className={`p-2 sm:p-1.5 rounded-lg transition-all ${
-          asc ? "text-neutral-500 hover:text-neutral-300" : "bg-[var(--menzu-accent)] text-white"
+          asc ? "text-neutral-500 hover:text-neutral-300" : "bg-[var(--menzu-accent-dark)] text-white"
         }`}
       >
         <ArrowDownWideNarrow size={18} />
@@ -332,7 +332,7 @@ function SortToggle({ asc, onChange }: { asc: boolean; onChange: (asc: boolean) 
         title="Cũ nhất"
         onClick={() => onChange(true)}
         className={`p-2 sm:p-1.5 rounded-lg transition-all ${
-          asc ? "bg-[var(--menzu-accent)] text-white" : "text-neutral-500 hover:text-neutral-300"
+          asc ? "bg-[var(--menzu-accent-dark)] text-white" : "text-neutral-500 hover:text-neutral-300"
         }`}
       >
         <ArrowUpNarrowWide size={18} />

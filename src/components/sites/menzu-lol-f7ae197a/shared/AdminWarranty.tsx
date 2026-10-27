@@ -143,7 +143,7 @@ export function AdminWarranty({
                 <span
                   className={`rounded-full px-1.5 text-[10px] tabular-nums ${
                     f.key === "TODO" && count("TODO") > 0
-                      ? "bg-[var(--brand)] text-white"
+                      ? "bg-[var(--brand-dark)] text-white"
                       : "bg-white/10 text-neutral-300"
                   }`}
                 >

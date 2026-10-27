@@ -502,7 +502,7 @@ export function SoftwareCard({
                         }}
                         className={`block w-full whitespace-nowrap px-2 py-1 text-center text-[13px] font-semibold transition-colors ${
                           selected
-                            ? "bg-[var(--menzu-accent)] text-white"
+                            ? "bg-[var(--menzu-accent-dark)] text-white"
                             : `${row.id ? "text-white" : "text-[#aaa]"} hover:bg-[var(--menzu-accent)]/70 hover:text-white`
                         }`}
                       >

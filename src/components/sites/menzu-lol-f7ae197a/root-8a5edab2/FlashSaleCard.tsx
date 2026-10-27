@@ -81,7 +81,7 @@ export function FlashSaleCard({ item }: FlashSaleCardProps) {
             </div>
           ) : null}
 
-          <div className="relative w-full bg-gradient-to-b from-[var(--menzu-accent)] to-[var(--menzu-accent-dark)] border border-white/[0.08] text-[#FFE5A0] rounded-lg flex items-center px-1 sm:px-2 hover:from-[var(--menzu-accent-dark)] hover:to-[var(--menzu-accent-dark)] transition-colors duration-150 group h-[38px] sm:h-[44px]">
+          <div className="relative w-full bg-gradient-to-b from-[var(--menzu-accent-dark)] to-[var(--menzu-accent-dark)] border border-white/[0.08] text-[#FFE5A0] rounded-lg flex items-center px-1 sm:px-2 hover:from-[var(--menzu-accent)] hover:to-[var(--menzu-accent-dark)] transition-colors duration-150 group h-[38px] sm:h-[44px]">
             <span className="absolute left-2 sm:left-3 shrink-0 hidden sm:flex items-center justify-center">
               <ShoppingCart size={16} />
             </span>

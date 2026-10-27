@@ -158,7 +158,7 @@ function CopyButton({
       aria-label={done ? `Đã copy ${label}` : `Copy ${label}`}
       className={`${COPY} ${
         accent
-          ? "z-10 bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/90"
+          ? "z-10 bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)]"
           : "bg-white/10 hover:bg-white/20"
       }`}
     >

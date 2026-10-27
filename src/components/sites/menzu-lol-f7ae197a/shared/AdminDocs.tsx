@@ -299,7 +299,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           onClick={() => setCatFilter("")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors ${
             catFilter === ""
-              ? "bg-[var(--brand)] text-white"
+              ? "bg-[var(--brand-dark)] text-white"
               : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
           }`}
         >

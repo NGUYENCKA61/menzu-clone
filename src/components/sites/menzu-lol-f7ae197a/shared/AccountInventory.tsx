@@ -187,8 +187,8 @@ interface TabAccent {
 
 const RED_ACCENT: TabAccent = {
   // The open tab in solid red, menzu's way (the owner, 25/10/2026: "đỏ đặc").
-  tabActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
-  filterActive: "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white",
+  tabActive: "border-[var(--menzu-accent-dark)] bg-[var(--menzu-accent-dark)] text-white",
+  filterActive: "border-[var(--menzu-accent-dark)] bg-[var(--menzu-accent-dark)] text-white",
   barFill: "bg-[var(--menzu-accent)]",
   tileHover: "hover:border-white/25",
   searchFocus: "focus-within:border-[var(--menzu-accent)]/60 focus-within:ring-2 focus-within:ring-[var(--menzu-accent)]/25",

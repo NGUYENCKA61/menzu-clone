@@ -282,7 +282,7 @@ export function WarrantyChat({
             type="button"
             onClick={() => void send()}
             disabled={busy || (!text.trim() && !file)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-3.5 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Send className="h-4 w-4" />
             <span className="hidden sm:inline">

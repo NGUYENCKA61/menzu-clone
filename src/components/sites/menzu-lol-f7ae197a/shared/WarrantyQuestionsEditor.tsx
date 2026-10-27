@@ -474,7 +474,7 @@ export function WarrantyQuestionsEditor({
             type="button"
             onClick={() => void save()}
             disabled={busy}
-            className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--brand)] px-4 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-[var(--brand-dark)] px-4 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Save className="h-3.5 w-3.5" />
             {busy ? "Đang lưu…" : "Lưu câu hỏi"}

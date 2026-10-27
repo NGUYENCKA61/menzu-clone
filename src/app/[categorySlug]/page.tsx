@@ -421,7 +421,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
                             aria-current={n === data.page ? "page" : undefined}
                             className={
                               n === data.page
-                                ? "relative w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--menzu-accent)] text-white"
+                                ? "relative w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-black bg-[var(--menzu-accent-dark)] text-white"
                                 : "relative w-9 h-9 flex items-center justify-center rounded-lg text-[13px] font-bold bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
                             }
                           >
