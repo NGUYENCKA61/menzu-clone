@@ -235,7 +235,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Link
             href="/feedback"
-            className="h-11 px-6 rounded-xl bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] transition-colors text-[14px] font-semibold text-white inline-flex items-center justify-center"
+            className="h-11 px-6 rounded-xl bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] transition-colors text-[14px] font-semibold text-white inline-flex items-center justify-center"
           >
             Xem trang đánh giá
           </Link>
@@ -497,7 +497,7 @@ export function FeedbackComposer({ user, today }: { user: ComposerUser; today: s
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[var(--menzu-accent)] hover:bg-[var(--menzu-accent-dark)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 rounded-xl mt-2 flex justify-center items-center gap-2 transition-colors text-[14px]"
+            className="w-full bg-[var(--menzu-accent-dark)] hover:bg-[var(--menzu-accent)] disabled:opacity-70 disabled:cursor-wait text-white font-semibold py-3.5 rounded-xl mt-2 flex justify-center items-center gap-2 transition-colors text-[14px]"
           >
             {submitting ? (
               <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />

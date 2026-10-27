@@ -167,7 +167,7 @@ export function SoftwareCard({
     : null;
   const freeHref = detailHref;
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent-dark)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]";
 
   // The rent button at the picker's and "Xem chi tiết"'s height and corners.
   const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";

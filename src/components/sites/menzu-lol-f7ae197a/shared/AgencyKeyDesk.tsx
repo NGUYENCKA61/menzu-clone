@@ -196,7 +196,7 @@ export function AgencyKeyDesk({
         type="button"
         onClick={buy}
         disabled={pending}
-        className="w-full rounded-xl bg-[var(--brand)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand-dark)] disabled:cursor-wait disabled:opacity-70"
+        className="w-full rounded-xl bg-[var(--brand-dark)] py-3.5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--brand)] disabled:cursor-wait disabled:opacity-70"
       >
         {pending ? "Đang xử lý…" : "Mua key"}
       </button>

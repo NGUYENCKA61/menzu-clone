@@ -18,7 +18,7 @@ const TYPES = ["image/png", "image/jpeg", "image/webp"];
 const GHOST =
   "inline-flex h-11 items-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-white/25 hover:text-white";
 const PRIMARY =
-  "inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]";
+  "inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-[var(--menzu-accent)]";
 
 /**
  * The second round of a warranty report, one question at a time.

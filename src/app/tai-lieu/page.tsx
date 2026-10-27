@@ -162,7 +162,7 @@ export default async function ToolDocsHomePage() {
               <div className="flex flex-wrap gap-2">
                 <Link
                   href="/orders"
-                  className="inline-flex h-11 items-center rounded-xl bg-[var(--menzu-accent)] px-4 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
+                  className="inline-flex h-11 items-center rounded-xl bg-[var(--menzu-accent-dark)] px-4 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)]"
                 >
                   Lịch sử mua & bảo hành
                 </Link>

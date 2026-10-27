@@ -239,7 +239,7 @@ export function CartEmpty({ signedIn }: { signedIn: boolean }) {
 
       <Link
         href={signedIn ? "/categories" : "/login?next=/cart"}
-        className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[14px] font-semibold text-white"
+        className="mt-6 inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] transition-colors text-[14px] font-semibold text-white"
       >
         {signedIn ? "Quay lại cửa hàng" : "Đăng nhập"}
         <ArrowRight size={14} />
@@ -689,7 +689,7 @@ export function CartView({
           <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
             <Link
               href="/orders"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 sm:flex-1 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-6 sm:flex-1 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
             >
               <KeyRound className="h-4 w-4" aria-hidden />
               Lấy key trong đơn hàng
@@ -1001,7 +1001,7 @@ export function CartView({
         {shortfall > 0 ? (
           <Link
             href="/wallet"
-            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
           >
             Nạp tiền ngay
           </Link>
@@ -1011,7 +1011,7 @@ export function CartView({
             disabled={busy || isPending}
             aria-busy={busy}
             onClick={checkout}
-            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-60"
+            className="relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:opacity-60"
           >
             {busy ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
             {busy ? "Đang xử lý…" : "Thanh toán"}

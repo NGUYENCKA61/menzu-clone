@@ -80,7 +80,7 @@ export default async function ResetPasswordPage({
                 </p>
                 <Link
                   href="/forgot-password"
-                  className="flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]"
+                  className="flex w-full items-center justify-center rounded-2xl bg-[var(--menzu-accent-dark)] py-4 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]"
                 >
                   Yêu cầu liên kết mới
                 </Link>

@@ -9,7 +9,7 @@ import {
 
 const BUTTON =
   "inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-[13px] font-semibold transition-colors";
-const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
+const PRIMARY = `${BUTTON} bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`;
 const QUIET = `${BUTTON} border border-white/10 bg-white/[0.04] text-neutral-300 hover:border-white/25 hover:text-white`;
 
 /**

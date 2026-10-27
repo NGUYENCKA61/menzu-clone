@@ -33,7 +33,7 @@ const LABEL =
 const HINT = "mt-1.5 text-[13px] leading-relaxed text-dim";
 const BUTTON =
   "inline-flex h-11 items-center justify-center gap-2 rounded-[10px] px-5 text-[15px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
-const PRIMARY = `${BUTTON} bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]`;
+const PRIMARY = `${BUTTON} bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]`;
 const QUIET = `${BUTTON} border border-line bg-raise text-frost hover:border-line-strong`;
 
 type Otp =

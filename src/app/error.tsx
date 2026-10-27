@@ -54,7 +54,7 @@ export default function GlobalError({
           disabled={retrying}
           aria-busy={retrying}
           onClick={() => startRetry(() => reset())}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] transition-colors text-[14px] font-semibold text-white disabled:opacity-60"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] transition-colors text-[14px] font-semibold text-white disabled:opacity-60"
         >
           {retrying ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden /> : null}
           {retrying ? "Đang thử lại…" : "Thử lại"}

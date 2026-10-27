@@ -31,7 +31,7 @@ export function voucherInputClass(typed: boolean): string {
 export function voucherButtonClass(solid: boolean): string {
   return `h-11 shrink-0 rounded-xl border px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed ${
     solid
-      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent)] text-white hover:bg-[var(--menzu-accent-dark)]"
+      ? "border-[var(--menzu-accent)] bg-[var(--menzu-accent-dark)] text-white hover:bg-[var(--menzu-accent)]"
       : "border-[var(--menzu-accent)]/45 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)] hover:bg-[var(--menzu-accent)]/20"
   }`;
 }
