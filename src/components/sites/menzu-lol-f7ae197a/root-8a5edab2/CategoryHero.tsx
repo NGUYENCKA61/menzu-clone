@@ -33,11 +33,7 @@ export function CategoryHero({
     // back below the header (64px tall on a phone, 104px from sm up).
     // category-hero and category-hero-art are hooks for the light trial
     // "moi" (theme-light.css, part 6); they carry no style of their own.
-    // TRIAL: 52px under the shop's line, 4px more than the 48px it was, so
-    // the header stands as tall as before the trail's 32px and the line's 4px
-    // trials (the owner, 27/10/2026: "nới thêm đi 4px", "nhỏ vậy chứ mắt
-    // tui để ý thấy mà").
-    <section className="category-hero relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] pb-[52px] sm:min-h-[35vh] sm:pt-[136px]">
+    <section className="category-hero relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] pb-12 sm:min-h-[35vh] sm:pt-[136px]">
       {imageUrl ? (
         <div aria-hidden className="category-hero-art pointer-events-none absolute inset-0 -z-10">
           <CardImage
