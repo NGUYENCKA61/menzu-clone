@@ -62,10 +62,11 @@ export function CategoryHero({
 
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-4 lg:px-6">
         {breadcrumb}
-        {/* TRIAL: the shop's line sits closer under the name, 8px where it
+        {/* TRIAL: the shop's line sits closer under the name, 4px where it
             was 16px (the owner, 27/10/2026: "viết phần mô tả sát lại xem
-            ntn", 4px; then "lùi lại 1 nấc thử", one step looser). */}
-        <h1 className="mb-2 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
+            ntn"; 8px tried on "lùi lại 1 nấc thử", then "dời lại như nãy mô
+            tả và tên danh mục thử"). */}
+        <h1 className="mb-1 py-1 text-3xl font-black leading-tight text-white sm:text-4xl md:text-5xl">
           {/* As the home page's tile names it (23/10/2026). */}
           {shelfTitle(name)}
         </h1>
