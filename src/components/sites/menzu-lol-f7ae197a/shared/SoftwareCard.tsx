@@ -449,7 +449,7 @@ export function SoftwareCard({
                 } - ${software.name}`}
                 onClick={() => hasPackages && setOpen((o) => !o)}
                 className={`relative flex h-[42px] w-full items-center justify-center border-0 border-b bg-transparent px-5 outline-none transition-colors duration-200 hover:border-white/30 focus-visible:border-[var(--menzu-accent)] aria-expanded:border-[var(--menzu-accent)] disabled:cursor-default disabled:opacity-50 ${
-                  old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
+                  old ? "text-[11px] font-extrabold" : "text-[12px] font-semibold"
                 } ${chosen ? "border-white/25 text-white" : "border-white/10 text-[#aaa]"}`}
               >
                 <span className="truncate">
@@ -524,7 +524,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`bg-[var(--menzu-accent)] text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
+              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
             >
               {/* "Mua ngay", the tool page's word (the owner, 27/10/2026:
                   "thuê ngay đổi thành chữ mua ngay"). */}
@@ -546,7 +546,7 @@ export function SoftwareCard({
 
           <Link
             href={detailHref}
-            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[13px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
+            className="tool-more flex h-[42px] w-full items-center justify-center rounded-[10px] border border-[var(--menzu-accent)]/40 bg-transparent text-[12px] font-semibold text-[#ddd] transition-colors hover:bg-[var(--menzu-accent)]/10"
           >
             Xem chi tiết
           </Link>
