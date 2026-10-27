@@ -11,6 +11,8 @@ import {
   KeyRound,
   Mail,
   Medal,
+  Minus,
+  Plus,
   Shield,
   ShieldAlert,
   Trash2,
@@ -54,16 +56,6 @@ function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-/** "-50000" → "-50.000". A lone "-" stays visible so typing a debit isn't
- *  fought by the formatter. */
-function formatDelta(value: string): string {
-  if (!value) return "";
-  const negative = value.startsWith("-");
-  const digits = value.replace(/[^\d]/g, "");
-  if (!digits) return negative ? "-" : "";
-  return (negative ? "-" : "") + formatVnd(Number(digits));
-}
-
 function StatCard({
   label,
   value,
@@ -105,7 +97,11 @@ export function AdminUserDetail({
 
   const [email, setEmail] = useState(user.email ?? "");
   const [password, setPassword] = useState("");
-  const [delta, setDelta] = useState("");
+  // The balance change: which way, and how much (digits only, always positive).
+  const [mode, setMode] = useState<"add" | "sub">("add");
+  const [amount, setAmount] = useState("");
+  const amountValue = Number(amount) || 0;
+  const balanceAfter = user.balance + (mode === "add" ? amountValue : -amountValue);
   const [note, setNote] = useState("");
   const [agencyPct, setAgencyPct] = useState("");
 
@@ -386,23 +382,63 @@ export function AdminUserDetail({
               <Wallet size={13} className="text-neutral-400" />
               Số dư ví
             </span>
+            {/* Adding and taking off as two plain choices, where one field
+                read a minus sign (the owner, 27/10/2026: "nên có cộng hoặc
+                trừ rõ ràng tách ra"). The amount is always typed positive;
+                the choice gives it its sign, and the button and the line
+                under it say what will happen before it does. */}
+            <div
+              role="radiogroup"
+              aria-label="Cộng hay trừ tiền"
+              className="grid w-full max-w-[320px] grid-cols-2 gap-1 rounded-lg border border-white/10 bg-neutral-950/60 p-1"
+            >
+              {(["add", "sub"] as const).map((kind) => {
+                const on = mode === kind;
+                const add = kind === "add";
+                return (
+                  <button
+                    key={kind}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setMode(kind)}
+                    className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-md text-[12px] font-semibold transition-colors ${
+                      on
+                        ? add
+                          ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/40"
+                          : "bg-red-500/15 text-red-400 ring-1 ring-red-500/40"
+                        : "text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    {add ? <Plus size={13} /> : <Minus size={13} />}
+                    {add ? "Cộng tiền" : "Trừ tiền"}
+                  </button>
+                );
+              })}
+            </div>
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <label htmlFor="detail-delta" className={LABEL}>
-                  Cộng / trừ (âm để trừ)
+                  {mode === "add" ? "Số tiền cộng" : "Số tiền trừ"}
                 </label>
-                <input
-                  id="detail-delta"
-                  value={formatDelta(delta)}
-                  onChange={(event) => {
-                    const raw = event.target.value;
-                    const negative = raw.trimStart().startsWith("-");
-                    const digits = raw.replace(/[^\d]/g, "").slice(0, 10);
-                    setDelta(digits ? (negative ? `-${digits}` : digits) : negative ? "-" : "");
-                  }}
-                  placeholder="100.000 hoặc -50.000"
-                  className={`${FIELD} w-40 tabular-nums`}
-                />
+                <div className="relative">
+                  <span
+                    aria-hidden
+                    className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold ${
+                      mode === "add" ? "text-emerald-400" : "text-red-400"
+                    }`}
+                  >
+                    {mode === "add" ? "+" : "−"}
+                  </span>
+                  <input
+                    id="detail-delta"
+                    inputMode="numeric"
+                    value={amount ? formatVnd(Number(amount)) : ""}
+                    onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, "").slice(0, 10))}
+                    placeholder="100.000"
+                    className={`${FIELD} w-40 pl-7 tabular-nums`}
+                  />
+                </div>
               </div>
               <div className="flex-1 min-w-[160px]">
                 <label htmlFor="detail-note" className={LABEL}>
@@ -418,25 +454,38 @@ export function AdminUserDetail({
               </div>
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || amountValue === 0}
                 onClick={async () => {
                   const ok = await call({
                     username: user.username,
                     action: "balance",
-                    delta: Number(delta.replace(/[^\d-]/g, "")),
+                    delta: mode === "add" ? amountValue : -amountValue,
                     note,
                   });
                   if (ok) {
-                    setDelta("");
+                    setAmount("");
                     setNote("");
                   }
                 }}
-                className={`${ACTION} inline-flex items-center gap-1.5`}
+                className={`inline-flex h-[34px] items-center gap-1.5 rounded-lg px-4 text-[12px] font-semibold text-white transition-colors disabled:opacity-50 ${
+                  mode === "add" ? "bg-emerald-600 hover:bg-emerald-500" : "bg-red-600 hover:bg-red-500"
+                }`}
               >
-                <Wallet size={12} />
-                Áp dụng
+                {mode === "add" ? <Plus size={13} /> : <Minus size={13} />}
+                {mode === "add" ? "Cộng" : "Trừ"} {amountValue ? `${formatVnd(amountValue)}đ` : "tiền"}
               </button>
             </div>
+            {amountValue ? (
+              <p className={HINT}>
+                Số dư sau khi {mode === "add" ? "cộng" : "trừ"}:{" "}
+                <span className={`font-bold tabular-nums ${balanceAfter < 0 ? "text-red-400" : "text-white"}`}>
+                  {balanceAfter < 0 ? "-" : ""}
+                  {formatVnd(Math.abs(balanceAfter))}đ
+                </span>{" "}
+                (hiện {formatVnd(user.balance)}đ)
+                {balanceAfter < 0 ? <span className="text-red-400">, số dư sẽ bị âm</span> : null}
+              </p>
+            ) : null}
             <p className={HINT}>
               Mọi thay đổi số dư đều ghi một dòng vào lịch sử giao dịch của khách, kèm tên
               quản trị viên thực hiện.
