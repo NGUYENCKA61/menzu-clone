@@ -412,7 +412,9 @@ export function SoftwareCard({
               }}
               aria-label={`Chọn gói - ${software.name}`}
               className={`h-[42px] w-full min-w-0 cursor-pointer truncate border-0 border-b bg-transparent px-1 text-center outline-none transition-colors duration-200 [color-scheme:dark] hover:border-white/30 focus:border-[var(--menzu-accent)] disabled:cursor-default disabled:opacity-50 ${
-                old ? "text-[11px] font-extrabold" : "text-[13px] font-semibold"
+                // 12px semibold, as "Thuê ngay" and "Xem chi tiết" (the
+                // owner, 27/10/2026: "quay về lúc 3 chữ đó bằng nhau").
+                old ? "text-[11px] font-extrabold" : "text-[12px] font-semibold"
               } ${chosen ? "border-white/25 text-white" : "border-white/10 text-[#aaa]"}`}
             >
               {/* Without the old site's dashes (the owner, 27/10/2026:
