@@ -20,12 +20,17 @@ export function CategoryHero({
   description,
   imageUrl,
   breadcrumb,
+  footPad = "pb-12",
 }: {
   name: string;
   /** The shop's line about the shelf; "" draws no paragraph. */
   description: string;
   imageUrl: string | null;
   breadcrumb: ReactNode;
+  /** The space under the shop's line: 48px (menzu's), or the lab's ?day=52
+   *  version at 52px (the owner, 27/10/2026: "làm phiên bản 52px ở url khác
+   *  đi"). */
+  footPad?: "pb-12" | "pb-[52px]";
 }) {
   return (
     // Pulled up under the 104px the layout keeps for the header, so the
@@ -33,7 +38,7 @@ export function CategoryHero({
     // back below the header (64px tall on a phone, 104px from sm up).
     // category-hero and category-hero-art are hooks for the light trial
     // "moi" (theme-light.css, part 6); they carry no style of their own.
-    <section className="category-hero relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] pb-12 sm:min-h-[35vh] sm:pt-[136px]">
+    <section className={`category-hero relative isolate -mt-[104px] flex min-h-[30vh] w-full flex-col justify-start overflow-hidden pt-[96px] ${footPad} sm:min-h-[35vh] sm:pt-[136px]`}>
       {imageUrl ? (
         <div aria-hidden className="category-hero-art pointer-events-none absolute inset-0 -z-10">
           <CardImage

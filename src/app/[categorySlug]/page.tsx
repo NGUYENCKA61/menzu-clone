@@ -38,6 +38,8 @@ interface PageProps {
   searchParams: Promise<{
     /** LAB: "cu" draws the tool cards and the FAQ as they were. */
     ban?: string;
+    /** LAB: "52" draws the header's foot at 52px (CategoryHero footPad). */
+    day?: string;
     page?: string;
     min?: string;
     max?: string;
@@ -274,6 +276,9 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             name={data.name}
             description={data.description}
             imageUrl={data.heroImageUrl}
+            // LAB: ?day=52 shows the 52px foot beside the default 48px; a
+            // production build always shows 48px.
+            footPad={process.env.NODE_ENV !== "production" && query.day === "52" ? "pb-[52px]" : "pb-12"}
             breadcrumb={
               <Breadcrumb
                 items={[{ label: "Trang chủ", href: "/" }, { label: shelfTitle(data.name) }]}
