@@ -360,9 +360,11 @@ export function SiteHeaderClient({
               aria-label="Trang chủ"
               className="mr-2 flex items-center whitespace-nowrap font-display text-[20px] font-black leading-none tracking-[-0.02em] transition-opacity hover:opacity-85"
             >
-              {/* "KWIN-HACK", with the hyphen (the owner, 27/10/2026). */}
-              <span className="text-[var(--menzu-accent)]">KWIN</span>
-              <span className="text-white">-HACK</span>
+              {/* KWIN in white, HACK in the accent, no hyphen (the owner,
+                  27/10/2026: "KWIN-HACK", then "KWIN chữ trắng HACK đỏ",
+                  "bỏ -"). */}
+              <span className="text-white">KWIN</span>
+              <span className="text-[var(--menzu-accent)]">HACK</span>
             </Link>
             <NavDropdown label="CÁC LOẠI HACK" items={HACK_CATEGORY_ITEMS} />
             <NavDropdown label="SHOP ACC" items={SHOP_ACC_ITEMS} />
