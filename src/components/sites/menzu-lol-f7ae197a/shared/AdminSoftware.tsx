@@ -267,7 +267,7 @@ export function AdminSoftware({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : "Thêm phần mềm"}
         </button>

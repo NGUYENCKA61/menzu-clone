@@ -452,7 +452,7 @@ export function AdminWarrantyDetail({
                           busy !== null || note.trim().length === 0 || !amountOk
                         }
                         onClick={() => move("REFUND", { method, amount })}
-                        className={`${BTN} bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]`}
+                        className={`${BTN} bg-[var(--brand-dark)] text-white hover:bg-[var(--brand)]`}
                       >
                         <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                         {busy === "REFUND"
@@ -577,7 +577,7 @@ export function AdminWarrantyDetail({
                     type="button"
                     disabled={busy !== null || note.trim().length === 0}
                     onClick={() => void sendMessage()}
-                    className={`${BTN} bg-[var(--brand)] text-white hover:bg-[var(--brand-dark)]`}
+                    className={`${BTN} bg-[var(--brand-dark)] text-white hover:bg-[var(--brand)]`}
                   >
                     <Send className="h-3.5 w-3.5" aria-hidden />
                     {busy === "MESSAGE" ? "Đang gửi…" : "Gửi tin"}

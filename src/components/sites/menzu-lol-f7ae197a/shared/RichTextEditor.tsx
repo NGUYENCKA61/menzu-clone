@@ -1448,7 +1448,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={applyLink}
-            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[12px] font-semibold text-white transition-colors"
+            className="h-8 px-3.5 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] text-[12px] font-semibold text-white transition-colors"
           >
             Gắn link
           </button>
@@ -1485,7 +1485,7 @@ export function RichTextEditor({
           <button
             type="button"
             onClick={insertVideo}
-            className="h-8 px-3.5 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] text-[12px] font-semibold text-white transition-colors"
+            className="h-8 px-3.5 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] text-[12px] font-semibold text-white transition-colors"
           >
             Chèn video
           </button>

@@ -240,7 +240,7 @@ export function OrderReviewForm({ orderId, onDone }: { orderId: string; onDone: 
           type="button"
           onClick={submit}
           disabled={submitting || body.trim().length < WORDS_MIN}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-6 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? (
             <Loader2 size={14} className="animate-spin motion-reduce:animate-none" aria-hidden />

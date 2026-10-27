@@ -181,7 +181,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             {next ? (
               <Link
                 href={pcSetupHref(next.slug)}
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)]"
               >
                 {next.title}
                 <ArrowRight size={14} aria-hidden />
@@ -189,7 +189,7 @@ export default async function PcSetupPageRoute({ params }: PageProps) {
             ) : (
               <Link
                 href="/tai-lieu"
-                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--menzu-accent-dark)] px-4 py-3 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)]"
               >
                 Xong, chọn tool
                 <ArrowRight size={14} aria-hidden />

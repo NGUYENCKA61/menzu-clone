@@ -353,7 +353,7 @@ export function AdminCategoryDetail({
         type="button"
         disabled={busy || !name.trim() || !slug.trim()}
         onClick={() => void save()}
-        className="self-start h-10 px-5 rounded-xl bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
+        className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
       >
         {busy ? "Đang lưu…" : "Lưu thay đổi"}
       </button>

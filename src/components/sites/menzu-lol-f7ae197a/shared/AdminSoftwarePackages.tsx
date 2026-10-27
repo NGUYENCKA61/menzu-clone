@@ -260,7 +260,7 @@ export function AdminSoftwarePackages({
             // from — and durationValid above already guarantees there is.
             !(label.trim() || autoLabel(length, unit))
           }
-          className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+          className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
         >
           <Plus size={12} />
           {busy ? "Đang thêm…" : "Thêm gói"}
@@ -348,7 +348,7 @@ export function AdminSoftwarePackages({
                       !durationValid(editLength, editUnit)
                     }
                     onClick={() => void saveEdit()}
-                    className="h-[30px] px-3 rounded-lg bg-[var(--brand)] hover:bg-[var(--brand-dark)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors"
+                    className="h-[30px] px-3 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors"
                   >
                     Lưu
                   </button>

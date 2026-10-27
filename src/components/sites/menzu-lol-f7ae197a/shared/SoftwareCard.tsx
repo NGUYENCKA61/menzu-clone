@@ -167,7 +167,7 @@ export function SoftwareCard({
     : null;
   const freeHref = detailHref;
   const FREE_BUTTON =
-    "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)]";
+    "flex h-[42px] items-center justify-center gap-2 rounded-[10px] bg-[var(--menzu-accent-dark)] px-5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)]";
 
   // The rent button at the picker's and "Xem chi tiết"'s height and corners.
   const RENT = old ? "h-11 rounded-xl" : "h-[42px] rounded-[10px]";
@@ -404,7 +404,7 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${RENT}`}
+                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent-dark)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] ${RENT}`}
               >
                 Mua ngay
               </Link>
@@ -524,7 +524,7 @@ export function SoftwareCard({
               type="button"
               onClick={rentNow}
               disabled={!hasPackages}
-              className={`bg-[var(--menzu-accent)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50 ${RENT}`}
+              className={`bg-[var(--menzu-accent-dark)] text-[12px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:opacity-50 ${RENT}`}
             >
               {/* "Mua ngay", the tool page's word (the owner, 27/10/2026:
                   "thuê ngay đổi thành chữ mua ngay"). */}

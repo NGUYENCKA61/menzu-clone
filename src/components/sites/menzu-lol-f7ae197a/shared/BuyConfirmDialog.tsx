@@ -40,7 +40,7 @@ const TILE = "rounded-xl border border-white/[0.06] bg-white/[0.02]";
 /** The footer pair, exported so a view other than the confirm one — the
  *  "đã mua" view — can close with the same two buttons. */
 export const FOOTER_PRIMARY_BTN =
-  "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-[var(--menzu-accent)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)]";
+  "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] bg-[var(--menzu-accent-dark)] text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)]";
 export const FOOTER_GHOST_BTN =
   "press inline-flex h-11 flex-1 items-center justify-center rounded-[10px] border border-white/10 bg-white/[0.04] text-[14px] font-semibold text-white hover:border-white/25 hover:bg-white/[0.08]";
 
