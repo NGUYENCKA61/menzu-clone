@@ -91,7 +91,7 @@ export function StickyBuyBar({
         type="button"
         disabled={disabled}
         onClick={onPress}
-        className="press h-11 shrink-0 rounded-xl bg-[var(--menzu-accent-dark)] px-6 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent)] disabled:opacity-50"
+        className="press h-11 shrink-0 rounded-xl bg-[var(--menzu-accent)] px-6 text-[14px] font-semibold text-white hover:bg-[var(--menzu-accent-dark)] disabled:opacity-50"
       >
         {cta}
       </button>
