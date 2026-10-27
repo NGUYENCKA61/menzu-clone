@@ -746,7 +746,10 @@ export function CartView({
   if (lines.length === 0) return <CartEmpty signedIn />;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+    // At least the rest of the screen tall, so a short basket does not leave
+    // the footer showing under it (the owner, 27/10/2026: "tăng khoảng cách
+    // để k bị lộ footer").
+    <div className="grid min-h-[calc(100svh-15rem)] content-start gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
       {fatal ? (
         <ErrorModal title="Thanh toán bị gián đoạn" message={fatal} onClose={() => setFatal(null)} />
       ) : null}
