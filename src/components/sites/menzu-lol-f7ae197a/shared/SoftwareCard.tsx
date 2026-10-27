@@ -404,7 +404,7 @@ export function SoftwareCard({
             ) : (
               <Link
                 href={detailHref}
-                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent-dark)] ${RENT}`}
+                className={`inline-flex shrink-0 items-center gap-2 bg-[var(--menzu-accent-dark)] px-5 text-[14px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] ${RENT}`}
               >
                 Mua ngay
               </Link>
