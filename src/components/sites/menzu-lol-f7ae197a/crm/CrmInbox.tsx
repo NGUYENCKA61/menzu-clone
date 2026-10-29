@@ -87,6 +87,10 @@ interface Detail {
     openWarranty: number;
     note: string;
     tags: string[];
+    tier: string;
+    role: string;
+    blocked: boolean;
+    verified: boolean;
     memberSince: string;
   } | null;
   messages: DetailMessage[];
@@ -810,6 +814,21 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
 
             {detail.customer ? (
               <>
+                <div className="flex flex-wrap gap-1.5 text-[10.5px] font-bold">
+                  <span className="rounded-md border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 text-zinc-600">
+                    Hạng {detail.customer.tier.charAt(0) + detail.customer.tier.slice(1).toLowerCase()}
+                  </span>
+                  {detail.customer.verified ? (
+                    <span className="rounded-md border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-emerald-700">
+                      Cấp 2
+                    </span>
+                  ) : null}
+                  {detail.customer.blocked ? (
+                    <span className="rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-red-700">
+                      Đang khóa
+                    </span>
+                  ) : null}
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Figure label="Số dư ví" value={`${formatVnd(detail.customer.balance)}đ`} />
                   <Figure label="Tổng đã nạp" value={`${formatVnd(detail.customer.totalToppedUp)}đ`} />

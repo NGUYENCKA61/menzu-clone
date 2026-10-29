@@ -20,7 +20,12 @@ interface CustomerRow {
   id: string;
   uid: number;
   username: string;
+  email: string | null;
   balance: number;
+  points: number;
+  role: string;
+  tier: string;
+  agencyPercent: number;
   totalSpent: number;
   totalToppedUp: number;
   orderCount: number;
@@ -28,8 +33,28 @@ interface CustomerRow {
   note: string;
   tags: string[];
   lastLoginAt: string | null;
+  lastIp: string | null;
+  blocked: boolean;
+  blockedReason: string | null;
+  verified: boolean;
   memberSince: string;
 }
+
+const TIERS = ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND", "ELITE"] as const;
+
+const TIER_LABEL: Record<string, string> = {
+  CLASSIC: "Classic",
+  GOLD: "Gold",
+  PLATINUM: "Platinum",
+  DIAMOND: "Diamond",
+  ELITE: "Elite",
+};
+
+const ROLE_LABEL: Record<string, string> = {
+  MEMBER: "Thành viên",
+  AGENCY: "Đại lý",
+  ADMIN: "Quản trị",
+};
 
 interface ThreadRow {
   id: string;
@@ -73,6 +98,18 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
   const [tagDraft, setTagDraft] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+  // The account-management drawer section, wired to the admin users API.
+  const [delta, setDelta] = useState("");
+  const [deltaNote, setDeltaNote] = useState("");
+  const [blockReason, setBlockReason] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [emailDraft, setEmailDraft] = useState("");
+  const [tierDraft, setTierDraft] = useState("CLASSIC");
+  const [roleDraft, setRoleDraft] = useState("MEMBER");
+  const [percentDraft, setPercentDraft] = useState("");
+  const [actBusy, setActBusy] = useState<string | null>(null);
+  const [actNote, setActNote] = useState<string | null>(null);
+  const [actError, setActError] = useState<string | null>(null);
 
   const fetchPage = useCallback(async (query: string, skip: number) => {
     const params = new URLSearchParams({ view: "customers" });
@@ -110,6 +147,16 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
     setTags(row.tags);
     setTagDraft("");
     setNoteSaved(false);
+    setDelta("");
+    setDeltaNote("");
+    setBlockReason("");
+    setNewPassword("");
+    setEmailDraft(row.email ?? "");
+    setTierDraft(row.tier);
+    setRoleDraft(row.role);
+    setPercentDraft(row.agencyPercent > 0 ? String(row.agencyPercent) : "");
+    setActNote(null);
+    setActError(null);
     setThreads(null);
     setOrders([]);
     setTopUps([]);
@@ -149,6 +196,44 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
     setTags([...tags, tag]);
     setTagDraft("");
     setNoteSaved(false);
+  }
+
+  /**
+   * One admin action on the open account, through the same endpoint the
+   * admin users screen uses — same guards (admins cannot be blocked, nobody
+   * acts on their own account), one behaviour everywhere. On success the
+   * list is re-pulled so the row agrees with what just happened.
+   */
+  async function adminAct(
+    kind: string,
+    payload: Record<string, unknown>,
+    doneNote: string,
+    patch?: Partial<CustomerRow>,
+  ) {
+    if (!picked || actBusy) return;
+    setActBusy(kind);
+    setActNote(null);
+    setActError(null);
+    const response = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: picked.username, ...payload }),
+    });
+    const data = (await response.json().catch(() => null)) as { error?: string } | null;
+    setActBusy(null);
+    if (!response.ok) {
+      setActError(data?.error ?? "Chưa thực hiện được.");
+      return;
+    }
+    setActNote(doneNote);
+    if (patch) setPicked({ ...picked, ...patch });
+    const page = await fetchPage(q, 0);
+    if (page) {
+      setRows(page);
+      setMoreLeft(page.length === 30);
+      const fresh = page.find((row) => row.id === picked.id);
+      if (fresh) setPicked({ ...fresh, ...(patch ?? {}) });
+    }
   }
 
   return (
@@ -208,7 +293,19 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                         {initials(row.username)}
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate font-semibold">{row.username}</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="truncate font-semibold">{row.username}</span>
+                          {row.blocked ? (
+                            <span className="shrink-0 rounded-md border border-red-200 bg-red-50 px-1.5 py-[1px] text-[10px] font-bold text-red-700">
+                              Khóa
+                            </span>
+                          ) : null}
+                          {row.role !== "MEMBER" ? (
+                            <span className="shrink-0 rounded-md border border-zinc-300 bg-zinc-100 px-1.5 py-[1px] text-[10px] font-bold text-zinc-600">
+                              {ROLE_LABEL[row.role] ?? row.role}
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="block text-[11px] text-zinc-400">UID {row.uid}</span>
                       </span>
                     </span>
@@ -330,11 +427,38 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
               </button>
             </div>
 
+            <div className="flex flex-wrap gap-1.5 text-[11px] font-bold">
+              <span className="rounded-md border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-zinc-600">
+                {ROLE_LABEL[picked.role] ?? picked.role}
+                {picked.role === "AGENCY" && picked.agencyPercent > 0
+                  ? ` ${picked.agencyPercent}%`
+                  : ""}
+              </span>
+              <span className="rounded-md border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-zinc-600">
+                Hạng {TIER_LABEL[picked.tier] ?? picked.tier}
+              </span>
+              {picked.verified ? (
+                <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700">
+                  Cấp 2
+                </span>
+              ) : null}
+              {picked.blocked ? (
+                <span className="rounded-md border border-red-200 bg-red-50 px-2 py-0.5 text-red-700">
+                  Đang khóa{picked.blockedReason ? `: ${picked.blockedReason}` : ""}
+                </span>
+              ) : null}
+            </div>
+
             <div className="grid grid-cols-2 gap-2">
               <Figure label="Số dư ví" value={`${formatVnd(picked.balance)}đ`} />
               <Figure label="Tổng đã nạp" value={`${formatVnd(picked.totalToppedUp)}đ`} />
               <Figure label="Tổng đã mua" value={`${formatVnd(picked.totalSpent)}đ`} />
               <Figure label="Đơn hàng" value={`${picked.orderCount}`} />
+              <Figure label="Điểm thưởng" value={`${formatVnd(picked.points)} Pts`} />
+              <Figure
+                label="IP gần nhất"
+                value={picked.lastIp ?? "Chưa có"}
+              />
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -518,6 +642,239 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                 ))
               )}
             </div>
+
+            {/* The admin desk's account tools, same endpoint, same guards —
+                the CRM just puts them beside the conversation. Deleting an
+                account is deliberately NOT here. */}
+            <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 p-3">
+              <summary className="cursor-pointer text-[12.5px] font-bold text-zinc-700">
+                Quản lý tài khoản
+              </summary>
+              <div className="mt-3 flex flex-col gap-3">
+                {actNote ? (
+                  <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] font-semibold text-emerald-700">
+                    {actNote}
+                  </p>
+                ) : null}
+                {actError ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[12px] font-semibold text-red-700">
+                    {actError}
+                  </p>
+                ) : null}
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Cộng / trừ tiền ví (âm là trừ)
+                  </p>
+                  <div className="flex gap-1.5">
+                    <input
+                      value={delta}
+                      onChange={(event) => setDelta(event.target.value)}
+                      inputMode="numeric"
+                      placeholder="VD: 50000 hoặc -20000"
+                      className="h-8 w-[150px] rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                    />
+                    <input
+                      value={deltaNote}
+                      onChange={(event) => setDeltaNote(event.target.value)}
+                      maxLength={120}
+                      placeholder="Lý do (khách sẽ thấy)"
+                      className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                    />
+                    <button
+                      type="button"
+                      disabled={actBusy !== null || !delta.trim() || Number(delta) === 0}
+                      onClick={() =>
+                        void adminAct(
+                          "balance",
+                          { action: "balance", delta: Math.trunc(Number(delta)), note: deltaNote },
+                          "Đã điều chỉnh số dư.",
+                        ).then(() => {
+                          setDelta("");
+                          setDeltaNote("");
+                        })
+                      }
+                      className="h-8 shrink-0 rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "balance" ? "…" : "Lưu"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    {picked.blocked ? "Tài khoản đang khóa" : "Khóa tài khoản"}
+                  </p>
+                  {picked.blocked ? (
+                    <button
+                      type="button"
+                      disabled={actBusy !== null}
+                      onClick={() =>
+                        void adminAct("unblock", { blocked: false }, "Đã mở khóa tài khoản.")
+                      }
+                      className="h-8 w-fit rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "unblock" ? "…" : "Mở khóa"}
+                    </button>
+                  ) : (
+                    <div className="flex gap-1.5">
+                      <input
+                        value={blockReason}
+                        onChange={(event) => setBlockReason(event.target.value)}
+                        maxLength={120}
+                        placeholder="Lý do (chỉ admin thấy)"
+                        className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                      />
+                      <button
+                        type="button"
+                        disabled={actBusy !== null}
+                        onClick={() =>
+                          void adminAct(
+                            "block",
+                            { blocked: true, reason: blockReason },
+                            "Đã khóa tài khoản và đăng xuất mọi phiên.",
+                          )
+                        }
+                        className="h-8 shrink-0 rounded-lg border border-red-300 px-3 text-[12px] font-semibold text-red-700 hover:bg-red-50 disabled:opacity-40"
+                      >
+                        {actBusy === "block" ? "…" : "Khóa"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Hạng thành viên
+                  </p>
+                  <div className="flex gap-1.5">
+                    <select
+                      value={tierDraft}
+                      onChange={(event) => setTierDraft(event.target.value)}
+                      className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2 text-[12.5px] outline-none focus:border-zinc-500"
+                    >
+                      {TIERS.map((tier) => (
+                        <option key={tier} value={tier}>
+                          {TIER_LABEL[tier]}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      disabled={actBusy !== null || tierDraft === picked.tier}
+                      onClick={() =>
+                        void adminAct("tier", { action: "tier", tier: tierDraft }, "Đã đổi hạng.")
+                      }
+                      className="h-8 shrink-0 rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "tier" ? "…" : "Lưu"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Vai trò
+                  </p>
+                  <div className="flex gap-1.5">
+                    <select
+                      value={roleDraft}
+                      onChange={(event) => setRoleDraft(event.target.value)}
+                      className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2 text-[12.5px] outline-none focus:border-zinc-500"
+                    >
+                      <option value="MEMBER">Thành viên</option>
+                      <option value="AGENCY">Đại lý</option>
+                      <option value="ADMIN">Quản trị</option>
+                    </select>
+                    {roleDraft === "AGENCY" ? (
+                      <input
+                        value={percentDraft}
+                        onChange={(event) => setPercentDraft(event.target.value)}
+                        inputMode="numeric"
+                        placeholder="% chiết khấu"
+                        className="h-8 w-[110px] rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                      />
+                    ) : null}
+                    <button
+                      type="button"
+                      disabled={actBusy !== null}
+                      onClick={() =>
+                        void adminAct(
+                          "role",
+                          {
+                            action: "role",
+                            role: roleDraft,
+                            ...(roleDraft === "AGENCY"
+                              ? { percent: Number(percentDraft) }
+                              : {}),
+                          },
+                          "Đã đổi vai trò.",
+                        )
+                      }
+                      className="h-8 shrink-0 rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "role" ? "…" : "Lưu"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Email
+                  </p>
+                  <div className="flex gap-1.5">
+                    <input
+                      value={emailDraft}
+                      onChange={(event) => setEmailDraft(event.target.value)}
+                      placeholder="Để trống là xoá email"
+                      className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                    />
+                    <button
+                      type="button"
+                      disabled={actBusy !== null || emailDraft === (picked.email ?? "")}
+                      onClick={() =>
+                        void adminAct("email", { action: "email", email: emailDraft }, "Đã đổi email.")
+                      }
+                      className="h-8 shrink-0 rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "email" ? "…" : "Lưu"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                    Đặt lại mật khẩu
+                  </p>
+                  <div className="flex gap-1.5">
+                    <input
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      type="text"
+                      placeholder="Mật khẩu mới cho khách"
+                      className="h-8 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
+                    />
+                    <button
+                      type="button"
+                      disabled={actBusy !== null || newPassword.length < 6}
+                      onClick={() =>
+                        void adminAct(
+                          "password",
+                          { action: "password", password: newPassword },
+                          "Đã đổi mật khẩu và đăng xuất mọi phiên của khách.",
+                        ).then(() => setNewPassword(""))
+                      }
+                      className="h-8 shrink-0 rounded-lg bg-zinc-900 px-3 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-40"
+                    >
+                      {actBusy === "password" ? "…" : "Đổi"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-zinc-400">
+                    Bạn tự nhắn mật khẩu mới cho khách; hệ thống không gửi hộ.
+                  </p>
+                </div>
+              </div>
+            </details>
 
             <Link
               href={`/admin/users/${picked.uid}`}
