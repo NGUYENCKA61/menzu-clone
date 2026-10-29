@@ -12,6 +12,8 @@ import { db } from "@/lib/db";
 
 export const CRM_KEYS = {
   quickReplies: "crm.quickReplies",
+  /** The shop's voice: read into EVERY bot answer, not retrieved by match. */
+  assistantVoice: "crm.assistantVoice",
   facebookPageId: "integrations.facebook.pageId",
   facebookPageToken: "integrations.facebook.pageToken",
   manychatApiKey: "integrations.manychat.apiKey",

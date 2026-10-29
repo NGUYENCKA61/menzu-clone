@@ -115,9 +115,13 @@ export async function GET(request: Request) {
     });
   }
 
-  // The bot's handbook.
+  // The bot's handbook, and the voice it speaks every answer in.
   if (url.searchParams.get("view") === "knowledge") {
-    return NextResponse.json({ entries: await listKnowledge(q) });
+    const [entries, voice] = await Promise.all([
+      listKnowledge(q),
+      getSettingValue(CRM_KEYS.assistantVoice),
+    ]);
+    return NextResponse.json({ entries, voice });
   }
 
   // What the drafting agent may write about.
@@ -314,6 +318,13 @@ export async function POST(request: Request) {
       : [];
     await saveQuickReplies(list);
     return NextResponse.json({ ok: true, quickReplies: await getQuickReplies() });
+  }
+
+  // --- the shop's voice ------------------------------------------------------
+  if (body.action === "voice") {
+    const text = typeof body.text === "string" ? body.text.trim().slice(0, 1500) : "";
+    await setSettingValue(CRM_KEYS.assistantVoice, text);
+    return NextResponse.json({ ok: true });
   }
 
   // --- the handbook's own writes --------------------------------------------

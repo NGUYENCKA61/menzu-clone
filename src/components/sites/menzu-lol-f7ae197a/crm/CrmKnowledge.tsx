@@ -23,8 +23,17 @@ interface Entry {
 
 type Draft = { id: string | null; title: string; body: string; internal: boolean };
 
-export function CrmKnowledge({ initial }: { initial: Entry[] }) {
+export function CrmKnowledge({
+  initial,
+  initialVoice,
+}: {
+  initial: Entry[];
+  initialVoice: string;
+}) {
   const [entries, setEntries] = useState<Entry[]>(initial);
+  const [voice, setVoice] = useState(initialVoice);
+  const [voiceSaving, setVoiceSaving] = useState(false);
+  const [voiceSaved, setVoiceSaved] = useState(false);
   const [q, setQ] = useState("");
   const [show, setShow] = useState<"ALL" | "BOT" | "INTERNAL">("ALL");
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -112,6 +121,51 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
           mật khẩu, khóa hay giá vốn ở đó. Thứ tuyệt mật thì chọn &quot;Chỉ nội
           bộ&quot;: admin đọc được trong này, bot không bao giờ thấy.
         </p>
+
+        {/* The voice: read into every answer, unlike entries that are
+            retrieved by match. Filled by hand, or distilled from the owner's
+            own fanpage messages when the export lands. */}
+        <div className="flex flex-col gap-2 rounded-2xl border border-zinc-200 bg-white p-4">
+          <p className="text-[13px] font-bold">Giọng điệu của shop</p>
+          <p className="text-[12px] text-zinc-500">
+            Bot đọc đoạn này ở mọi câu trả lời: xưng hô, độ dài câu, kiểu chốt,
+            mấy chữ hay dùng. Để trống là bot nói giọng mặc định.
+          </p>
+          <textarea
+            value={voice}
+            onChange={(event) => {
+              setVoice(event.target.value);
+              setVoiceSaved(false);
+            }}
+            rows={4}
+            maxLength={1500}
+            placeholder={'Ví dụ: xưng "shop" với khách, câu ngắn, thân thiện, hay chốt bằng "nhé"…'}
+            className="resize-y rounded-lg border border-zinc-300 px-3 py-2.5 text-[13px] leading-relaxed outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={voiceSaving}
+              onClick={() => {
+                setVoiceSaving(true);
+                void fetch("/api/admin/crm", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: "voice", text: voice }),
+                }).then((response) => {
+                  setVoiceSaving(false);
+                  if (response.ok) setVoiceSaved(true);
+                });
+              }}
+              className="h-8 rounded-lg bg-zinc-900 px-3.5 text-[12.5px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
+            >
+              {voiceSaving ? "Đang lưu…" : "Lưu giọng điệu"}
+            </button>
+            {voiceSaved ? (
+              <span className="text-[12px] font-semibold text-emerald-600">Đã lưu.</span>
+            ) : null}
+          </div>
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <form

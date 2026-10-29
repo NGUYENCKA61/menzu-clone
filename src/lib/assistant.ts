@@ -18,6 +18,7 @@ import {
 } from "@/lib/assistantProviders";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
+import { CRM_KEYS, getSettingValue } from "@/lib/crmSettings";
 import { retrieveForQuestion } from "@/lib/knowledge";
 import { featuresOrDefault, parseFeatures } from "@/lib/productFeatures";
 import { DEFAULT_GUIDE } from "@/lib/productGuide";
@@ -150,13 +151,20 @@ export async function buildCatalogue(): Promise<string> {
 export async function askAssistant(history: ChatTurn[]): Promise<string> {
   const question = history[history.length - 1]?.content ?? "";
   const settings = await getShopSettings();
-  const [catalogue, retrieved] = await Promise.all([
+  const [catalogue, retrieved, voice] = await Promise.all([
     buildCatalogue(),
     // The handbook and matching wiki titles, pulled per question — the part
     // of the prompt that varies, so it rides OUTSIDE the cached block.
     retrieveForQuestion(question).catch(() => ""),
+    // The shop's voice (CRM > Sổ tay bot): how the owner talks to customers,
+    // distilled from their own fanpage answers. Read into every reply; it
+    // changes rarely, so it lives in the cached half of the prompt.
+    getSettingValue(CRM_KEYS.assistantVoice).catch(() => ""),
   ]);
-  const system = `${SYSTEM_RULES}\n\n# DỮ LIỆU SHOP\n${catalogue}`;
+  const voiceBlock = voice.trim()
+    ? `\n\n# GIỌNG ĐIỆU CỦA SHOP (áp dụng cho mọi câu trả lời)\n${voice.trim().slice(0, 1500)}`
+    : "";
+  const system = `${SYSTEM_RULES}${voiceBlock}\n\n# DỮ LIỆU SHOP\n${catalogue}`;
   return settings.assistantProvider === "compatible"
     ? askCompatible(settings, retrieved ? `${system}\n\n${retrieved}` : system, history)
     : askClaude(system, retrieved, history);
