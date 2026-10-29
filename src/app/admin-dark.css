@@ -20,6 +20,7 @@ html[data-admin-theme="dark"] .admin-app :is(.bg-white, .focus-visible\:bg-zinc-
 }
 html[data-admin-theme="dark"] .admin-app .bg-zinc-50 { background-color: #1b1b20; }
 html[data-admin-theme="dark"] .admin-app .bg-zinc-50\/70 { background-color: rgba(27, 27, 32, 0.7); }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-50\/40 { background-color: rgba(27, 27, 32, 0.5); }
 html[data-admin-theme="dark"] .admin-app .bg-zinc-100 { background-color: #232329; }
 html[data-admin-theme="dark"] .admin-app .bg-zinc-200 { background-color: #30303a; }
 html[data-admin-theme="dark"] .admin-app .bg-\[\#f6f6f7\]\/95 { background-color: rgba(11, 11, 13, 0.95); }
