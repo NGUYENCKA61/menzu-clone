@@ -147,8 +147,15 @@ export async function buildCatalogue(): Promise<string> {
   return catalogueToText(tools, listings);
 }
 
+/** A customer's screenshot, riding with the last turn of the history. */
+export interface AssistantImage {
+  /** The processed WebP bytes, base64 — the same file the desk stores. */
+  base64: string;
+  mediaType: "image/webp";
+}
+
 /** One answer, through whichever door Cấu hình names. */
-export async function askAssistant(history: ChatTurn[]): Promise<string> {
+export async function askAssistant(history: ChatTurn[], image?: AssistantImage): Promise<string> {
   const question = history[history.length - 1]?.content ?? "";
   const settings = await getShopSettings();
   const [catalogue, retrieved, voice] = await Promise.all([
@@ -166,8 +173,24 @@ export async function askAssistant(history: ChatTurn[]): Promise<string> {
     : "";
   const system = `${SYSTEM_RULES}${voiceBlock}\n\n# DỮ LIỆU SHOP\n${catalogue}`;
   return settings.assistantProvider === "compatible"
-    ? askCompatible(settings, retrieved ? `${system}\n\n${retrieved}` : system, history)
-    : askClaude(system, retrieved, history);
+    ? askCompatible(settings, retrieved ? `${system}\n\n${retrieved}` : system, history, image)
+    : askClaude(system, retrieved, history, image);
+}
+
+/** The last user turn's content, with the screenshot attached when there is one. */
+function claudeContent(
+  turn: ChatTurn,
+  last: boolean,
+  image?: AssistantImage,
+): string | Anthropic.ContentBlockParam[] {
+  if (!last || !image) return turn.content;
+  return [
+    {
+      type: "image",
+      source: { type: "base64", media_type: image.mediaType, data: image.base64 },
+    },
+    { type: "text", text: turn.content },
+  ];
 }
 
 /**
@@ -195,7 +218,12 @@ export async function draftOnce(system: string, ask: string): Promise<string> {
  * default, disabling it invites tool-call text and stray tags into the visible
  * answer, and a support reply does not need deep reasoning anyway.
  */
-async function askClaude(system: string, retrieved: string, history: ChatTurn[]): Promise<string> {
+async function askClaude(
+  system: string,
+  retrieved: string,
+  history: ChatTurn[],
+  image?: AssistantImage,
+): Promise<string> {
   const client = new Anthropic();
 
   const response = await client.messages.create({
@@ -212,7 +240,10 @@ async function askClaude(system: string, retrieved: string, history: ChatTurn[])
       // cached half stays identical for every visitor.
       ...(retrieved ? [{ type: "text" as const, text: retrieved }] : []),
     ],
-    messages: history.map((turn) => ({ role: turn.role, content: turn.content })),
+    messages: history.map((turn, index) => ({
+      role: turn.role,
+      content: claudeContent(turn, index === history.length - 1, image),
+    })),
   });
 
   // A safety decline is not an error — the request succeeded and the model
@@ -240,6 +271,7 @@ async function askCompatible(
   settings: ShopSettings,
   system: string,
   history: ChatTurn[],
+  image?: AssistantImage,
 ): Promise<string> {
   const res = await fetch(chatCompletionsUrl(settings.assistantBaseUrl), {
     method: "POST",
@@ -253,7 +285,22 @@ async function askCompatible(
       temperature: 0.3,
       messages: [
         { role: "system", content: system },
-        ...history.map((turn) => ({ role: turn.role, content: turn.content })),
+        // The OpenAI dialect carries a picture as a data URL on the last
+        // user turn; Gemini's compatible endpoint reads it the same way.
+        ...history.map((turn, index) =>
+          index === history.length - 1 && image
+            ? {
+                role: turn.role,
+                content: [
+                  {
+                    type: "image_url",
+                    image_url: { url: `data:${image.mediaType};base64,${image.base64}` },
+                  },
+                  { type: "text", text: turn.content },
+                ],
+              }
+            : { role: turn.role, content: turn.content },
+        ),
       ],
     }),
     signal: AbortSignal.timeout(COMPATIBLE_TIMEOUT_MS),

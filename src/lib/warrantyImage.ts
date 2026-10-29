@@ -15,18 +15,34 @@ const MIN_SIDE = 64;
 const MAX_SIDE = 8192;
 const MAX_STORED_WIDTH = 1400;
 
-export type StoredImage = { ok: true; url: string | null } | { ok: false; error: string };
+export type StoredImage =
+  | { ok: true; url: string | null; data: Buffer | null }
+  | { ok: false; error: string };
 
 /**
  * A screenshot a buyer attached to a warranty report or to a message on one:
  * checked, re-encoded to WebP and stored. Nothing attached is fine — the url
  * is null.
  */
-export async function storeWarrantyImage(
+export function storeWarrantyImage(
   file: FormDataEntryValue | null,
   uid: number,
 ): Promise<StoredImage> {
-  if (!(file instanceof File) || file.size === 0) return { ok: true, url: null };
+  return storeCheckedImage(file, "warranty", String(uid));
+}
+
+/**
+ * The one image pipeline every chat-adjacent upload shares: bytes sniffed,
+ * EXIF dropped with the re-encode, resized, random name. The caller also
+ * gets the processed bytes — the AI assistant reads those, so the model
+ * sees exactly the picture the desk sees.
+ */
+export async function storeCheckedImage(
+  file: FormDataEntryValue | null,
+  folder: string,
+  prefix: string,
+): Promise<StoredImage> {
+  if (!(file instanceof File) || file.size === 0) return { ok: true, url: null, data: null };
 
   if (!TYPES.has(file.type)) {
     return { ok: false, error: "Ảnh chỉ nhận PNG, JPG hoặc WebP" };
@@ -56,6 +72,10 @@ export async function storeWarrantyImage(
     return { ok: false, error: "Không đọc được ảnh, file có thể bị hỏng" };
   }
 
-  const filename = `${uid}-${randomBytes(8).toString("hex")}.webp`;
-  return { ok: true, url: await storeUpload("warranty", filename, processed, "image/webp") };
+  const filename = `${prefix}-${randomBytes(8).toString("hex")}.webp`;
+  return {
+    ok: true,
+    url: await storeUpload(folder, filename, processed, "image/webp"),
+    data: processed,
+  };
 }

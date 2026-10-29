@@ -2211,6 +2211,9 @@ model ChatMessage {
   thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   role      ChatRole
   body      String
+  /// A screenshot the customer attached (checked, re-encoded, stored under
+  /// /uploads/chat); null for a plain line. The models read it too.
+  imageUrl  String?
   createdAt DateTime   @default(now())
 
   @@index([threadId, createdAt])

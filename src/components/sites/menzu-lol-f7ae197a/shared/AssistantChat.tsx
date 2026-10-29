@@ -1,12 +1,13 @@
 "use client";
 
-import { Headset, Loader2, SendHorizontal, Sparkles } from "lucide-react";
+import { Headset, ImagePlus, Loader2, SendHorizontal, Sparkles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 /** One line of the conversation as the panel holds it. */
 interface Turn {
   role: "user" | "assistant" | "admin";
   content: string;
+  imageUrl?: string | null;
 }
 
 /** The thread's holder, as the server names it. */
@@ -16,6 +17,7 @@ type ThreadStatus = "BOT" | "NEED_ADMIN" | "DONE";
 interface WireMessage {
   role: "CUSTOMER" | "BOT" | "ADMIN";
   body: string;
+  imageUrl?: string | null;
 }
 
 /** Mirrors MAX_QUESTION on the server, so the box stops before the API does. */
@@ -55,6 +57,8 @@ export function AssistantChat() {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [status, setStatus] = useState<ThreadStatus | null>(null);
   const [draft, setDraft] = useState("");
+  const [picked, setPicked] = useState<File | null>(null);
+  const [pickedUrl, setPickedUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [calling, setCalling] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +95,11 @@ export function AssistantChat() {
         }
         setStatus(data.thread.status);
         setTurns(
-          data.thread.messages.map((m) => ({ role: WIRE_ROLE[m.role], content: m.body })),
+          data.thread.messages.map((m) => ({
+            role: WIRE_ROLE[m.role],
+            content: m.body,
+            imageUrl: m.imageUrl ?? null,
+          })),
         );
       } catch {
         // The poll is a convenience; the next tick tries again.
@@ -106,15 +114,56 @@ export function AssistantChat() {
     };
   }, []);
 
+  function pickImage(file: File | null) {
+    if (pickedUrl) URL.revokeObjectURL(pickedUrl);
+    setPicked(file);
+    setPickedUrl(file ? URL.createObjectURL(file) : null);
+  }
+
   async function send(text: string) {
     const question = text.trim().slice(0, MAX_QUESTION);
-    if (!question || busy) return;
+    if ((!question && !picked) || busy) return;
 
-    const next = [...turns, { role: "user" as const, content: question }];
+    const image = picked;
+    const next = [
+      ...turns,
+      { role: "user" as const, content: question || (image ? "[Ảnh]" : ""), imageUrl: pickedUrl },
+    ];
     setTurns(next);
     setDraft("");
     setError(null);
     setBusy(true);
+    setPicked(null);
+    setPickedUrl(null);
+
+    // A picture rides as multipart to its own endpoint; the server rebuilds
+    // the history from the stored thread, so only the caption travels.
+    if (image) {
+      try {
+        const form = new FormData();
+        form.set("image", image);
+        if (question) form.set("body", question);
+        const response = await fetch("/api/assistant/image", { method: "POST", body: form });
+        const data = (await response.json()) as {
+          reply?: string;
+          status?: ThreadStatus;
+          error?: string;
+        };
+        if (data.status) setStatus(data.status);
+        if (!response.ok) {
+          setError(data.error ?? "Trợ lý đang bận, bạn thử lại sau nhé.");
+          return;
+        }
+        if (data.reply) {
+          setTurns((current) => [...current, { role: "assistant", content: data.reply! }]);
+        }
+      } catch {
+        setError("Không kết nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
 
     try {
       const response = await fetch("/api/assistant", {
@@ -179,7 +228,7 @@ export function AssistantChat() {
         <Bubble role="assistant">{GREETING}</Bubble>
 
         {turns.map((turn, index) => (
-          <Bubble key={index} role={turn.role}>
+          <Bubble key={index} role={turn.role} imageUrl={turn.imageUrl ?? null}>
             {turn.content}
           </Bubble>
         ))}
@@ -222,6 +271,23 @@ export function AssistantChat() {
         ) : null}
       </div>
 
+      {pickedUrl ? (
+        <div className="flex items-center gap-2 border-t border-white/5 px-3 py-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={pickedUrl} alt="Ảnh sắp gửi" className="h-10 w-10 rounded-lg object-cover" />
+          <span className="min-w-0 flex-1 truncate text-[12px] text-neutral-400">
+            Ảnh sẽ gửi kèm tin nhắn
+          </span>
+          <button
+            type="button"
+            onClick={() => pickImage(null)}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-neutral-400 hover:text-white"
+            aria-label="Bỏ ảnh"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ) : null}
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -229,6 +295,22 @@ export function AssistantChat() {
         }}
         className="flex items-center gap-2 border-t border-white/5 p-2"
       >
+        <label
+          className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 text-neutral-400 transition-colors hover:border-[var(--brand)]/50 hover:text-white"
+          aria-label="Gửi ảnh chụp màn hình"
+          title="Gửi ảnh chụp màn hình lỗi"
+        >
+          <ImagePlus size={15} />
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={(event) => {
+              pickImage(event.target.files?.[0] ?? null);
+              event.target.value = "";
+            }}
+          />
+        </label>
         <input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -240,7 +322,7 @@ export function AssistantChat() {
         />
         <button
           type="submit"
-          disabled={busy || !draft.trim()}
+          disabled={busy || (!draft.trim() && !picked)}
           aria-label="Gửi"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-dark)] text-white transition-colors hover:bg-[var(--brand)] disabled:opacity-40"
         >
@@ -274,7 +356,15 @@ export function AssistantChat() {
 }
 
 /** One line, sided and coloured by who said it. */
-function Bubble({ role, children }: { role: Turn["role"]; children: React.ReactNode }) {
+function Bubble({
+  role,
+  imageUrl = null,
+  children,
+}: {
+  role: Turn["role"];
+  imageUrl?: string | null;
+  children: React.ReactNode;
+}) {
   if (role === "admin") {
     return (
       <div className="flex max-w-[85%] flex-col gap-1 self-start">
@@ -289,14 +379,20 @@ function Bubble({ role, children }: { role: Turn["role"]; children: React.ReactN
   }
   const mine = role === "user";
   return (
-    <p
+    <div
       className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-[13px] leading-relaxed ${
         mine
           ? "self-end rounded-br-sm bg-[var(--brand)]/20 text-white"
           : "self-start rounded-bl-sm bg-white/[0.04] text-neutral-200"
       }`}
     >
+      {imageUrl ? (
+        <a href={imageUrl} target="_blank" rel="noreferrer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imageUrl} alt="Ảnh đã gửi" className="mb-1.5 max-h-[180px] rounded-lg" />
+        </a>
+      ) : null}
       {children}
-    </p>
+    </div>
   );
 }

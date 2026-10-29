@@ -87,10 +87,15 @@ export async function threadForNewMessage(viewer: ChatViewer) {
 }
 
 /** Append one line and keep the thread's sort keys honest. */
-export async function appendChatMessage(threadId: string, role: ChatRole, body: string) {
+export async function appendChatMessage(
+  threadId: string,
+  role: ChatRole,
+  body: string,
+  imageUrl?: string | null,
+) {
   const now = new Date();
   const [message] = await db.$transaction([
-    db.chatMessage.create({ data: { threadId, role, body } }),
+    db.chatMessage.create({ data: { threadId, role, body, imageUrl: imageUrl ?? null } }),
     db.chatThread.update({
       where: { id: threadId },
       data: { lastMessageAt: now, ...(role === "CUSTOMER" ? { lastCustomerAt: now } : {}) },
@@ -170,7 +175,7 @@ export async function threadViewForViewer(viewer: ChatViewer, after?: Date) {
     where: { threadId: thread.id, ...(after ? { createdAt: { gt: after } } : {}) },
     orderBy: { createdAt: "asc" },
     take: 100,
-    select: { id: true, role: true, body: true, createdAt: true },
+    select: { id: true, role: true, body: true, imageUrl: true, createdAt: true },
   });
   return {
     id: thread.id,
@@ -179,6 +184,7 @@ export async function threadViewForViewer(viewer: ChatViewer, after?: Date) {
       id: m.id,
       role: m.role,
       body: m.body,
+      imageUrl: m.imageUrl,
       at: m.createdAt.toISOString(),
     })),
   };
@@ -488,7 +494,7 @@ export async function threadDetailForDesk(threadId: string) {
       messages: {
         orderBy: { createdAt: "asc" },
         take: 300,
-        select: { id: true, role: true, body: true, createdAt: true },
+        select: { id: true, role: true, body: true, imageUrl: true, createdAt: true },
       },
     },
   });
@@ -506,7 +512,7 @@ export async function threadDetailForDesk(threadId: string) {
       id: m.id,
       role: m.role,
       body: m.body,
-      imageUrl: null as string | null,
+      imageUrl: m.imageUrl,
       at: m.createdAt.toISOString(),
     })),
   };
