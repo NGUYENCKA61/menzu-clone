@@ -105,6 +105,12 @@ model User {
   /// nobody else — the shop deliberately publishes no flat rate.
   agencyPercent Int @default(0)
 
+  /// The CRM desk's own margin notes on a customer — never shown to them.
+  /// A free-text note ("hay đòi bảo hành, nói chuyện nhẹ thôi") and a few
+  /// short labels ("VIP", "đại lý cũ") the admin reads at a glance.
+  crmNote String   @default("")
+  crmTags String[] @default([])
+
   /// "Số tiền hoa hồng khả dụng": referral earnings waiting to be moved into
   /// `balance`. Kept apart from balance so the shop can see referral money
   /// as its own stream before it is spent.
@@ -142,6 +148,7 @@ model User {
   warrantyMessages    WarrantyMessage[]
   verifications       AccountVerification[]
   phoneVerifications  PhoneVerification[]
+  chatThreads         ChatThread[]
 
   /// The admin list sorts newest-first and pages through; at 8k+ accounts an
   /// unindexed createdAt means a full sort on every page.
@@ -2116,4 +2123,70 @@ model AdminLoginChallenge {
 
   @@index([userId, createdAt])
   @@map("admin_login_challenges")
+}
+
+/// Where a conversation came from. Only WEB exists today; the other names are
+/// reserved so folding the Zalo and fanpage inboxes in later is a data change,
+/// not a migration.
+enum ChatChannel {
+  WEB
+  ZALO
+  FACEBOOK
+  TELEGRAM
+}
+
+/// Who holds the conversation right now. BOT answers by itself, NEED_ADMIN is
+/// the hand-off (the bot goes quiet, the desk was pinged), DONE is closed —
+/// the customer's next message opens a fresh thread.
+enum ChatThreadStatus {
+  BOT
+  NEED_ADMIN
+  DONE
+}
+
+enum ChatRole {
+  CUSTOMER
+  BOT
+  ADMIN
+}
+
+/// One support conversation on the CRM desk (29/10/2026). A signed-in
+/// customer is tied by userId; a visitor by the random cookie in guestKey.
+/// The customer is SetNull, not Cascade: the transcript is the desk's record
+/// of what was promised, and deleting an account must not eat it.
+model ChatThread {
+  id       String      @id @default(cuid())
+  channel  ChatChannel @default(WEB)
+  userId   String?
+  user     User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// The anonymous visitor's cookie value — random bytes, never shown.
+  guestKey String?
+
+  status ChatThreadStatus @default(BOT)
+  /// Why the bot handed over, in the desk's words ("Khách bấm nút Gặp admin").
+  needReason String?
+
+  /// Kept by hand on every append so the desk list sorts without joining.
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messages ChatMessage[]
+
+  @@index([status, lastMessageAt])
+  @@index([userId, lastMessageAt])
+  @@index([guestKey, lastMessageAt])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id        String     @id @default(cuid())
+  threadId  String
+  thread    ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  role      ChatRole
+  body      String
+  createdAt DateTime   @default(now())
+
+  @@index([threadId, createdAt])
+  @@map("chat_messages")
 }

@@ -7,8 +7,16 @@ import {
   assistantConfigured,
   AssistantUpstreamError,
 } from "@/lib/assistant";
+import { handoffReason } from "@/lib/chatHandoff";
 import { MAX_QUESTION, sanitizeHistory } from "@/lib/assistantPrompt";
 import { DAY_MS, HOUR_MS, throttleReason } from "@/lib/assistantThrottle";
+import {
+  appendChatMessage,
+  handoffToAdmin,
+  readChatViewer,
+  setGuestCookie,
+  threadForNewMessage,
+} from "@/lib/chatStore";
 import { clientIp } from "@/lib/clientIp";
 import { db } from "@/lib/db";
 import { crossSiteRequest } from "@/lib/sameOrigin";
@@ -16,15 +24,20 @@ import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
 
 /**
- * The AI assistant's one endpoint: a question in, an answer out.
+ * The AI assistant's one endpoint: a question in, an answer out — and since
+ * the CRM desk (29/10/2026), a record. Every exchange lands in the thread
+ * store so the admin can read it at /admin/crm, and three kinds of question
+ * never reach the model at all: a thread already handed to the admin (the
+ * bot has lost its turn), a message the hand-off rules catch (money, a dead
+ * key, a customer past arguing), and anything over the throttle.
  *
- * Every call here costs the shop money or free allowance, and the page it is
- * reached from is public, so the throttle is not a nicety — it is the only
- * thing between the shop and somebody holding down a send button. Four
+ * Every model call costs the shop money or free allowance, and the page it
+ * is reached from is public, so the throttle is not a nicety — it is the
+ * only thing between the shop and somebody holding down a send button. Four
  * windows: an hour per address, an hour per account, and an hour and a day
- * for the whole shop (the numbers live in assistantThrottle). Only the shop's
- * own pages may call: another site's page would spend the allowance under
- * its visitors' addresses.
+ * for the whole shop (the numbers live in assistantThrottle). Only the
+ * shop's own pages may call: another site's page would spend the allowance
+ * under its visitors' addresses.
  */
 
 export const dynamic = "force-dynamic";
@@ -67,9 +80,50 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  const question = history[history.length - 1]!.content;
+
+  // The conversation this message belongs to. The viewer is the signed-in
+  // customer or the guest cookie; a cookie minted here is set on this same
+  // response, so the next message finds the same thread.
+  const viewer = await readChatViewer();
+  const thread = await threadForNewMessage(viewer);
+  if (viewer.mintedGuestKey) await setGuestCookie(viewer.mintedGuestKey);
+
+  if (thread.status === "NEED_ADMIN") {
+    // The admin holds this conversation: store the customer's words for them
+    // and keep the model out of it. This path spends no allowance, so it has
+    // its own small cap against someone leaning on the button.
+    const hourAgo = new Date(Date.now() - HOUR_MS);
+    const recent = await db.chatMessage.count({
+      where: { threadId: thread.id, role: "CUSTOMER", createdAt: { gte: hourAgo } },
+    });
+    if (recent >= 60) {
+      return NextResponse.json(
+        { error: "Bạn gửi khá nhiều rồi, admin sẽ trả lời sớm nhé." },
+        { status: 429 },
+      );
+    }
+    await appendChatMessage(thread.id, "CUSTOMER", question);
+    return NextResponse.json({ threadId: thread.id, status: "NEED_ADMIN" });
+  }
+
+  await appendChatMessage(thread.id, "CUSTOMER", question);
+
+  // Money, a key that still fails, a customer past arguing: the desk's
+  // cases, decided before any model gets to improvise about a refund.
+  const user = await getCurrentUser();
+  const reason = handoffReason(question);
+  if (reason) {
+    await handoffToAdmin({
+      threadId: thread.id,
+      reason,
+      excerpt: question,
+      customerName: user?.username ?? null,
+    });
+    return NextResponse.json({ threadId: thread.id, status: "NEED_ADMIN", handoff: true });
+  }
 
   const ip = clientIp(request);
-  const user = await getCurrentUser();
   const now = Date.now();
   const hour = { gte: new Date(now - HOUR_MS) };
   const day = { gte: new Date(now - DAY_MS) };
@@ -89,7 +143,7 @@ export async function POST(request: Request) {
       {
         error:
           "Trợ lý đang bận vì nhiều người hỏi cùng lúc. Bạn thử lại sau, " +
-          "hoặc nhắn thẳng cho admin qua kênh hỗ trợ nhé.",
+          "hoặc bấm Gặp admin để admin trả lời nhé.",
       },
       { status: 429 },
     );
@@ -99,7 +153,7 @@ export async function POST(request: Request) {
       {
         error:
           "Bạn hỏi khá nhiều trong một giờ rồi. Nghỉ một lát rồi hỏi tiếp, " +
-          "hoặc nhắn thẳng cho admin qua kênh hỗ trợ nhé.",
+          "hoặc bấm Gặp admin để admin trả lời nhé.",
       },
       { status: 429 },
     );
@@ -120,7 +174,8 @@ export async function POST(request: Request) {
 
   try {
     const reply = await askAssistant(history);
-    return NextResponse.json({ reply });
+    await appendChatMessage(thread.id, "BOT", reply);
+    return NextResponse.json({ reply, threadId: thread.id, status: "BOT" });
   } catch (error) {
     // The visitor gets one sentence and somewhere else to go; the detail goes
     // to the server log, where the shop can see whether it is a bad key, a
@@ -145,7 +200,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Trợ lý đang bận, bạn thử lại sau ít phút hoặc nhắn admin nhé.",
+        error: "Trợ lý đang bận, bạn thử lại sau ít phút hoặc bấm Gặp admin nhé.",
       },
       { status: 502 },
     );
