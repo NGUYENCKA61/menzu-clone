@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Plus, Power, TicketPercent, Trash2 } from "lucide-react";
+import { Plus, Power, TicketPercent, Trash2, Zap } from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
