@@ -2,15 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  CalendarClock,
-  Plus,
-  Power,
-  TicketPercent,
-  Trash2,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { Plus, Power, TicketPercent, Trash2 } from "lucide-react";
 
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 
@@ -61,37 +53,6 @@ const BTN_ON =
   "h-8 px-3 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 text-[12px] font-semibold text-emerald-600 transition-colors inline-flex items-center gap-1.5";
 const BTN_OFF =
   "h-8 px-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 disabled:opacity-60 text-[12px] font-semibold text-amber-600 transition-colors inline-flex items-center gap-1.5";
-
-function StatMini({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: number;
-  icon: LucideIcon;
-  tint: string;
-}) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-zinc-500">
-          {label}
-        </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}>
-          <Icon size={15} />
-        </span>
-      </div>
-      <span
-        className={`text-[26px] font-black leading-none tabular-nums ${
-          value === 0 ? "text-zinc-400" : "text-zinc-900"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
 
 /**
  * Vouchers and scheduled flash sales on one screen.
@@ -198,39 +159,20 @@ export function AdminMarketing({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatMini
-          label="Voucher đang bật"
-          value={vouchers.filter((v) => v.active).length}
-          icon={TicketPercent}
-          tint="border-emerald-200 bg-emerald-50 text-emerald-600"
-        />
-        <StatMini
-          label="Tổng lượt dùng mã"
-          value={vouchers.reduce((sum, v) => sum + v.usedCount, 0)}
-          icon={TicketPercent}
-          tint="border-violet-200 bg-violet-50 text-violet-600"
-        />
-        <StatMini
-          label="Sale đang chạy"
-          value={sales.filter((s) => s.running).length}
-          icon={Zap}
-          tint="border-rose-500/25 bg-rose-50 text-rose-600"
-        />
-        <StatMini
-          label="Sale chờ tới giờ"
-          value={sales.filter((s) => s.active && !s.running).length}
-          icon={CalendarClock}
-          tint="border-amber-200 bg-amber-50 text-amber-600"
-        />
-      </div>
-
+      {/* The four stat tiles went (30/10/2026, "đập đi xây lại cho gọn"):
+          the tabs carry the two live counts, the tables say the rest. */}
       <div className="flex gap-2">
         <button type="button" onClick={() => setTab("voucher")} className={tab === "voucher" ? TAB_ON : TAB_OFF}>
           Voucher
+          {vouchers.filter((v) => v.active).length > 0
+            ? ` · ${vouchers.filter((v) => v.active).length} đang bật`
+            : ""}
         </button>
         <button type="button" onClick={() => setTab("sale")} className={tab === "sale" ? TAB_ON : TAB_OFF}>
           Flash Sale
+          {sales.filter((s) => s.running).length > 0
+            ? ` · ${sales.filter((s) => s.running).length} đang chạy`
+            : ""}
         </button>
       </div>
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { WarrantyIssueGlyph } from "./warrantyIssueIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -150,17 +149,19 @@ export function AdminWarranty({
                 }`}
               >
                 {f.label}
-                <span
-                  className={`rounded-full px-1.5 text-[10px] tabular-nums ${
-                    on
-                      ? "bg-white/20 text-white"
-                      : f.key === "TODO" && count("TODO") > 0
-                        ? "bg-rose-600 text-white"
-                        : "bg-zinc-100 text-zinc-500"
-                  }`}
-                >
-                  {count(f.key)}
-                </span>
+                {count(f.key) > 0 ? (
+                  <span
+                    className={`rounded-full px-1.5 text-[10px] tabular-nums ${
+                      on
+                        ? "bg-white/20 text-white"
+                        : f.key === "TODO"
+                          ? "bg-rose-600 text-white"
+                          : "bg-zinc-100 text-zinc-500"
+                    }`}
+                  >
+                    {count(f.key)}
+                  </span>
+                ) : null}
               </button>
             );
           })}
@@ -222,7 +223,7 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
   return (
     <Link
       href={`/admin/warranty/${row.id}`}
-      className="group flex items-center gap-3 border-b border-zinc-100 px-4 py-3.5 transition-colors last:border-b-0 hover:bg-zinc-50/70 sm:gap-4"
+      className="group flex items-center gap-3 border-b border-zinc-100 px-4 py-3 transition-colors last:border-b-0 hover:bg-zinc-50/70 sm:gap-4"
     >
       <div className="min-w-0 flex-1">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -242,28 +243,16 @@ function TicketRow({ row }: { row: WarrantyListRow }) {
             <span className="inline-flex shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
               Chờ chuyển khoản
             </span>
-          ) : row.bankAwaited ? (
-            <span className="inline-flex shrink-0 rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[11px] font-semibold text-zinc-500">
-              Chờ khách nhập STK
-            </span>
           ) : null}
           <span className="min-w-0 truncate text-[13px] font-bold text-zinc-900">
             {row.productName}
           </span>
-          {row.packageLabel ? (
-            <span className="shrink-0 rounded-md border border-zinc-200 bg-zinc-50 px-1.5 py-px text-[11px] font-semibold text-zinc-600">
-              {row.packageLabel}
-            </span>
-          ) : null}
         </div>
         <p className="mt-1 truncate text-[12px] text-zinc-500">
           <span className="font-semibold text-zinc-700">{row.username}</span>{" "}
-          · {row.orderCode} ·{" "}
-          <WarrantyIssueGlyph
-            issue={row.issue}
-            className="-mt-0.5 mr-1 inline-block h-3.5 w-3.5 align-middle text-zinc-400"
-          />
-          {WARRANTY_ISSUE[row.issue].label}
+          · {row.orderCode} · {WARRANTY_ISSUE[row.issue].label}
+          {row.packageLabel ? ` · Gói ${row.packageLabel}` : ""}
+          {!row.transferDue && row.bankAwaited ? " · Chờ khách nhập STK" : ""}
         </p>
         <p className="mt-0.5 truncate text-[12px] text-zinc-500">
           {row.lastFromShop === true ? (

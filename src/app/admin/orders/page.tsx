@@ -8,10 +8,7 @@ import {
   Clock,
   Eye,
   KeyRound,
-  Repeat,
   ShoppingBag,
-  Wallet,
-  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,13 +20,12 @@ import { currentOrderIdOf, loginHandover } from "@/lib/accountLogin";
 import { getAdmin } from "@/lib/admin";
 import { dayStamp } from "@/lib/dayGroups";
 import { db } from "@/lib/db";
+import { sentenceCase } from "@/lib/displayCase";
 import {
   hasOrderFilters,
-  ORDER_METHOD_LABELS,
   ORDER_STATUS_LABELS,
   ORDERS_PER_PAGE,
   parseOrderFilters,
-  type OrderMethod,
   type OrderStatus,
 } from "@/lib/orders";
 import { productHref } from "@/lib/routes";
@@ -51,14 +47,6 @@ const STATUS_TONE: Record<string, ChipTone> = {
   PENDING: "amber",
   CANCELLED: "red",
   REFUNDED: "violet",
-};
-
-/** The little glyph beside each payment method. */
-const METHOD_ICON: Record<string, LucideIcon> = {
-  BUY_NOW: Zap,
-  DEPOSIT: Wallet,
-  TRADE_IN: Repeat,
-  PAY_LATER: Clock,
 };
 
 /**
@@ -130,6 +118,7 @@ export default async function AdminOrdersPage({
       product: {
         select: {
           code: true,
+          name: true,
           slug: true,
           productType: true,
           accountPool: true,
@@ -169,7 +158,6 @@ export default async function AdminOrdersPage({
   // phone and the table from sm up read the same array.
   const rows = orders.map((o) => ({
     o,
-    MethodIcon: METHOD_ICON[o.method],
     discounted: o.discountPct > 0 || o.voucher !== null,
     login: loginHandover(o, {
       ...o.product,
@@ -230,7 +218,7 @@ export default async function AdminOrdersPage({
             {filtered ? "Không có đơn nào khớp bộ lọc" : "Chưa có đơn hàng nào"}
           </p>
         ) : (
-          rows.map(({ o, MethodIcon, discounted, login }) => (
+          rows.map(({ o, discounted, login }) => (
             <article key={o.code} className="rounded-xl border border-zinc-200 bg-white p-3.5">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -264,12 +252,14 @@ export default async function AdminOrdersPage({
                   <span className="text-[11px] tabular-nums text-zinc-400">UID {o.user.uid}</span>
                 </span>
               </Link>
-              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                <span className="font-mono font-bold text-zinc-900">#{o.product.code}</span>
-                <span className="flex items-center gap-1 text-zinc-500">
-                  {MethodIcon ? <MethodIcon size={12} className="text-zinc-400" /> : null}
-                  {ORDER_METHOD_LABELS[o.method as OrderMethod] ?? o.method}
-                </span>
+              <p
+                title={o.product.name ?? o.product.code}
+                className="mt-3 truncate text-[13px] font-semibold text-zinc-800"
+              >
+                {sentenceCase(o.product.name ?? o.product.code)}
+              </p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="font-mono text-[11px] text-zinc-400">#{o.product.code}</span>
                 {login.state === "ready" ? (
                   <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
                     <KeyRound size={10} /> Đã giao TK tự động
@@ -305,15 +295,13 @@ export default async function AdminOrdersPage({
       </div>
 
       <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white sm:block">
-        <table className="w-full min-w-[900px] border-collapse text-left">
+        <table className="w-full min-w-[760px] border-collapse text-left">
           <thead>
             <tr className="border-b border-zinc-200">
               {[
                 "Mã đơn & Thời gian",
                 "Khách hàng",
                 "Sản phẩm",
-                "Hình thức",
-                "Giá gốc & Giảm",
                 "Thành tiền",
                 "Trạng thái",
                 "",
@@ -321,7 +309,7 @@ export default async function AdminOrdersPage({
                 <th
                   key={h || `actions-${index}`}
                   className={`whitespace-nowrap px-5 py-3 text-left text-[12.5px] font-semibold text-zinc-500 ${
-                    index === 7 ? STICKY_ACTIONS : ""
+                    index === 5 ? STICKY_ACTIONS : ""
                   }`}
                 >
                   {h}
@@ -332,12 +320,12 @@ export default async function AdminOrdersPage({
           <tbody>
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-5 py-14 text-center text-zinc-500">
+                <td colSpan={6} className="px-5 py-14 text-center text-zinc-500">
                   {filtered ? "Không có đơn nào khớp bộ lọc" : "Chưa có đơn hàng nào"}
                 </td>
               </tr>
             ) : (
-              rows.map(({ o, MethodIcon, discounted, login }) => {
+              rows.map(({ o, discounted, login }) => {
                 return (
                   <tr
                     key={o.code}
@@ -380,9 +368,15 @@ export default async function AdminOrdersPage({
                         </span>
                       </Link>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-3">
-                      <div className="flex flex-col items-start gap-1">
-                        <span className="font-mono text-xs font-bold text-zinc-900">
+                    <td className="px-5 py-3">
+                      <div className="flex max-w-[280px] flex-col items-start gap-1">
+                        <span
+                          title={o.product.name ?? o.product.code}
+                          className="w-full truncate text-[13px] font-semibold text-zinc-800"
+                        >
+                          {sentenceCase(o.product.name ?? o.product.code)}
+                        </span>
+                        <span className="font-mono text-[11px] text-zinc-400">
                           #{o.product.code}
                         </span>
                         {/* Whether the account's sign-in went out with the
@@ -404,18 +398,19 @@ export default async function AdminOrdersPage({
                         <RevealNote order={o} />
                       </div>
                     </td>
+                    {/* One money cell: the strike-through list price and the
+                        voucher only step in on the rare discounted order. */}
                     <td className="whitespace-nowrap px-5 py-3">
-                      <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                        {MethodIcon ? <MethodIcon size={13} className="shrink-0 text-zinc-400" /> : null}
-                        {ORDER_METHOD_LABELS[o.method as OrderMethod] ?? o.method}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      {discounted ? (
-                        <div className="flex flex-col">
+                      <div className="flex flex-col">
+                        {discounted ? (
                           <span className="text-[11px] tabular-nums text-zinc-400 line-through">
                             {formatVnd(Number(o.listPrice))}đ
                           </span>
+                        ) : null}
+                        <span className="text-sm font-bold tabular-nums text-zinc-900">
+                          {formatVnd(Number(o.total))}đ
+                        </span>
+                        {discounted ? (
                           <span className="mt-0.5 flex items-center gap-1.5 text-[11px] font-bold text-amber-600">
                             −{String(o.discountPct).replace(".", ",")}%
                             {o.voucher ? (
@@ -424,13 +419,8 @@ export default async function AdminOrdersPage({
                               </span>
                             ) : null}
                           </span>
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-zinc-300">-</span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-sm font-bold tabular-nums text-zinc-900">
-                      {formatVnd(Number(o.total))}đ
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-5 py-3">
                       <Chip tone={STATUS_TONE[o.status] ?? "zinc"}>
