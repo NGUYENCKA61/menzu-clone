@@ -13,6 +13,11 @@ import { getAdmin } from "@/lib/admin";
 export const metadata: Metadata = {
   title: { default: "CRM | THICHTHIHACK", template: "%s | CRM THICHTHIHACK" },
   robots: { index: false, follow: false },
+  // Its own manifest and icon, so "Thêm vào MH chính" installs the desk as
+  // the CRM app — straight into /crm, full screen — not the storefront.
+  manifest: "/crm/manifest.webmanifest",
+  icons: { icon: "/seo/crm-192.png", apple: "/seo/crm-192.png" },
+  appleWebApp: { capable: true, title: "CRM", statusBarStyle: "default" },
 };
 export const dynamic = "force-dynamic";
 
