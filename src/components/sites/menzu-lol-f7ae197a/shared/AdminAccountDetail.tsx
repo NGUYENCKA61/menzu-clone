@@ -76,27 +76,27 @@ export interface AccountDetailView {
   pool: PoolView | null;
 }
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-zinc-500";
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5";
 
 const STATUS_META: Record<string, { label: string; tint: string }> = {
   AVAILABLE: {
     label: "Đang bán",
-    tint: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    tint: "border-emerald-200 bg-emerald-50 text-emerald-600",
   },
   RESERVED: {
     label: "Đang giữ",
-    tint: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    tint: "border-amber-200 bg-amber-50 text-amber-600",
   },
-  SOLD: { label: "Đã bán", tint: "border-rose-500/30 bg-rose-500/10 text-rose-400" },
-  HIDDEN: { label: "Đã ẩn", tint: "border-white/10 bg-white/5 text-neutral-500" },
+  SOLD: { label: "Đã bán", tint: "border-rose-200 bg-rose-50 text-rose-600" },
+  HIDDEN: { label: "Đã ẩn", tint: "border-zinc-200 bg-zinc-50 text-zinc-500" },
 };
 
 function formatVnd(n: number): string {
@@ -407,20 +407,20 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
   const loginStatus = loginStored
     ? account.buyer
       ? {
-          tone: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+          tone: "border-emerald-200 bg-emerald-50 text-emerald-600",
           text: `Đã giao tự động cho ${account.buyer.username} (đơn ${account.buyer.orderCode}), khách nhận qua nút Lấy thông tin trong Lịch sử mua.`,
         }
       : {
-          tone: "border-white/10 bg-white/[0.03] text-neutral-300",
+          tone: "border-zinc-200 bg-white text-zinc-700",
           text: "Sẵn sàng: bán xong khách nhận qua nút Lấy thông tin trong Lịch sử mua (bắt buộc quay màn hình).",
         }
     : account.buyer
       ? {
-          tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+          tone: "border-amber-200 bg-amber-50 text-amber-600",
           text: `Đã bán cho ${account.buyer.username} (đơn ${account.buyer.orderCode}) khi chưa có thông tin đăng nhập: khách đang thấy "đang được chuẩn bị", nhập vào là khách nhận được.`,
         }
       : {
-          tone: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+          tone: "border-amber-200 bg-amber-50 text-amber-600",
           text: "Chưa có thông tin đăng nhập: bán ra lúc này khách sẽ phải chờ shop nhập.",
         };
 
@@ -432,7 +432,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
         ) : (
           <p
             role="status"
-            className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
           >
             {msg.text}
           </p>
@@ -440,39 +440,39 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
       ) : null}
 
       {/* The account's papers. */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-wrap items-center gap-5">
-        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-wrap items-center gap-5">
+        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-white">
           {account.imageUrl ? (
             <Image src={account.imageUrl} alt="" fill sizes="192px" className="object-cover" />
           ) : (
-            <span className="flex h-full w-full items-center justify-center text-neutral-600">
+            <span className="flex h-full w-full items-center justify-center text-zinc-400">
               <Boxes size={20} />
             </span>
           )}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="font-mono text-base font-black text-white">#{account.code}</span>
+            <span className="font-mono text-base font-black text-zinc-900">#{account.code}</span>
             <span
               className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${statusMeta.tint}`}
             >
               {statusMeta.label}
             </span>
             {account.tag ? (
-              <span className="rounded border border-indigo-500/25 bg-indigo-500/10 px-1.5 py-0.5 text-[12px] font-semibold text-indigo-400">
+              <span className="rounded border border-indigo-200 bg-indigo-50 px-1.5 py-0.5 text-[12px] font-semibold text-indigo-600">
                 {account.tag}
               </span>
             ) : null}
           </div>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
             <span>{account.categoryName}</span>
             {account.rank ? <span>Rank {account.rank}</span> : null}
             <span className="tabular-nums">{account.orderCount} đơn</span>
-            <span className="font-black tabular-nums text-rose-400">
+            <span className="font-black tabular-nums text-rose-600">
               {formatVnd(account.price)}đ
             </span>
             {account.oldPrice > account.price ? (
-              <span className="tabular-nums text-neutral-600 line-through">
+              <span className="tabular-nums text-zinc-400 line-through">
                 {formatVnd(account.oldPrice)}đ
               </span>
             ) : null}
@@ -482,7 +482,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           href={account.publicHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3.5 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
           <ExternalLink size={13} />
           Xem trang khách
@@ -493,7 +493,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Wallet size={13} className="text-neutral-400" />
+              <Wallet size={13} className="text-zinc-500" />
               Giá & trạng thái
             </span>
             <div className="flex flex-wrap items-end gap-3">
@@ -546,7 +546,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   className={`${FIELD} w-40`}
                 >
                   {Object.entries(STATUS_META).map(([value, meta]) => (
-                    <option key={value} value={value} className="bg-neutral-900">
+                    <option key={value} value={value} className="bg-zinc-100">
                       {meta.label}
                     </option>
                   ))}
@@ -562,7 +562,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 Lưu
               </button>
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               &ldquo;Đã ẩn&rdquo; rút tài khoản khỏi kệ nhưng giữ nguyên link; &ldquo;Đã
               bán&rdquo; hiện nhãn hết hàng trên trang khách.
             </p>
@@ -572,13 +572,13 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 checked={verifiedOnly}
                 disabled={busy}
                 onChange={(event) => void saveVerifiedOnly(event.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-zinc-900"
               />
               <span>
-                <span className="block text-xs font-bold text-white">
+                <span className="block text-xs font-bold text-zinc-900">
                   Chỉ bán cho tài khoản xác thực cấp 2
                 </span>
-                <span className="mt-0.5 block text-[11px] text-neutral-500">
+                <span className="mt-0.5 block text-[11px] text-zinc-500">
                   Trang khách báo rõ, máy chủ từ chối đơn của tài khoản chưa duyệt
                   (kể cả qua giỏ hàng và bot Telegram). Lưu ngay khi bật/tắt.
                 </span>
@@ -588,13 +588,13 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Tag size={13} className="text-neutral-400" />
+              <Tag size={13} className="text-zinc-500" />
               Tag & chỉ số trên card
             </span>
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <label htmlFor="acc-tag" className={LABEL}>
-                  Tag góc card <span className="text-neutral-600">(trống = ẩn)</span>
+                  Tag góc card <span className="text-zinc-400">(trống = ẩn)</span>
                 </label>
                 <select
                   id="acc-tag"
@@ -602,16 +602,16 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   onChange={(event) => setTag(event.target.value)}
                   className={`${FIELD} w-44`}
                 >
-                  <option value="" className="bg-neutral-900">
+                  <option value="" className="bg-zinc-100">
                     Không tag
                   </option>
-                  <option value="NFA" className="bg-neutral-900">
+                  <option value="NFA" className="bg-zinc-100">
                     NFA
                   </option>
-                  <option value="FULL THÔNG TIN" className="bg-neutral-900">
+                  <option value="FULL THÔNG TIN" className="bg-zinc-100">
                     FULL THÔNG TIN
                   </option>
-                  <option value="RANDOM" className="bg-neutral-900">
+                  <option value="RANDOM" className="bg-zinc-100">
                     RANDOM
                   </option>
                 </select>
@@ -643,10 +643,10 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   <output
                     id="acc-vipingame"
                     title="Tự đếm số món VIP trong danh sách vật phẩm"
-                    className={`${FIELD} w-28 tabular-nums flex items-center gap-1.5 text-neutral-400`}
+                    className={`${FIELD} w-28 tabular-nums flex items-center gap-1.5 text-zinc-500`}
                   >
                     {account.vipItems}
-                    <span className="text-[11px] text-neutral-600">tự đếm</span>
+                    <span className="text-[11px] text-zinc-400">tự đếm</span>
                   </output>
                 ) : (
                   <input
@@ -671,11 +671,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   onChange={(event) => setRankMatch(event.target.value)}
                   className={`${FIELD} w-44`}
                 >
-                  <option value="0" className="bg-neutral-900">
+                  <option value="0" className="bg-zinc-100">
                     Chưa có
                   </option>
                   {CF_RANK_MATCHES.map((tier, index) => (
-                    <option key={tier} value={String(index + 1)} className="bg-neutral-900">
+                    <option key={tier} value={String(index + 1)} className="bg-zinc-100">
                       {tier}
                     </option>
                   ))}
@@ -690,7 +690,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Swords size={13} className="text-neutral-400" />
+              <Swords size={13} className="text-zinc-500" />
               Vật phẩm trong tài khoản
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -706,7 +706,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 <div key={label}>
                   <span className={LABEL}>
                     {label}
-                    <span className="ml-1.5 font-bold normal-case tracking-normal text-neutral-600">
+                    <span className="ml-1.5 font-bold normal-case tracking-normal text-zinc-400">
                       {value.split("\n").filter((l) => l.trim() && !isGroupHeader(l)).length}
                     </span>
                   </span>
@@ -726,7 +726,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 <Save size={12} />
                 Lưu vật phẩm
               </button>
-              <span className="text-[11px] text-neutral-500">
+              <span className="text-[11px] text-zinc-500">
                 Mỗi dòng một tên, thứ tự trên xuống là thứ tự hiện trên card.
               </span>
             </div>
@@ -738,16 +738,16 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               under it holds every sign-in of that kind. Sold by the piece. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Users size={13} className="text-neutral-400" />
+              <Users size={13} className="text-zinc-500" />
               Acc random, bán theo số lượng
             </span>
-            <label className="flex items-start gap-2.5 text-xs leading-relaxed text-neutral-300">
+            <label className="flex items-start gap-2.5 text-xs leading-relaxed text-zinc-700">
               <input
                 type="checkbox"
                 checked={poolOn}
                 disabled={busy}
                 onChange={(event) => togglePool(event.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
+                className="mt-0.5 h-4 w-4 accent-zinc-900"
               />
               <span>
                 Bật kho tài khoản: nhiều cặp tài khoản/mật khẩu cùng loại, khách chọn số
@@ -758,10 +758,10 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             {poolOn ? (
               <>
                 <div className="flex flex-wrap gap-3 text-[11px] font-bold">
-                  <span className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-2.5 py-1 text-sky-400">
+                  <span className="rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-1 text-sky-600">
                     Còn {account.pool?.available ?? 0} tài khoản
                   </span>
-                  <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-neutral-400">
+                  <span className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-zinc-500">
                     Đã giao {account.pool?.sold ?? 0}
                   </span>
                 </div>
@@ -788,7 +788,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                       <Save size={12} />
                       Thêm vào kho
                     </button>
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-[11px] text-zinc-500">
                       Nhận dấu |, dấu :, tab hoặc khoảng trắng giữa tài khoản và mật khẩu.
                       Cặp trùng bị bỏ qua.
                     </span>
@@ -801,9 +801,9 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                       {account.pool.shelf.map((key) => (
                         <li
                           key={key.id}
-                          className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-neutral-950/60 px-2.5 py-1.5"
+                          className="flex items-center gap-2 rounded-lg border border-zinc-100 bg-white px-2.5 py-1.5"
                         >
-                          <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-neutral-200">
+                          <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-zinc-800">
                             {key.value.replace("|", "  |  ")}
                           </span>
                           <button
@@ -814,7 +814,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                             // 32px, not 20: on a phone these sit at the right
                             // edge where the thumb also grabs the page, 18px
                             // apart, and each one throws a key away.
-                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-white/10 hover:text-rose-400"
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-rose-600"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -830,12 +830,12 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                       {account.pool.recent.map((key) => (
                         <li
                           key={key.id}
-                          className="flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg border border-white/[0.06] bg-neutral-950/40 px-2.5 py-1.5 text-[11px]"
+                          className="flex flex-wrap items-center gap-x-3 gap-y-0.5 rounded-lg border border-zinc-100 bg-zinc-50/40 px-2.5 py-1.5 text-[11px]"
                         >
-                          <span className="min-w-0 flex-1 truncate font-mono text-neutral-400">
+                          <span className="min-w-0 flex-1 truncate font-mono text-zinc-500">
                             {key.value.replace("|", "  |  ")}
                           </span>
-                          <span className="text-neutral-500">
+                          <span className="text-zinc-500">
                             {key.buyer ? `${key.buyer} · ` : ""}
                             {key.orderCode ? `${key.orderCode} · ` : ""}
                             {key.when}
@@ -847,7 +847,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 ) : null}
               </>
             ) : (
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-zinc-500">
                 Tắt: sản phẩm là một tài khoản duy nhất, giao thông tin đăng nhập ở ô bên dưới.
               </p>
             )}
@@ -858,11 +858,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               the sale complete without anyone touching it. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <KeyRound size={13} className="text-neutral-400" />
+              <KeyRound size={13} className="text-zinc-500" />
               Thông tin đăng nhập giao khách
             </span>
             {poolOn ? (
-              <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-400">
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-600">
                 Acc random giao từ kho ở trên, ô này không dùng.
               </p>
             ) : null}
@@ -906,7 +906,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                     type="button"
                     onClick={() => setShowPass((s) => !s)}
                     aria-label={showPass ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                    className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-neutral-500 transition-colors hover:bg-white/10 hover:text-white"
+                    className="absolute right-1 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
                   >
                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -915,7 +915,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             </div>
             <div>
               <label htmlFor="acc-login-note" className={LABEL}>
-                Ghi chú bàn giao <span className="text-neutral-600">(không bắt buộc)</span>
+                Ghi chú bàn giao <span className="text-zinc-400">(không bắt buộc)</span>
               </label>
               <textarea
                 id="acc-login-note"
@@ -937,10 +937,10 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 Lưu thông tin đăng nhập
               </button>
               {loginChanged ? (
-                <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+                <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
               ) : null}
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Mọi acc đều giao tự động: khách thanh toán xong bấm Lấy thông tin trong
               Lịch sử mua (bắt buộc quay màn hình) là thấy. Trang sản phẩm ngoài kệ
               không hiện. Cần cả tên đăng nhập lẫn mật khẩu; để trống cả hai rồi lưu
@@ -950,10 +950,10 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <ImagePlus size={13} className="text-neutral-400" />
+              <ImagePlus size={13} className="text-zinc-500" />
               Ảnh bìa
             </span>
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-white/[0.06] bg-neutral-950">
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50">
               {account.imageUrl ? (
                 <Image
                   src={account.imageUrl}
@@ -963,7 +963,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                   className="object-cover"
                 />
               ) : (
-                <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-neutral-600">
+                <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-zinc-400">
                   <Boxes size={22} />
                   <span className="text-[11px]">Đang dùng ảnh mặc định theo mã</span>
                 </span>
@@ -987,7 +987,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                     const data = await api("PATCH", { code: account.code, imageUrl: "" });
                     if (data) setMsg({ tone: "ok", text: "Đã về ảnh mặc định theo mã" });
                   }}
-                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+                  className="h-[34px] px-4 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-40 text-[12px] font-semibold text-zinc-700 transition-colors inline-flex items-center gap-1.5"
                 >
                   <RotateCcw size={12} />
                   Về ảnh mặc định
@@ -1009,11 +1009,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <ImagePlus size={13} className="text-neutral-400" />
+              <ImagePlus size={13} className="text-zinc-500" />
               Ảnh phụ ({account.gallery.length})
             </span>
             {account.gallery.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-neutral-500">
+              <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500">
                 Chưa có ảnh phụ, trang khách chỉ hiện ảnh bìa.
               </p>
             ) : (
@@ -1021,7 +1021,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 {account.gallery.map((shot) => (
                   <div
                     key={shot.id}
-                    className="group relative aspect-video overflow-hidden rounded-lg border border-white/[0.06] bg-neutral-950"
+                    className="group relative aspect-video overflow-hidden rounded-lg border border-zinc-100 bg-zinc-50"
                   >
                     <Image
                       src={shot.url}
@@ -1035,7 +1035,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                       disabled={busy}
                       onClick={() => void deleteGallery(shot.id)}
                       aria-label="Xóa ảnh phụ này"
-                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-black/70 text-neutral-300 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+                      className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md bg-zinc-900/80 text-white opacity-0 transition-opacity hover:text-rose-600 group-hover:opacity-100"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -1047,7 +1047,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               type="button"
               disabled={busy}
               onClick={() => galleryRef.current?.click()}
-              className="self-start h-[34px] px-4 rounded-lg border border-dashed border-white/15 bg-white/[0.02] hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400 disabled:opacity-40 text-[12px] font-semibold text-neutral-400 transition-colors inline-flex items-center gap-1.5"
+              className="self-start h-[34px] px-4 rounded-lg border border-dashed border-zinc-200 bg-white hover:border-emerald-500/40 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-40 text-[12px] font-semibold text-zinc-500 transition-colors inline-flex items-center gap-1.5"
             >
               <ImagePlus size={12} />
               Thêm ảnh phụ
@@ -1074,11 +1074,11 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           mail gốc, cam kết) deserves the same editor a tool gets. */}
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <FileText size={13} className="text-neutral-400" />
+          <FileText size={13} className="text-zinc-500" />
           Mô tả sản phẩm
         </span>
         <RichTextEditor initialHtml={account.descriptionHtml} onUpdate={setDescHtml} />
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Có nội dung ở đây thì card ngoài danh mục và panel mua hiện lời này
           (rút thành chữ thường). Để trống rồi lưu thì quay về câu mặc định.
         </p>
@@ -1093,7 +1093,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
             Lưu mô tả
           </button>
           {descHtml !== descBaseline ? (
-            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>
       </section>

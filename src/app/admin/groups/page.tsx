@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminGroups } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminGroups";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { listAdminGroups } from "@/lib/queries";
 import { listAdminCategories } from "@/lib/queries";
@@ -19,7 +19,7 @@ export default async function AdminGroupsPage() {
   const [groups, categories] = await Promise.all([listAdminGroups(), listAdminCategories()]);
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Nhóm danh mục"
       subtitle="Các hàng danh mục trên trang chủ. Một danh mục nằm được trong nhiều nhóm mà vẫn chỉ là một bản ghi."
       username={admin.username}
@@ -32,6 +32,6 @@ export default async function AdminGroupsPage() {
           productCount: c.productCount,
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

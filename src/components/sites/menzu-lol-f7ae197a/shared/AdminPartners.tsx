@@ -13,10 +13,10 @@ export interface AdminPartnerRow {
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/5 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-xl border border-zinc-100 bg-zinc-50 px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ICON_BUTTON =
-  "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
+  "h-8 w-8 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-zinc-100 text-zinc-700 transition-colors inline-flex items-center justify-center";
 
 /**
  * The "Đối tác uy tín" strip's contents: add, reorder, retire.
@@ -104,9 +104,9 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col gap-4"
       >
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           Thêm đối tác
         </span>
 
@@ -126,7 +126,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
           </div>
           <div>
             <label htmlFor="pt-tagline" className={LABEL}>
-              Mô tả ngắn <span className="text-neutral-600">(dưới logo)</span>
+              Mô tả ngắn <span className="text-zinc-400">(dưới logo)</span>
             </label>
             <input
               id="pt-tagline"
@@ -138,7 +138,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
           </div>
           <div>
             <label htmlFor="pt-url" className={LABEL}>
-              Link <span className="text-neutral-600">(không bắt buộc)</span>
+              Link <span className="text-zinc-400">(không bắt buộc)</span>
             </label>
             <input
               id="pt-url"
@@ -151,18 +151,18 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="relative h-12 w-[110px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950 flex items-center justify-center">
+          <div className="relative h-12 w-[110px] shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 flex items-center justify-center">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="" className="max-h-9 max-w-[96px] object-contain" />
             ) : (
-              <span className="text-[12px] font-bold text-neutral-700">
+              <span className="text-[12px] font-bold text-zinc-300">
                 Chưa có logo
               </span>
             )}
           </div>
           <label
-            className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+            className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
               uploading ? "pointer-events-none opacity-60" : ""
             }`}
           >
@@ -179,7 +179,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
               }}
             />
           </label>
-          <span className="text-[10px] text-neutral-600">
+          <span className="text-[10px] text-zinc-400">
             PNG / JPG / WebP · nền trong suốt nhìn đẹp nhất · không logo thì hiện tên
           </span>
         </div>
@@ -189,8 +189,8 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
             role="alert"
             className={
               msg.tone === "ok"
-                ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-                : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
+                : "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[12px] font-semibold text-rose-600"
             }
           >
             {msg.text}
@@ -200,43 +200,43 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
         <button
           type="submit"
           disabled={busy || !name.trim()}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang xử lý…" : "Thêm đối tác"}
         </button>
       </form>
 
       {partners.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-8 text-center text-sm text-neutral-500">
+        <p className="rounded-2xl border border-dashed border-zinc-200 bg-white px-5 py-8 text-center text-sm text-zinc-500">
           Chưa có đối tác nào, mục &ldquo;Đối tác uy tín&rdquo; đang ẩn trên trang chủ.
         </p>
       ) : (
-        <ul className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+        <ul className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
           {partners.map((p, index) => (
             <li
               key={p.id}
-              className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3 border-b border-white/[0.07] last:border-0"
+              className="flex flex-wrap items-center gap-3 px-4 sm:px-5 py-3 border-b border-zinc-200 last:border-0"
             >
-              <div className="h-10 w-[92px] shrink-0 rounded-lg border border-white/10 bg-neutral-950 flex items-center justify-center overflow-hidden">
+              <div className="h-10 w-[92px] shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 flex items-center justify-center overflow-hidden">
                 {p.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.logoUrl} alt="" className="max-h-7 max-w-[80px] object-contain" />
                 ) : (
-                  <span className="text-[12px] font-bold text-neutral-600">chữ</span>
+                  <span className="text-[12px] font-bold text-zinc-400">chữ</span>
                 )}
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-white truncate">
+                <p className="text-sm font-bold text-zinc-900 truncate">
                   {p.name}
                   {p.tagline ? (
-                    <span className="ml-2 text-[11px] font-semibold text-neutral-500">
+                    <span className="ml-2 text-[11px] font-semibold text-zinc-500">
                       {p.tagline}
                     </span>
                   ) : null}
                 </p>
                 {p.url ? (
-                  <p className="text-[11px] text-neutral-500 truncate">{p.url}</p>
+                  <p className="text-[11px] text-zinc-500 truncate">{p.url}</p>
                 ) : null}
               </div>
 
@@ -263,7 +263,7 @@ export function AdminPartners({ partners }: { partners: AdminPartnerRow[] }) {
                 aria-label={`Xoá ${p.name}`}
                 disabled={busy}
                 onClick={() => call("DELETE", null, `?id=${encodeURIComponent(p.id)}`)}
-                className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 transition-colors"
+                className="p-2 rounded-lg text-zinc-500 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 transition-colors"
               >
                 <Trash2 size={14} />
               </button>

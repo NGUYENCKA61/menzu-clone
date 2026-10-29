@@ -24,10 +24,10 @@ import { ConfirmDialog } from "./AdminStates";
 import { SpinWheelFace } from "./SpinWheelFace";
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--brand)]/60";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900";
 const LABEL =
-  "mb-1.5 block text-[12px] font-semibold text-neutral-500";
-const HINT = "mt-1.5 text-[11px] leading-relaxed text-neutral-500";
+  "mb-1.5 block text-[12px] font-semibold text-zinc-500";
+const HINT = "mt-1.5 text-[11px] leading-relaxed text-zinc-500";
 const ACTION =
   "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -295,10 +295,10 @@ export function AdminSpinPrizeEditor({
             value={short}
             onChange={(e) => edit(setShort)(e.target.value)}
             placeholder="+2.000đ"
-            className={`${FIELD} ${over ? "border-rose-500/60" : ""}`}
+            className={`${FIELD} ${over ? "border-zinc-900" : ""}`}
           />
           <p className={HINT}>
-            <span className={over ? "font-bold text-rose-400" : "text-neutral-400"}>
+            <span className={over ? "font-bold text-rose-600" : "text-zinc-500"}>
               {short.trim().length}/{room} ký tự
             </span>{" "}, nan hẹp dần khi vòng quay nhiều ô, và hẹp thêm nữa nếu ô có ảnh.
           </p>
@@ -332,7 +332,7 @@ export function AdminSpinPrizeEditor({
             className={FIELD}
           >
             {PRIZE_KINDS.map((k) => (
-              <option key={k} value={k} className="bg-neutral-900">
+              <option key={k} value={k} className="bg-zinc-100">
                 {PRIZE_KIND_LABEL[k].label}
               </option>
             ))}
@@ -386,7 +386,7 @@ export function AdminSpinPrizeEditor({
           />
           <p className={HINT}>
             Số càng lớn càng hay ra. Với các ô còn lại, ô này trúng khoảng{" "}
-            <b className="text-[var(--brand)]">{share.toFixed(1)}%</b>.
+            <b className="text-rose-600">{share.toFixed(1)}%</b>.
           </p>
         </div>
 
@@ -406,7 +406,7 @@ export function AdminSpinPrizeEditor({
               className={`${FIELD} max-w-xs`}
             />
             <p className={HINT}>
-              Mỗi lượt trúng sinh <b className="text-neutral-300">một mã riêng</b>,
+              Mỗi lượt trúng sinh <b className="text-zinc-700">một mã riêng</b>,
               dùng được một lần. Một mã chung ai cũng xài được thì không còn là
               phần thưởng, mà là giảm giá cả shop.
             </p>
@@ -455,9 +455,9 @@ export function AdminSpinPrizeEditor({
                 // would move the dot by a pixel and the row would twitch on
                 // every click.
                 style={wedgeSwatch(key)}
-                className={`h-7 w-7 rounded-full border border-white/10 transition-all ${
+                className={`h-7 w-7 rounded-full border border-zinc-200 transition-all ${
                   color === key
-                    ? "ring-2 ring-white ring-offset-2 ring-offset-[#0e0e11]"
+                    ? "ring-2 ring-zinc-900 ring-offset-2 ring-offset-white"
                     : "opacity-70 hover:opacity-100"
                 }`}
               />
@@ -476,7 +476,7 @@ export function AdminSpinPrizeEditor({
             {/* The thumbnail on the shop's own dark ground, not on white: a
                 logo with a transparent background looks fine on paper and
                 disappears into the wedge, and this is where that shows. */}
-            <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/10 bg-[#141419]">
+            <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl border border-zinc-200 bg-[#141419]">
               {image.trim() ? (
                 // Plain img: the path is whatever the shop uploaded a moment
                 // ago, and next/image would want it declared in the config.
@@ -487,12 +487,12 @@ export function AdminSpinPrizeEditor({
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <ImagePlus size={18} className="text-neutral-700" />
+                <ImagePlus size={18} className="text-zinc-300" />
               )}
             </span>
 
             <label
-              className={`${ACTION} cursor-pointer border border-white/12 bg-white/[0.04] text-neutral-300 hover:border-[var(--brand)]/50 hover:text-white ${
+              className={`${ACTION} cursor-pointer border border-zinc-200 bg-zinc-50 text-zinc-700 hover:border-zinc-400 hover:text-zinc-900 ${
                 uploading ? "pointer-events-none opacity-50" : ""
               }`}
             >
@@ -514,7 +514,7 @@ export function AdminSpinPrizeEditor({
               <button
                 type="button"
                 onClick={() => edit(setImage)("")}
-                className={`${ACTION} border border-white/12 bg-white/[0.04] text-neutral-400 hover:border-rose-500/40 hover:text-rose-300`}
+                className={`${ACTION} border border-zinc-200 bg-zinc-50 text-zinc-500 hover:border-rose-300 hover:text-rose-700`}
               >
                 <Trash2 size={13} />
                 Bỏ ảnh
@@ -527,7 +527,7 @@ export function AdminSpinPrizeEditor({
             ở trên tự trừ theo.
           </p>
           {image.trim() ? (
-            <p className="mt-1 truncate font-mono text-[10px] text-neutral-600">
+            <p className="mt-1 truncate font-mono text-[10px] text-zinc-400">
               {image.trim()}
             </p>
           ) : null}
@@ -535,12 +535,12 @@ export function AdminSpinPrizeEditor({
       </div>
 
       {error ? (
-        <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[12px] font-semibold text-rose-300">
+        <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700">
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[12px] font-semibold text-emerald-300">
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[12px] font-semibold text-emerald-700">
           Đã lưu. Vòng quay ngoài trang khách đổi theo ngay, bạn vẫn đang ở nan
           này, sửa tiếp được.
         </p>
@@ -551,7 +551,7 @@ export function AdminSpinPrizeEditor({
           type="button"
           disabled={busy}
           onClick={save}
-          className={`${ACTION} bg-[var(--brand-dark)] text-white hover:bg-[var(--brand)]`}
+          className={`${ACTION} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
         >
           <Save size={13} />
           {isNew ? "Thêm vào vòng quay" : "Lưu ô này"}
@@ -566,7 +566,7 @@ export function AdminSpinPrizeEditor({
                 ? `Vòng quay phải còn ít nhất ${MIN_SLICES} ô`
                 : "Xoá ô này khỏi vòng quay"
             }
-            className={`${ACTION} border border-white/12 bg-white/[0.04] text-neutral-400 hover:border-rose-500/40 hover:text-rose-300`}
+            className={`${ACTION} border border-zinc-200 bg-zinc-50 text-zinc-500 hover:border-rose-300 hover:text-rose-700`}
           >
             <Trash2 size={13} />
             Xoá ô này
@@ -581,16 +581,16 @@ export function AdminSpinPrizeEditor({
           would show the reader everything except the thing they changed. */}
       <aside className="lg:sticky lg:top-6">
         <span className={LABEL}>Xem trước</span>
-        <div className="rounded-xl border border-white/[0.08] bg-[#0b0b10] p-4">
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
           <SpinWheelFace
             prizes={wheel}
             onSlice={go}
-            className="h-auto w-full rounded-full border-4 border-white/10"
+            className="h-auto w-full rounded-full border-4 border-zinc-200"
           />
-          <p className="mt-3 text-[11px] leading-relaxed text-neutral-500">
+          <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
             Đây là bánh xe khách nhìn thấy, không thêm không bớt, vẽ bằng đúng
             đoạn mã vẽ bánh xe thật, nên chữ tràn nan ở đây thì trang khách cũng
-            tràn. <b className="text-neutral-300">Bấm vào nan khác</b> để sửa
+            tràn. <b className="text-zinc-700">Bấm vào nan khác</b> để sửa
             ngay nan đó.
           </p>
         </div>

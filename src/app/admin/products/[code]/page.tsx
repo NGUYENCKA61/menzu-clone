@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AdminAccountDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminAccountDetail";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminSoftwareDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftwareDetail";
 import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
 import { parseQuestionSet, resolveQuestions } from "@/lib/warrantyDetails";
@@ -99,14 +99,14 @@ export default async function AdminAccountDetailPage({
     );
 
     return (
-      <AdminShell
+      <AdminChrome
         title={software.name ?? software.code}
         subtitle="Chi tiết phần mềm, thông tin, giá, gói thời hạn"
         username={admin.username}
         aside={
           <Link
             href="/admin/products"
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
           >
             <ArrowLeft size={14} />
             Danh sách sản phẩm
@@ -182,7 +182,7 @@ export default async function AdminAccountDetailPage({
             }
           />
         </div>
-      </AdminShell>
+      </AdminChrome>
     );
   }
 
@@ -212,14 +212,14 @@ export default async function AdminAccountDetailPage({
     : null;
 
   return (
-    <AdminShell
+    <AdminChrome
       title={product.name || `#${product.code}`}
       subtitle="Chi tiết tài khoản, giá, ảnh, vật phẩm và trạng thái"
       username={admin.username}
       aside={
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           Danh sách sản phẩm
@@ -290,6 +290,6 @@ export default async function AdminAccountDetailPage({
       />
       {/* No second-round editor for an account: its report has no second
           round (hasSecondRound; the owner, 12/10/2026). */}
-    </AdminShell>
+    </AdminChrome>
   );
 }

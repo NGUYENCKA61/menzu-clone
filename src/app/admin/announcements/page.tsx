@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminAnnouncements } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminAnnouncements";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { announcementState } from "@/lib/announcements";
 import { listAnnouncements } from "@/lib/announcementStore";
@@ -40,7 +40,7 @@ export default async function AdminAnnouncementsPage() {
   const now = new Date();
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Thông báo hệ thống"
       subtitle="Thông báo hiện trên trang cho khách, tự bật tắt theo lịch"
       username={admin.username}
@@ -69,6 +69,6 @@ export default async function AdminAnnouncementsPage() {
           endAt: row.endAt ? formatWhen(row.endAt) : null,
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

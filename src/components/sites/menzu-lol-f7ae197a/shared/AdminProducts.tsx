@@ -55,11 +55,11 @@ export interface AdminCategoryOption {
 // only one on a lighter, rounder, larger variant, so moving between it and a
 // detail screen changed the shape of every box on the way.
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 // The status pick on a shelf row - the same small select the software list uses.
 const MINI =
-  "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
+  "rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-bold text-zinc-800";
 
 const STATUS_LABEL: Record<string, string> = {
   AVAILABLE: "Đang bán",
@@ -229,9 +229,9 @@ export function AdminProducts({
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col gap-4"
       >
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           Thêm sản phẩm
         </span>
 
@@ -248,7 +248,7 @@ export function AdminProducts({
           </div>
           <div>
             <label className={LABEL}>
-              Tên sản phẩm <span className="text-neutral-600">(không bắt buộc)</span>
+              Tên sản phẩm <span className="text-zinc-400">(không bắt buộc)</span>
             </label>
             <input
               value={newName}
@@ -265,7 +265,7 @@ export function AdminProducts({
               className={FIELD}
             >
               {categories.map((c) => (
-                <option key={c.slug} value={c.slug} className="bg-neutral-900">
+                <option key={c.slug} value={c.slug} className="bg-zinc-100">
                   {c.name}
                 </option>
               ))}
@@ -296,7 +296,7 @@ export function AdminProducts({
 
         <div>
           <label className={LABEL}>
-            Mô tả <span className="text-neutral-600">(không bắt buộc)</span>
+            Mô tả <span className="text-zinc-400">(không bắt buộc)</span>
           </label>
           <textarea
             value={newDescription}
@@ -314,7 +314,7 @@ export function AdminProducts({
           <div>
             <label className={LABEL}>
               Tài khoản đăng nhập giao khách{" "}
-              <span className="text-neutral-600">
+              <span className="text-zinc-400">
                 (tag NFA giao tự động, không bắt buộc, nhập sau cũng được)
               </span>
             </label>
@@ -340,7 +340,7 @@ export function AdminProducts({
 
         <div>
           <label className={LABEL}>
-            Ảnh sản phẩm <span className="text-neutral-600">(không bắt buộc, trống thì dùng ảnh theo mã)</span>
+            Ảnh sản phẩm <span className="text-zinc-400">(không bắt buộc, trống thì dùng ảnh theo mã)</span>
           </label>
           <input
             value={newImage}
@@ -364,8 +364,8 @@ export function AdminProducts({
             role="alert"
             className={
               msg.tone === "ok"
-                ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-                : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
+                : "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[12px] font-semibold text-rose-600"
             }
           >
             {msg.text}
@@ -375,7 +375,7 @@ export function AdminProducts({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang xử lý…" : "Thêm sản phẩm"}
         </button>
@@ -406,8 +406,8 @@ export function AdminProducts({
                 onClick={() => setTab(t.value)}
                 className={`rounded-lg border px-3 py-1.5 text-[13px] font-semibold transition-colors ${
                   active
-                    ? "border-[var(--brand)]/60 bg-[var(--brand)]/15 text-white"
-                    : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
                 }`}
               >
                 {t.label} · {count}
@@ -418,7 +418,7 @@ export function AdminProducts({
       ) : null}
 
       {shown.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center text-sm text-neutral-500">
+        <p className="rounded-2xl border border-dashed border-zinc-200 bg-white px-5 py-10 text-center text-sm text-zinc-500">
           {needle
             ? `Không có tài khoản nào khớp "${query.trim()}".`
             : "Chưa có tài khoản nào."}
@@ -433,16 +433,16 @@ export function AdminProducts({
       {shown.map((p) => (
         <div
           key={p.code}
-          className="rounded-2xl border border-white/10 bg-white/[0.02] flex flex-wrap items-center gap-3 px-5 py-4"
+          className="rounded-2xl border border-zinc-200 bg-white flex flex-wrap items-center gap-3 px-5 py-4"
         >
           {/* The cover, at the tile size the software and category lists
               wear, so the three shelves read as one. */}
-          <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+          <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
             {p.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="grid h-full w-full place-items-center text-neutral-600">
+              <span className="grid h-full w-full place-items-center text-zinc-400">
                 <ImageIcon size={14} />
               </span>
             )}
@@ -453,27 +453,27 @@ export function AdminProducts({
               href={`/admin/products/${encodeURIComponent(p.code)}`}
               className="group inline-flex items-center gap-1.5"
             >
-              <p className="text-sm font-black text-white truncate transition-colors group-hover:text-rose-400">
+              <p className="text-sm font-black text-zinc-900 truncate transition-colors group-hover:text-rose-600">
                 #{p.code}
                 {p.name ? ` - ${p.name}` : ""}
               </p>
               <Eye
                 size={13}
-                className="shrink-0 text-neutral-600 transition-colors group-hover:text-rose-400"
+                className="shrink-0 text-zinc-400 transition-colors group-hover:text-rose-600"
               />
             </Link>
-            <p className="text-[11px] text-neutral-500 mt-0.5">
+            <p className="text-[11px] text-zinc-500 mt-0.5">
               {p.categoryName} · {formatVnd(p.price)}đ
               {p.rank ? ` · ${p.rank}` : ""}
               {p.tag ? ` · ${p.tag}` : ""}
               {p.accountPool ? (
-                <span className="text-sky-400"> · acc random · còn {p.poolAvailable}</span>
+                <span className="text-sky-600"> · acc random · còn {p.poolAvailable}</span>
               ) : null}
               {/* Said on the shelf, not only on the detail page: an account
                   sold without this hands its buyer nothing until the shop
                   types it. A random listing hands over its stock instead. */}
               {!p.accountPool && !p.hasLogin ? (
-                <span className="text-amber-400"> · chưa có TK đăng nhập</span>
+                <span className="text-amber-600"> · chưa có TK đăng nhập</span>
               ) : null}
             </p>
           </div>
@@ -486,7 +486,7 @@ export function AdminProducts({
             className={MINI}
           >
             {Object.entries(STATUS_LABEL).map(([value, label]) => (
-              <option key={value} value={value} className="bg-neutral-900">
+              <option key={value} value={value} className="bg-zinc-100">
                 {label}
               </option>
             ))}
@@ -494,7 +494,7 @@ export function AdminProducts({
 
           <Link
             href={`/admin/products/${encodeURIComponent(p.code)}`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center"
+            className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors inline-flex items-center"
           >
             Sửa
           </Link>
@@ -505,7 +505,7 @@ export function AdminProducts({
             title="Xoá tài khoản"
             aria-label={`Xoá ${p.code}`}
             onClick={() => setRemoving(p)}
-            className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 transition-colors"
+            className="p-2 rounded-lg text-zinc-500 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 transition-colors"
           >
             <Trash2 size={14} />
           </button>

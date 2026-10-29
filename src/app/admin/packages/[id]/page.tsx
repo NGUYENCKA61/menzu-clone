@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AdminPackageDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminPackageDetail";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { readKeyStore } from "@/lib/packageKeyStore";
@@ -40,14 +40,14 @@ export default async function AdminPackageDetailPage({
   const keys = await readKeyStore(pkg.id);
 
   return (
-    <AdminShell
+    <AdminChrome
       title={`${pkg.product.name ?? pkg.product.code}, gói ${pkg.label}`}
       subtitle="Chi tiết gói thời hạn, giá, thời hạn và kho key"
       username={admin.username}
       aside={
         <Link
           href={`/admin/products/${encodeURIComponent(pkg.product.code)}`}
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           {pkg.product.name ?? pkg.product.code}
@@ -64,6 +64,6 @@ export default async function AdminPackageDetailPage({
           keys,
         }}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

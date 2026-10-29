@@ -26,9 +26,9 @@ const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHE
   DOC_SHELF_META;
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 
 /**
  * One article, full page: papers on top, the shared TipTap desk below.
@@ -113,30 +113,30 @@ export function AdminDocEditor({
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {/* The article's papers: where it lives and how it is doing. */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-wrap items-center gap-4">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-wrap items-center gap-4">
         <span
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border ${
-            meta?.tint ?? "border-white/10 bg-white/5 text-neutral-400"
+            meta?.tint ?? "border-zinc-200 bg-zinc-50 text-zinc-500"
           }`}
         >
           <Icon size={19} />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-sm font-black text-white">{doc.title}</span>
+            <span className="text-sm font-black text-zinc-900">{doc.title}</span>
             <span
               className={`text-[12px] font-semibold px-1.5 py-0.5 rounded border ${
                 hasBody
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                  : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                  : "border-amber-200 bg-amber-50 text-amber-600"
               }`}
             >
               {hasBody ? "Đã có nội dung" : "Đang biên soạn"}
             </span>
           </div>
-          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
             <span>{meta?.label ?? doc.category}</span>
-            <span className="font-mono text-neutral-600">/docs/{doc.slug}</span>
+            <span className="font-mono text-zinc-400">/docs/{doc.slug}</span>
             <span className="inline-flex items-center gap-1 tabular-nums">
               <Eye size={11} />
               {doc.views.toLocaleString("vi-VN")}
@@ -148,16 +148,16 @@ export function AdminDocEditor({
           href={`/docs/${doc.slug}`}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3.5 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
           <ExternalLink size={13} />
           Xem trang công khai
         </a>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4">
-        <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
-          <FileText size={13} className="text-neutral-400" />
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4">
+        <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
+          <FileText size={13} className="text-zinc-500" />
           Soạn nội dung
         </span>
 
@@ -179,7 +179,7 @@ export function AdminDocEditor({
           <div>
             <label htmlFor="doc-excerpt" className={LABEL}>
               Mô tả ngắn{" "}
-              <span className="text-neutral-600">(hiện trong kết quả tìm kiếm và card Nội dung nổi bật ở Wiki)</span>
+              <span className="text-zinc-400">(hiện trong kết quả tìm kiếm và card Nội dung nổi bật ở Wiki)</span>
             </label>
             <input
               id="doc-excerpt"
@@ -193,7 +193,7 @@ export function AdminDocEditor({
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-neutral-950/40 p-3">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/40 p-3">
           <input
             type="checkbox"
             checked={featured}
@@ -201,11 +201,11 @@ export function AdminDocEditor({
               setFeatured(e.target.checked);
               setSaved(false);
             }}
-            className="mt-0.5 h-4 w-4 accent-[var(--menzu-accent)]"
+            className="mt-0.5 h-4 w-4 accent-zinc-900"
           />
           <span>
-            <span className="block text-sm font-bold text-white">Ghim lên Nội dung nổi bật</span>
-            <span className="block text-[11px] text-neutral-500">
+            <span className="block text-sm font-bold text-zinc-900">Ghim lên Nội dung nổi bật</span>
+            <span className="block text-[11px] text-zinc-500">
               Bài này lên khung Nội dung nổi bật đầu trang Wiki. Ghim nhiều bài thì khung lần lượt chuyển qua từng bài. Không ghim bài nào thì khung lấy các bài xem nhiều nhất.
             </span>
           </span>
@@ -214,7 +214,7 @@ export function AdminDocEditor({
         <div>
           <label htmlFor="doc-tool" className={LABEL}>
             Gắn với tool{" "}
-            <span className="text-neutral-600">(tài liệu riêng của tool)</span>
+            <span className="text-zinc-400">(tài liệu riêng của tool)</span>
           </label>
           <select
             id="doc-tool"
@@ -232,7 +232,7 @@ export function AdminDocEditor({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-[11px] text-neutral-500">
+          <p className="mt-1.5 text-[11px] text-zinc-500">
             Gắn thì bài này rời khỏi Wiki công khai, hiện trong trang tài liệu
             của tool (/tai-lieu) và chỉ khách đang trong hạn xem theo key mới
             đọc được nội dung.
@@ -248,7 +248,7 @@ export function AdminDocEditor({
               setSaved(false);
             }}
           />
-          <p className="mt-1.5 text-[11px] text-neutral-500">
+          <p className="mt-1.5 text-[11px] text-zinc-500">
             Soạn trực tiếp như Word, đậm, nghiêng, màu, ảnh hiện ngay trong khung, và
             trang khách sẽ hiển thị đúng như bạn thấy. Để trống thì bài hiện trạng thái
             &ldquo;đang biên soạn&rdquo; và không được Google lập chỉ mục.
@@ -260,18 +260,18 @@ export function AdminDocEditor({
             type="button"
             onClick={save}
             disabled={pending || !dirty}
-            className="h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-2"
+            className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-2"
           >
             <FileText size={14} />
             {pending ? "Đang lưu…" : "Lưu bài viết"}
           </button>
           {saved && !dirty ? (
-            <span className="text-[11px] font-bold text-emerald-400 inline-flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-emerald-600 inline-flex items-center gap-1.5">
               <Check size={13} />
               Đã lưu
             </span>
           ) : dirty ? (
-            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>
       </div>

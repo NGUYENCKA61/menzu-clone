@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminSettings } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSettings";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import {
   getPartners,
@@ -53,7 +53,7 @@ export default async function AdminSettingsPage() {
     zaloBotState?.groups?.find((g) => g.id === id)?.name ?? id;
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Cấu hình"
       subtitle="Mức nạp, trạng thái bán hàng, nhận diện shop và bố cục trang chủ"
       username={admin.username}
@@ -79,6 +79,6 @@ export default async function AdminSettingsPage() {
           }),
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

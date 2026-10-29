@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminSoftwarePackages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftwarePackages";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -56,14 +56,14 @@ export default async function AdminSoftwarePackagesPage({
   );
 
   return (
-    <AdminShell
+    <AdminChrome
       title={`Gói thời hạn: ${software.name ?? software.code}`}
       subtitle="Thêm gói, xem tồn key và mở chi tiết từng gói"
       username={admin.username}
       aside={
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           Danh sách sản phẩm
@@ -82,6 +82,6 @@ export default async function AdminSoftwarePackagesPage({
           keysPending: keyStores[index]!.pending,
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

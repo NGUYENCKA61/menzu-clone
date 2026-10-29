@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminDocs } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDocs";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { listDocArticles } from "@/lib/queries";
 
@@ -18,7 +18,7 @@ export default async function AdminDocsPage() {
   const docs = await listDocArticles("all");
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Bài viết Wiki"
       subtitle="Soạn nội dung cho FAQ, chính sách bảo hành và hướng dẫn"
       username={admin.username}
@@ -40,6 +40,6 @@ export default async function AdminDocsPage() {
           }),
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

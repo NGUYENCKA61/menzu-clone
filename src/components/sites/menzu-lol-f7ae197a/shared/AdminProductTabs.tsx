@@ -11,9 +11,9 @@ export interface ProductTab {
 }
 
 const TAB_ON =
-  "relative px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/25 bg-white/[0.12] text-frost transition-colors inline-flex items-center gap-2";
+  "relative px-4 py-2 rounded-xl text-[14px] font-semibold border border-zinc-300 bg-zinc-100 text-zinc-900 transition-colors inline-flex items-center gap-2";
 const TAB_OFF =
-  "relative px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors inline-flex items-center gap-2";
+  "relative px-4 py-2 rounded-xl text-[14px] font-semibold border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 transition-colors inline-flex items-center gap-2";
 
 /**
  * The product desk's four rooms behind one row of tabs.
@@ -47,7 +47,7 @@ export function AdminProductTabs({
             {tab.count !== undefined ? (
               <span
                 className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
-                  active === index ? "bg-white/20" : "bg-white/[0.06] text-neutral-500"
+                  active === index ? "bg-zinc-200 text-zinc-700" : "bg-zinc-50 text-zinc-500"
                 }`}
               >
                 {tab.count}

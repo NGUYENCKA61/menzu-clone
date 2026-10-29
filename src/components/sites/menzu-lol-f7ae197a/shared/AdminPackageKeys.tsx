@@ -34,9 +34,9 @@ export interface PackageKeysView {
 }
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const HEAD = "text-[12px] font-semibold text-neutral-500";
-const KEY_TEXT = "flex-1 truncate font-mono text-[11px] text-neutral-200";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const HEAD = "text-[12px] font-semibold text-zinc-500";
+const KEY_TEXT = "flex-1 truncate font-mono text-[11px] text-zinc-800";
 
 /**
  * One tier's key store: what is on the shelf, what went out, and the box the
@@ -170,11 +170,11 @@ export function AdminPackageKeys({
   }
 
   return (
-    <div className="flex flex-col gap-4 border-t border-white/[0.06] bg-black/20 px-3 py-3.5">
+    <div className="flex flex-col gap-4 border-t border-zinc-100 bg-zinc-50 px-3 py-3.5">
       {msg ? (
         <p
           className={`text-[11px] ${
-            msg.tone === "ok" ? "text-emerald-400" : "text-red-400"
+            msg.tone === "ok" ? "text-emerald-600" : "text-rose-600"
           }`}
         >
           {msg.text}
@@ -183,7 +183,7 @@ export function AdminPackageKeys({
 
       {/* The backlog first: it is the only thing here that is somebody waiting. */}
       {keys.pending > 0 ? (
-        <p className="rounded-lg border border-amber-500/25 bg-amber-500/[0.07] px-3 py-2 text-[11px] text-amber-300">
+        <p className="rounded-lg border border-amber-200 bg-amber-500/[0.07] px-3 py-2 text-[11px] text-amber-700">
           <strong className="font-black">{keys.pending} key đang nợ khách.</strong> Dán
           key vào ô dưới là hệ thống giao ngay cho đơn cũ nhất trước.
         </p>
@@ -210,13 +210,13 @@ export function AdminPackageKeys({
               type="button"
               disabled={busy || uniquePending === 0}
               onClick={addKeys}
-              className="h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-40 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-40 text-[12px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5"
             >
               {busy ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
               Thêm {uniquePending > 0 ? `${uniquePending} key` : "key"}
             </button>
             {pending.length > uniquePending ? (
-              <span className="text-[11px] text-neutral-500">
+              <span className="text-[11px] text-zinc-500">
                 {pending.length - uniquePending} dòng trùng nhau sẽ chỉ tính một lần
               </span>
             ) : null}
@@ -243,7 +243,7 @@ export function AdminPackageKeys({
             type="button"
             disabled={busy || !removePaste.trim()}
             onClick={() => void removeByValue()}
-            className="self-start h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[12px] font-semibold text-red-400 transition-colors inline-flex items-center gap-1.5"
+            className="self-start h-[34px] px-4 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 disabled:opacity-40 text-[12px] font-semibold text-rose-600 transition-colors inline-flex items-center gap-1.5"
           >
             <Trash2 size={11} />
             Xoá key đã nhập
@@ -264,33 +264,33 @@ export function AdminPackageKeys({
                 type="button"
                 disabled={busy}
                 onClick={() => setClearing(true)}
-                className="rounded-md border border-red-500/25 bg-red-500/[0.06] px-2 py-1 text-[12px] font-semibold text-red-400/90 transition-colors hover:bg-red-500/15 disabled:opacity-40"
+                className="rounded-md border border-red-500/25 bg-rose-50 px-2 py-1 text-[12px] font-semibold text-rose-600/90 transition-colors hover:bg-rose-50 disabled:opacity-40"
               >
                 Xoá tất cả
               </button>
             ) : null}
           </div>
-          <div className="rounded-xl border border-white/10 bg-neutral-950/50 p-2.5">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
             {keys.shelf.length === 0 ? (
-              <p className="px-1 py-2 text-[11px] text-neutral-500">
+              <p className="px-1 py-2 text-[11px] text-zinc-500">
                 Kho trống. Khách vẫn mua được, đơn sẽ nằm chờ tới khi có key.
               </p>
             ) : (
               // Plain rows ruled apart by hairlines: the panel around them is
               // the frame now, and a box per key inside a box of keys was a
               // border drawn twice for one idea.
-              <div className="max-h-[340px] divide-y divide-white/[0.05] overflow-y-auto pr-0.5">
+              <div className="max-h-[340px] divide-y divide-zinc-100 overflow-y-auto pr-0.5">
                 {/* Value only: dates and per-row buttons made every line a
                     control panel. Deleting goes through the paste box or
                     "Xoá tất cả", both of which take the key by name. */}
                 {keys.shelf.map((key) => (
                   <div key={key.id} className="flex items-center gap-2 px-1.5 py-1.5">
-                    <KeyRound size={11} className="shrink-0 text-neutral-600" />
+                    <KeyRound size={11} className="shrink-0 text-zinc-400" />
                     <span className={KEY_TEXT}>{key.value}</span>
                   </div>
                 ))}
                 {keys.shelfTruncated ? (
-                  <p className="px-1.5 py-1.5 text-[11px] text-neutral-500">
+                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500">
                     …và {keys.available - keys.shelf.length} key nữa không hiện ở đây.
                   </p>
                 ) : null}
@@ -306,21 +306,21 @@ export function AdminPackageKeys({
             since when. */}
         <div className="flex flex-col gap-2">
           <span className={HEAD}>Đã thuê ({keys.sold})</span>
-          <div className="rounded-xl border border-white/10 bg-neutral-950/50 p-2.5">
+          <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
             {keys.recent.length === 0 ? (
-              <p className="px-1 py-2 text-[11px] text-neutral-500">
+              <p className="px-1 py-2 text-[11px] text-zinc-500">
                 Chưa giao key nào cho khách.
               </p>
             ) : (
-              <div className="max-h-[340px] divide-y divide-white/[0.05] overflow-y-auto pr-0.5">
+              <div className="max-h-[340px] divide-y divide-zinc-100 overflow-y-auto pr-0.5">
                 {keys.recent.map((key) => (
                   <div
                     key={key.id}
                     className="flex flex-wrap items-center gap-x-2 gap-y-0.5 px-1.5 py-1.5"
                   >
-                    <KeyRound size={11} className="shrink-0 text-neutral-600" />
+                    <KeyRound size={11} className="shrink-0 text-zinc-400" />
                     <span className={KEY_TEXT}>{key.value}</span>
-                    <span className="shrink-0 text-[10px] font-bold text-neutral-300">
+                    <span className="shrink-0 text-[10px] font-bold text-zinc-700">
                       {key.username}
                     </span>
                     {/* When it was handed over, the order on the hover. No
@@ -329,14 +329,14 @@ export function AdminPackageKeys({
                         "key không có hết hạn"). */}
                     <span
                       title={key.orderCode ? `Đơn ${key.orderCode}` : undefined}
-                      className="shrink-0 text-[10px] tabular-nums text-neutral-500"
+                      className="shrink-0 text-[10px] tabular-nums text-zinc-500"
                     >
                       Giao {key.deliveredAt}
                     </span>
                   </div>
                 ))}
                 {keys.sold > keys.recent.length ? (
-                  <p className="px-1.5 py-1.5 text-[11px] text-neutral-500">
+                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500">
                     …và {keys.sold - keys.recent.length} key đã giao trước đó.
                   </p>
                 ) : null}

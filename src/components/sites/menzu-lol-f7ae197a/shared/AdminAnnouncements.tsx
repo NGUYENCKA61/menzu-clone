@@ -60,23 +60,23 @@ export interface AdminAnnouncementRow {
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 
 const STATE_TINT: Record<AnnouncementState, string> = {
-  ACTIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
-  SCHEDULED: "border-sky-500/30 bg-sky-500/10 text-sky-400",
-  DRAFT: "border-white/10 bg-white/5 text-neutral-400",
-  EXPIRED: "border-white/10 bg-white/5 text-neutral-500",
-  DISABLED: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+  ACTIVE: "border-emerald-200 bg-emerald-50 text-emerald-600",
+  SCHEDULED: "border-sky-200 bg-sky-50 text-sky-600",
+  DRAFT: "border-zinc-200 bg-zinc-50 text-zinc-500",
+  EXPIRED: "border-zinc-200 bg-zinc-50 text-zinc-500",
+  DISABLED: "border-amber-200 bg-amber-50 text-amber-600",
 };
 
 /** HIGH shouts, LOW whispers — the list should read the same way the notice
  *  will land. */
 const PRIORITY_TINT: Record<string, string> = {
-  HIGH: "border-rose-500/30 bg-rose-500/10 text-rose-400",
-  NORMAL: "border-white/10 bg-white/5 text-neutral-300",
-  LOW: "border-white/10 bg-white/5 text-neutral-500",
+  HIGH: "border-rose-200 bg-rose-50 text-rose-600",
+  NORMAL: "border-zinc-200 bg-zinc-50 text-zinc-700",
+  LOW: "border-zinc-200 bg-zinc-50 text-zinc-500",
 };
 
 function StatMini({
@@ -90,18 +90,18 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}>
           <Icon size={15} />
         </span>
       </div>
       <span
         className={`text-[26px] font-black leading-none tabular-nums ${
-          value === 0 ? "text-neutral-600" : "text-white"
+          value === 0 ? "text-zinc-400" : "text-zinc-900"
         }`}
       >
         {value}
@@ -300,25 +300,25 @@ export function AdminAnnouncements({
           label="Đang chạy"
           value={counts.active}
           icon={Megaphone}
-          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          tint="border-emerald-200 bg-emerald-50 text-emerald-600"
         />
         <StatMini
           label="Đã lên lịch"
           value={counts.scheduled}
           icon={CalendarClock}
-          tint="border-sky-500/25 bg-sky-500/10 text-sky-400"
+          tint="border-sky-500/25 bg-sky-50 text-sky-600"
         />
         <StatMini
           label="Nháp"
           value={counts.draft}
           icon={FileText}
-          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+          tint="border-violet-200 bg-violet-50 text-violet-600"
         />
         <StatMini
           label="Đã tắt / hết hạn"
           value={counts.off}
           icon={BellOff}
-          tint="border-amber-500/25 bg-amber-500/10 text-amber-400"
+          tint="border-amber-200 bg-amber-50 text-amber-600"
         />
       </div>
 
@@ -326,7 +326,7 @@ export function AdminAnnouncements({
         type="button"
         onClick={() => setComposerOpen((o) => !o)}
         aria-expanded={composerOpen || editing !== null}
-        className="press flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] text-[13px] font-semibold text-neutral-200 sm:hidden"
+        className="press flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white text-[13px] font-semibold text-zinc-800 sm:hidden"
       >
         <Plus size={14} aria-hidden />
         {composerOpen || editing ? "Thu gọn biểu mẫu" : "Thêm thông báo"}
@@ -334,18 +334,18 @@ export function AdminAnnouncements({
 
       <form
         onSubmit={handleSubmit}
-        className={`rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex-col gap-4 ${composerOpen || editing ? "flex" : "hidden sm:flex"}`}
+        className={`rounded-xl border border-zinc-200 bg-white p-5 flex-col gap-4 ${composerOpen || editing ? "flex" : "hidden sm:flex"}`}
       >
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
-            <Megaphone size={13} className="text-neutral-400" />
+          <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
+            <Megaphone size={13} className="text-zinc-500" />
             {editing ? "Sửa thông báo" : "Tạo thông báo"}
           </span>
           {editing ? (
             <button
               type="button"
               onClick={reset}
-              className="text-[11px] font-bold text-neutral-400 hover:text-white transition-colors"
+              className="text-[11px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
             >
               Hủy sửa
             </button>
@@ -367,7 +367,7 @@ export function AdminAnnouncements({
         <div>
           <label className={LABEL}>
             Nội dung
-            <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+            <span className="ml-2 font-bold normal-case tracking-normal text-zinc-400">
               {form.body.length}/{BODY_MAX} · chỉ chữ thường, không dùng HTML
             </span>
           </label>
@@ -385,7 +385,7 @@ export function AdminAnnouncements({
         <div>
           <label className={LABEL}>
             Lưu ý, mỗi dòng một gạch đầu dòng
-            <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+            <span className="ml-2 font-bold normal-case tracking-normal text-zinc-400">
               tối đa {BULLETS_MAX} dòng · để trống thì bỏ qua mục này
             </span>
           </label>
@@ -401,17 +401,17 @@ export function AdminAnnouncements({
         <div>
           <label className={LABEL}>
             Ảnh minh họa
-            <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+            <span className="ml-2 font-bold normal-case tracking-normal text-zinc-400">
               PNG, JPG hoặc WebP, tối đa 5MB · để trống thì không có ảnh
             </span>
           </label>
           {form.imageUrl ? (
-            <div className="relative mb-2 aspect-video w-full max-w-md overflow-hidden rounded-lg border border-white/10 bg-black/40">
+            <div className="relative mb-2 aspect-video w-full max-w-md overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100">
               <Image src={form.imageUrl} alt="" fill sizes="448px" className="object-cover" />
             </div>
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
-            <label className="inline-flex h-10 cursor-pointer items-center rounded-lg border border-white/10 bg-white/[0.03] px-4 text-[13px] font-medium text-neutral-200 transition-colors hover:bg-white/[0.06]">
+            <label className="inline-flex h-10 cursor-pointer items-center rounded-lg border border-zinc-200 bg-white px-4 text-[13px] font-medium text-zinc-800 transition-colors hover:bg-zinc-50">
               {uploading ? "Đang tải…" : form.imageUrl ? "Đổi ảnh" : "Chọn ảnh"}
               <input
                 type="file"
@@ -429,7 +429,7 @@ export function AdminAnnouncements({
               <button
                 type="button"
                 onClick={() => setForm({ ...form, imageUrl: "" })}
-                className="h-10 rounded-lg px-3 text-[13px] font-medium text-neutral-400 transition-colors hover:text-white"
+                className="h-10 rounded-lg px-3 text-[13px] font-medium text-zinc-500 transition-colors hover:text-zinc-900"
               >
                 Bỏ ảnh
               </button>
@@ -469,7 +469,7 @@ export function AdminAnnouncements({
               className={FIELD}
             >
               {Object.entries(AUDIENCE_LABELS).map(([value, label]) => (
-                <option key={value} value={value} className="bg-neutral-900">
+                <option key={value} value={value} className="bg-zinc-100">
                   {label}
                 </option>
               ))}
@@ -479,7 +479,7 @@ export function AdminAnnouncements({
             <div>
               <label className={LABEL}>
                 Tên tài khoản
-                <span className="ml-2 font-bold normal-case tracking-normal text-neutral-600">
+                <span className="ml-2 font-bold normal-case tracking-normal text-zinc-400">
                   {parseUsernames(form.usernames).length} người · cách nhau bằng dấu phẩy
                   hoặc xuống dòng
                 </span>
@@ -494,7 +494,7 @@ export function AdminAnnouncements({
             </div>
           ) : (
             <div className="flex items-end">
-              <p className="pb-2.5 text-[11px] text-neutral-500">
+              <p className="pb-2.5 text-[11px] text-zinc-500">
                 Hiện cho tất cả khách vào web, kể cả người chưa đăng nhập.
               </p>
             </div>
@@ -519,8 +519,8 @@ export function AdminAnnouncements({
                     onClick={() => setForm({ ...form, type: value })}
                     className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-bold transition-colors ${
                       on
-                        ? "border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]"
-                        : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                        ? "border-zinc-900 bg-zinc-900 text-white"
+                        : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
                     }`}
                   >
                     <Icon size={13} />
@@ -540,7 +540,7 @@ export function AdminAnnouncements({
               className={FIELD}
             >
               {Object.entries(PRIORITY_LABELS).map(([value, label]) => (
-                <option key={value} value={value} className="bg-neutral-900">
+                <option key={value} value={value} className="bg-zinc-100">
                   {label}
                 </option>
               ))}
@@ -571,10 +571,10 @@ export function AdminAnnouncements({
             present. Filling it in is what turns the notice into an errand —
             the reader gets an address form and the shop gets a queue row. */}
         {form.type === "GIFT" && form.audience === "USERS" ? (
-          <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.05] p-3.5">
+          <div className="rounded-xl border border-amber-200 bg-amber-500/[0.05] p-3.5">
             <label className={LABEL}>
               Quà cần giao tận nơi
-              <span className="ml-2 font-bold normal-case tracking-normal text-neutral-500">
+              <span className="ml-2 font-bold normal-case tracking-normal text-zinc-500">
                 để trống nếu không phải gửi hàng
               </span>
             </label>
@@ -585,21 +585,21 @@ export function AdminAnnouncements({
               placeholder="Áo thun THICHTHIHACK size L"
               className={FIELD}
             />
-            <p className="mt-2 text-[11px] leading-relaxed text-neutral-400">
+            <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
               Điền tên quà thì thông báo sẽ có nút{" "}
-              <span className="font-bold text-amber-300">Điền địa chỉ nhận</span> cho
+              <span className="font-bold text-amber-700">Điền địa chỉ nhận</span> cho
               khách nhập tên, số điện thoại và địa chỉ, giống khi quay trúng quà
               tặng. Quà hiện trong mục{" "}
-              <span className="font-bold text-neutral-300">Vận hành → Gửi quà</span>{" "}
+              <span className="font-bold text-zinc-700">Vận hành → Gửi quà</span>{" "}
               sau khi thông báo được đăng.
             </p>
           </div>
         ) : null}
 
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Để trống thời gian bắt đầu là chạy ngay, để trống kết thúc là chạy đến khi
           tự tắt. Thông báo mới luôn ở trạng thái nháp, bấm{" "}
-          <span className="font-bold text-neutral-300">Đăng</span> ở bảng dưới mới hiện
+          <span className="font-bold text-zinc-700">Đăng</span> ở bảng dưới mới hiện
           cho khách.
         </p>
 
@@ -608,8 +608,8 @@ export function AdminAnnouncements({
             role="alert"
             className={
               msg.tone === "ok"
-                ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-                : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
+                : "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[12px] font-semibold text-rose-600"
             }
           >
             {msg.text}
@@ -619,7 +619,7 @@ export function AdminAnnouncements({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang xử lý…" : editing ? "Lưu thay đổi" : "Tạo thông báo"}
         </button>
@@ -629,13 +629,13 @@ export function AdminAnnouncements({
         <label className="relative">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm theo tiêu đề hoặc nội dung…"
-            className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+            className="w-full h-10 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-[13px] text-zinc-900 outline-none focus:border-zinc-900 transition-colors"
           />
         </label>
         <select
@@ -643,11 +643,11 @@ export function AdminAnnouncements({
           onChange={(e) => setStateFilter(e.target.value as "" | AnnouncementState)}
           className={FIELD}
         >
-          <option value="" className="bg-neutral-900">
+          <option value="" className="bg-zinc-100">
             Mọi trạng thái
           </option>
           {Object.entries(STATE_LABELS).map(([value, label]) => (
-            <option key={value} value={value} className="bg-neutral-900">
+            <option key={value} value={value} className="bg-zinc-100">
               {label}
             </option>
           ))}
@@ -657,11 +657,11 @@ export function AdminAnnouncements({
           onChange={(e) => setTypeFilter(e.target.value as "" | AnnouncementType)}
           className={FIELD}
         >
-          <option value="" className="bg-neutral-900">
+          <option value="" className="bg-zinc-100">
             Mọi loại
           </option>
           {Object.entries(TYPE_LABELS).map(([value, label]) => (
-            <option key={value} value={value} className="bg-neutral-900">
+            <option key={value} value={value} className="bg-zinc-100">
               {label}
             </option>
           ))}
@@ -671,11 +671,11 @@ export function AdminAnnouncements({
           onChange={(e) => setPriorityFilter(e.target.value as "" | AnnouncementPriority)}
           className={FIELD}
         >
-          <option value="" className="bg-neutral-900">
+          <option value="" className="bg-zinc-100">
             Mọi mức ưu tiên
           </option>
           {Object.entries(PRIORITY_LABELS).map(([value, label]) => (
-            <option key={value} value={value} className="bg-neutral-900">
+            <option key={value} value={value} className="bg-zinc-100">
               {label}
             </option>
           ))}
@@ -686,14 +686,14 @@ export function AdminAnnouncements({
           Tắt/Sửa/Xóa buttons sat 790px to the right. One card per notice. */}
       <div className="flex flex-col gap-2 sm:hidden">
         {visible.length === 0 ? (
-          <p className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-12 text-center text-neutral-400">
+          <p className="rounded-xl border border-zinc-200 bg-white px-5 py-12 text-center text-zinc-500">
             {announcements.length === 0 ? "Chưa có thông báo nào" : "Không có thông báo nào khớp bộ lọc"}
           </p>
         ) : (
           visible.map((row) => {
             const Icon = TYPE_ICONS[row.type];
             return (
-              <article key={row.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+              <article key={row.id} className="rounded-xl border border-zinc-200 bg-white p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${TYPE_TILE}`}>
                     <Icon size={13} />
@@ -702,19 +702,19 @@ export function AdminAnnouncements({
                     {STATE_LABELS[row.state]}
                   </span>
                 </div>
-                <p className="mt-2 text-[13px] font-black leading-snug text-white">{row.title}</p>
-                <p className="mt-1 text-[11px] leading-relaxed text-neutral-400 line-clamp-2">{row.body}</p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-neutral-400">
+                <p className="mt-2 text-[13px] font-black leading-snug text-zinc-900">{row.title}</p>
+                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 line-clamp-2">{row.body}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-zinc-500">
                   <span>{TYPE_LABELS[row.type]}</span>
                   <span className={`px-2 py-0.5 rounded-lg border text-[12px] font-semibold ${PRIORITY_TINT[row.priority] ?? PRIORITY_TINT.NORMAL}`}>
                     {PRIORITY_LABELS[row.priority]}
                   </span>
                   <span>{row.audience === "ALL" ? "Tất cả" : `${row.recipients.length} người`}</span>
                 </div>
-                <p className="mt-1.5 text-[11px] text-neutral-500 tabular-nums">
+                <p className="mt-1.5 text-[11px] text-zinc-500 tabular-nums">
                   {row.startAt} · {row.endAt ? `đến ${row.endAt}` : "không giới hạn"}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2 border-t border-white/[0.06] pt-3">
+                <div className="mt-3 flex flex-wrap gap-2 border-t border-zinc-100 pt-3">
                   {row.status === "PUBLISHED" ? (
                     <ActionButton busy={busy} tone="warn" onClick={() => send("PATCH", { id: row.id, action: "disable" }, "Đã tắt thông báo")}>
                       Tắt
@@ -737,14 +737,14 @@ export function AdminAnnouncements({
         )}
       </div>
 
-      <div className="hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
+      <div className="hidden w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white sm:block">
         <table className="w-full min-w-[860px] text-left">
           <thead>
-            <tr className="border-b border-white/10">
+            <tr className="border-b border-zinc-200">
               {["Tiêu đề", "Gửi cho", "Loại", "Ưu tiên", "Lịch chạy", "Trạng thái", "Thao tác"].map((h) => (
                 <th
                   key={h}
-                  className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap"
+                  className="px-5 py-3.5 text-[12px] font-semibold text-zinc-500 whitespace-nowrap"
                 >
                   {h}
                 </th>
@@ -754,7 +754,7 @@ export function AdminAnnouncements({
           <tbody>
             {visible.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-12 text-center text-neutral-400">
+                <td colSpan={7} className="px-5 py-12 text-center text-zinc-500">
                   {announcements.length === 0
                     ? "Chưa có thông báo nào"
                     : "Không có thông báo nào khớp bộ lọc"}
@@ -764,29 +764,29 @@ export function AdminAnnouncements({
               visible.map((row) => (
                 <tr
                   key={row.id}
-                  className="border-b border-white/5 last:border-0 align-top transition-colors hover:bg-white/[0.015]"
+                  className="border-b border-zinc-100 last:border-0 align-top transition-colors hover:bg-zinc-50/70"
                 >
                   <td className="px-5 py-3 max-w-[280px]">
-                    <p className="text-xs font-black text-white truncate">{row.title}</p>
-                    <p className="mt-1 text-[11px] text-neutral-500 line-clamp-2">
+                    <p className="text-xs font-black text-zinc-900 truncate">{row.title}</p>
+                    <p className="mt-1 text-[11px] text-zinc-500 line-clamp-2">
                       {row.body}
                     </p>
                   </td>
                   <td className="px-5 py-3 max-w-[200px]">
-                    <p className="text-xs text-neutral-300 whitespace-nowrap">
+                    <p className="text-xs text-zinc-700 whitespace-nowrap">
                       {row.audience === "ALL"
                         ? "Tất cả"
                         : `${row.recipients.length} người`}
                     </p>
                     {row.audience === "USERS" ? (
-                      <p className="mt-1 text-[11px] text-neutral-500 truncate">
+                      <p className="mt-1 text-[11px] text-zinc-500 truncate">
                         {row.recipients.join(", ")}
                       </p>
                     ) : null}
                   </td>
                   <td className="px-5 py-3 whitespace-nowrap">
                     {/* The same glyph the customer sees on the notice itself. */}
-                    <span className="inline-flex items-center gap-2 text-xs text-neutral-300">
+                    <span className="inline-flex items-center gap-2 text-xs text-zinc-700">
                       <span className={`flex h-6 w-6 items-center justify-center rounded-md border ${TYPE_TILE}`}>
                         {(() => {
                           const Icon = TYPE_ICONS[row.type];
@@ -805,10 +805,10 @@ export function AdminAnnouncements({
                       {PRIORITY_LABELS[row.priority]}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-[11px] text-neutral-400 whitespace-nowrap">
+                  <td className="px-5 py-3 text-[11px] text-zinc-500 whitespace-nowrap">
                     {row.startAt}
                     <br />
-                    <span className="text-neutral-600">
+                    <span className="text-zinc-400">
                       {row.endAt ? `đến ${row.endAt}` : "không giới hạn"}
                     </span>
                   </td>
@@ -880,10 +880,10 @@ export function AdminAnnouncements({
 }
 
 const ACTION_TONE = {
-  go: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
-  warn: "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20",
-  danger: "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/15",
-  plain: "border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10",
+  go: "border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100",
+  warn: "border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100",
+  danger: "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-50",
+  plain: "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100",
 } as const;
 
 function ActionButton({

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminWarrantyDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWarrantyDetail";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -111,7 +111,7 @@ export default async function AdminWarrantyTicketPage({
   );
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Chi tiết bảo hành"
       subtitle={`Đơn ${ticket.order.code} · ${ticket.user.username}`}
       username={admin.username}
@@ -179,6 +179,6 @@ export default async function AdminWarrantyTicketPage({
           messages: ticket.messages.map(toChatMessage),
         }}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

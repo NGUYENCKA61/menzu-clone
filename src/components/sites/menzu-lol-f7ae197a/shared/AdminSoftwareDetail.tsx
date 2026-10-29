@@ -151,7 +151,7 @@ const BADGE_PRESETS = [
   "HOT",
 ];
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 
 /**
  * One badge, whole: the words, the colour they print in, and the glyph in
@@ -183,7 +183,7 @@ function BadgeField({
   onIcon: (next: BadgeIconName) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-white/[0.06] bg-black/20 p-2.5">
+    <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-2.5">
       <input
         id={id}
         value={value}
@@ -212,7 +212,7 @@ function BadgeField({
             // move the dot by a pixel and the row would twitch on every click.
             className={`h-5 w-5 rounded-full transition-all ${BADGE_COLORS[key].swatch} ${
               color === key
-                ? "ring-2 ring-white ring-offset-2 ring-offset-[#0e0e11]"
+                ? "ring-2 ring-zinc-900 ring-offset-2 ring-offset-white"
                 : "opacity-45 hover:opacity-100"
             }`}
           />
@@ -235,8 +235,8 @@ function BadgeField({
             onClick={() => onIcon(key)}
             className={`grid h-6 w-6 place-items-center rounded-md border text-[10px] transition-colors ${
               icon === key
-                ? "border-white/40 bg-white/10 text-white"
-                : "border-white/[0.08] text-neutral-500 hover:border-white/20 hover:text-neutral-200"
+                ? "border-zinc-400 bg-zinc-100 text-zinc-900"
+                : "border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-800"
             }`}
           >
             {/* The empty option needs a mark of its own, or it reads as a
@@ -253,29 +253,29 @@ function BadgeField({
   );
 }
 const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-zinc-500";
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5";
 
 /** The detection pill customers see on the storefront card. */
 const SOFTWARE_STATUS: Record<string, { label: string; tint: string }> = {
   UNDETECTED: {
     label: "Chưa phát hiện",
-    tint: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400",
+    tint: "border-emerald-200 bg-emerald-50 text-emerald-600",
   },
-  DETECTED: { label: "Đã phát hiện", tint: "border-red-500/30 bg-red-500/10 text-red-400" },
+  DETECTED: { label: "Đã phát hiện", tint: "border-rose-200 bg-rose-50 text-rose-600" },
   UPDATING: {
     label: "Đang cập nhật",
-    tint: "border-amber-500/30 bg-amber-500/10 text-amber-400",
+    tint: "border-amber-200 bg-amber-50 text-amber-600",
   },
-  STABLE: { label: "Ổn định", tint: "border-sky-500/30 bg-sky-500/10 text-sky-400" },
+  STABLE: { label: "Ổn định", tint: "border-sky-200 bg-sky-50 text-sky-600" },
   UPDATED: {
     label: "Cập nhật mới",
-    tint: "border-violet-500/30 bg-violet-500/10 text-violet-400",
+    tint: "border-violet-200 bg-violet-50 text-violet-600",
   },
   RISKY: { label: "Rủi ro", tint: "border-orange-500/30 bg-orange-500/10 text-orange-400" },
 };
@@ -586,7 +586,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         ) : (
           <p
             role="status"
-            className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
+            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
           >
             {msg.text}
           </p>
@@ -594,20 +594,20 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       ) : null}
 
       {/* The tool's papers. */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-wrap items-center gap-5">
-        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-wrap items-center gap-5">
+        <span className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-white">
           {software.imageUrl ? (
             <Image src={software.imageUrl} alt="" fill sizes="192px" className="object-cover" />
           ) : (
-            <span className="flex h-full w-full items-center justify-center text-neutral-600">
+            <span className="flex h-full w-full items-center justify-center text-zinc-400">
               <KeyRound size={20} />
             </span>
           )}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="text-base font-black text-white">{software.name}</span>
-            <span className="font-mono text-[11px] text-neutral-500">#{software.code}</span>
+            <span className="text-base font-black text-zinc-900">{software.name}</span>
+            <span className="font-mono text-[11px] text-zinc-500">#{software.code}</span>
             <span
               className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${detectMeta.tint}`}
             >
@@ -616,14 +616,14 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             <span
               className={`rounded-md border px-2 py-1 text-[12px] font-semibold ${
                 software.status === "AVAILABLE"
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                  : "border-white/10 bg-white/5 text-neutral-500"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                  : "border-zinc-200 bg-zinc-50 text-zinc-500"
               }`}
             >
               {software.status === "AVAILABLE" ? "Đang bán" : "Đã ẩn"}
             </span>
           </div>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
             <span>{software.categoryName}</span>
             <span className="tabular-nums">{software.packages.length} gói</span>
             <span className="tabular-nums">{totalOrders} đơn</span>
@@ -635,7 +635,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           href={software.publicHref}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3.5 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
         >
           <ExternalLink size={13} />
           Xem trang khách
@@ -646,7 +646,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <KeyRound size={13} className="text-neutral-400" />
+              <KeyRound size={13} className="text-zinc-500" />
               Thông tin phần mềm
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -679,7 +679,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="VD: Bản private an toàn, cập nhật liên tục, aimbot mượt và ESP rõ ràng, dễ cài cho cả người mới."
                   className={`${FIELD} resize-y leading-relaxed`}
                 />
-                <p className="mt-1.5 flex justify-between gap-3 text-[11px] text-neutral-500">
+                <p className="mt-1.5 flex justify-between gap-3 text-[11px] text-zinc-500">
                   <span>
                     1–2 câu, hiện ngay dưới tên sản phẩm ở trang khách và trên thẻ
                     sản phẩm. Để trống thì không hiện gì.
@@ -698,7 +698,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   Đường dẫn
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <span className="shrink-0 font-mono text-[11px] text-neutral-500">
+                  <span className="shrink-0 font-mono text-[11px] text-zinc-500">
                     /{software.categorySlug}/
                   </span>
                   <input
@@ -709,7 +709,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     className={`${FIELD} font-mono`}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500">
                   Đổi đường dẫn là link cũ hỏng, chỉ sửa khi sản phẩm chưa được
                   chia sẻ đi đâu.
                 </p>
@@ -739,7 +739,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder={DEFAULT_DOWNLOAD_NAME}
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500">
                   Hiện dưới &ldquo;Link tải hack&rdquo; trong đơn hàng của khách.
                   Để trống thì hiện &ldquo;{DEFAULT_DOWNLOAD_NAME}&rdquo;.
                 </p>
@@ -757,7 +757,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="https://…"
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500">
                   Hiện cùng &ldquo;Link tải&rdquo; trong đơn hàng của khách, ngay
                   cạnh key. Để trống nếu chưa có.
                 </p>
@@ -768,13 +768,13 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     type="checkbox"
                     checked={verifiedOnly}
                     onChange={(event) => setVerifiedOnly(event.target.checked)}
-                    className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-zinc-900"
                   />
                   <span>
-                    <span className="block text-xs font-bold text-white">
+                    <span className="block text-xs font-bold text-zinc-900">
                       Chỉ bán cho tài khoản xác thực cấp 2
                     </span>
-                    <span className="mt-0.5 block text-[11px] text-neutral-500">
+                    <span className="mt-0.5 block text-[11px] text-zinc-500">
                       Bản đặc biệt: trang khách báo &ldquo;chỉ bán cho tài khoản
                       xác thực cấp 2&rdquo;, máy chủ từ chối đơn của tài khoản chưa
                       duyệt (kể cả qua giỏ hàng và bot Telegram). Khách lên cấp 2
@@ -803,7 +803,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                         onClick={() =>
                           badge1.trim() === "" ? setBadge1(preset) : setBadge2(preset)
                         }
-                        className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[12px] font-semibold text-neutral-400 transition-colors hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 hover:text-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-white/10 disabled:hover:bg-white/[0.04] disabled:hover:text-neutral-400"
+                        className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[12px] font-semibold text-zinc-500 transition-colors hover:border-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:border-zinc-200 disabled:hover:bg-zinc-50 disabled:hover:text-zinc-500"
                       >
                         + {preset}
                       </button>
@@ -834,15 +834,15 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     onIcon={setIcon2}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500">
                   Hiện cạnh trạng thái ở trang khách. Gõ gì hiện nấy, &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
                   &ldquo;SẮP HẾT HÀNG&rdquo;. Mỗi nhãn chọn màu riêng bằng dãy
                   chấm bên phải. Để trống cả hai thì không hiện nhãn nào.
                 </p>
                 {/* What the customer will see, in the customer's colours. */}
                 {[badge1, badge2].some((b) => b.trim()) ? (
-                  <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2.5">
-                    <span className="text-[12px] font-semibold text-neutral-600">
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-zinc-100 bg-zinc-100 px-3 py-2.5">
+                    <span className="text-[12px] font-semibold text-zinc-400">
                       Xem trước
                     </span>
                     {[
@@ -875,7 +875,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="VD: 80"
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-neutral-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500">
                   Mức bảo hành / hoàn trả khách nhận được nếu sản phẩm gặp sự cố
                   ngoài ý muốn. Hiện dưới mục &ldquo;Chính sách bảo hành &amp;
                   hoàn tiền&rdquo; ở trang khách. Để trống thì không hiện dòng
@@ -903,7 +903,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Wallet size={13} className="text-neutral-400" />
+              <Wallet size={13} className="text-zinc-500" />
               Trạng thái bán & phát hiện
             </span>
             {/* No price field: the listing figure is the cheapest tier's, and
@@ -919,10 +919,10 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   onChange={(event) => setStatus(event.target.value)}
                   className={`${FIELD} w-32`}
                 >
-                  <option value="AVAILABLE" className="bg-neutral-900">
+                  <option value="AVAILABLE" className="bg-zinc-100">
                     Đang bán
                   </option>
-                  <option value="HIDDEN" className="bg-neutral-900">
+                  <option value="HIDDEN" className="bg-zinc-100">
                     Đã ẩn
                   </option>
                 </select>
@@ -938,7 +938,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   className={`${FIELD} w-40`}
                 >
                   {Object.entries(SOFTWARE_STATUS).map(([value, meta]) => (
-                    <option key={value} value={value} className="bg-neutral-900">
+                    <option key={value} value={value} className="bg-zinc-100">
                       {meta.label}
                     </option>
                   ))}
@@ -960,7 +960,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   className={`${FIELD} w-52`}
                 >
                   {STATUS_PILL_MODE_KEYS.map((mode) => (
-                    <option key={mode} value={mode} className="bg-neutral-900">
+                    <option key={mode} value={mode} className="bg-zinc-100">
                       {STATUS_PILL_MODES[mode]}
                     </option>
                   ))}
@@ -979,7 +979,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   className={`${FIELD} w-32`}
                 >
                   {RUNS_ON.map((value) => (
-                    <option key={value} value={value} className="bg-neutral-900">
+                    <option key={value} value={value} className="bg-zinc-100">
                       {RUNS_ON_LABELS[value]}
                     </option>
                   ))}
@@ -1010,8 +1010,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                       }
                       className={`rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-colors ${
                         on
-                          ? "border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 text-white"
-                          : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                          ? "border-zinc-900 bg-zinc-900/5 text-zinc-900"
+                          : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
                       }`}
                     >
                       {label}
@@ -1020,7 +1020,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 })}
               </div>
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Trạng thái hack hiện thành pill trên card ngoài cửa hàng, khách nhìn nó để
               quyết định mua. Card ngoài luôn hiện; ô bên phải chỉ quyết định
               trang chi tiết, nơi pill đứng chung hàng với nhãn nổi bật.
@@ -1032,7 +1032,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 /thong-bao keeps each change with the picture and the sentence
                 it was announced with. Both are optional and both reset after
                 a save. */}
-            <div className="flex flex-col gap-2 border-t border-white/[0.06] pt-4">
+            <div className="flex flex-col gap-2 border-t border-zinc-100 pt-4">
               <span className={LABEL}>Kèm theo lần đổi trạng thái này</span>
               <textarea
                 value={statusNote}
@@ -1044,7 +1044,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               {/* The note's formatting rules (lib/statusNote), named where the
                   note is written, so a dash turning into a bullet is never a
                   surprise. */}
-              <p className="text-[11px] leading-relaxed text-neutral-500">
+              <p className="text-[11px] leading-relaxed text-zinc-500">
                 **chữ đậm** · dòng bắt đầu bằng &quot;- &quot; là gạch đầu dòng · dòng trống để
                 tách đoạn · link dán vào tự bấm được
               </p>
@@ -1065,7 +1065,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 </label>
                 {statusImageUrl ? (
                   <>
-                    <span className="relative h-11 w-16 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                    <span className="relative h-11 w-16 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={statusImageUrl}
@@ -1076,13 +1076,13 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     <button
                       type="button"
                       onClick={() => setStatusImageUrl("")}
-                      className="text-[11px] font-bold text-neutral-400 transition-colors hover:text-red-400"
+                      className="text-[11px] font-bold text-zinc-500 transition-colors hover:text-rose-600"
                     >
                       Bỏ ảnh
                     </button>
                   </>
                 ) : (
-                  <span className="text-[11px] text-neutral-500">
+                  <span className="text-[11px] text-zinc-500">
                     Chỉ hiện khi trạng thái thực sự đổi.
                   </span>
                 )}
@@ -1094,7 +1094,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <ImagePlus size={13} className="text-neutral-400" />
+              <ImagePlus size={13} className="text-zinc-500" />
               Ảnh bìa
             </span>
             {/* The same compact picker the category desk uses — a 68px preview
@@ -1132,11 +1132,11 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
       {/* Full width below the grid — prose wants room the columns don't have. */}
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <FileText size={13} className="text-neutral-400" />
+          <FileText size={13} className="text-zinc-500" />
           Mô tả sản phẩm
         </span>
         <RichTextEditor initialHtml={software.descriptionHtml} onUpdate={setDescHtml} />
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Có nội dung ở đây thì khu &ldquo;Mô tả sản phẩm&rdquo; trên trang khách hiện
           đúng bài này, đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
           khách quay về đoạn hướng dẫn và bảo hành viết sẵn. Khu &ldquo;Tính năng nổi
@@ -1153,14 +1153,14 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             Lưu mô tả
           </button>
           {descHtml !== descBaseline ? (
-            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>
       </section>
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <Cpu size={13} className="text-neutral-400" />
+          <Cpu size={13} className="text-zinc-500" />
           Yêu cầu hệ thống
         </span>
         <textarea
@@ -1173,8 +1173,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           }
           className={`${FIELD} resize-y leading-relaxed`}
         />
-        <p className="text-[11px] text-neutral-500">
-          Mỗi dòng một yêu cầu, dạng <span className="font-mono text-neutral-400">Nhãn: giá trị</span>, nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
+        <p className="text-[11px] text-zinc-500">
+          Mỗi dòng một yêu cầu, dạng <span className="font-mono text-zinc-500">Nhãn: giá trị</span>, nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
           thống&rdquo; trên trang khách. Dòng không có dấu hai chấm bị bỏ qua. Xoá hết thì
           trang khách in lại danh sách mặc định chung của shop chứ không trống.
         </p>
@@ -1188,7 +1188,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             <Save size={12} />
             Lưu yêu cầu hệ thống
           </button>
-          <span className="text-[11px] text-neutral-500">
+          <span className="text-[11px] text-zinc-500">
             {requirementCount}/{REQUIREMENT_MAX} dòng
             {requirementText !== requirementBaseline ? " · có thay đổi chưa lưu" : ""}
           </span>
@@ -1197,7 +1197,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <Sparkles size={13} className="text-neutral-400" />
+          <Sparkles size={13} className="text-zinc-500" />
           Tính năng nổi bật
         </span>
         <textarea
@@ -1210,8 +1210,8 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           }
           className={`${FIELD} resize-y leading-relaxed`}
         />
-        <p className="text-[11px] text-neutral-500">
-          Mỗi dòng một tính năng, dạng <span className="font-mono text-neutral-400">Tên: mô tả</span>.
+        <p className="text-[11px] text-zinc-500">
+          Mỗi dòng một tính năng, dạng <span className="font-mono text-zinc-500">Tên: mô tả</span>.
           Phần trước dấu hai chấm đầu tiên được in đậm trên trang khách, phần sau viết
           thường. Không có dấu hai chấm thì cả dòng là tên, &ldquo;No recoil&rdquo; cũng là
           một tính năng. Xoá hết thì trang khách in lại danh sách mặc định chung của shop
@@ -1227,7 +1227,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             <Save size={12} />
             Lưu tính năng
           </button>
-          <span className="text-[11px] text-neutral-500">
+          <span className="text-[11px] text-zinc-500">
             {featureCount}/{FEATURE_MAX} dòng
             {featureText !== featureBaseline ? " · có thay đổi chưa lưu" : ""}
           </span>
@@ -1237,13 +1237,13 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             card rather than one of its own: it is the second half of the same
             block on the customer's page, and two cards would suggest two
             places on the page rather than one. */}
-        <div className="flex flex-col gap-4 border-t border-white/[0.06] pt-4">
+        <div className="flex flex-col gap-4 border-t border-zinc-100 pt-4">
           <span className={CARD_HEAD}>
-            <FileText size={13} className="text-neutral-400" />
+            <FileText size={13} className="text-zinc-500" />
             Mô tả tính năng
           </span>
           <RichTextEditor initialHtml={software.featuresNoteHtml} onUpdate={setNoteHtml} />
-          <p className="text-[11px] text-neutral-500">
+          <p className="text-[11px] text-zinc-500">
             Đoạn viết nằm ngay dưới danh sách gạch đầu dòng ở trên. Soạn y như ô mô tả
             sản phẩm, đậm, màu, tiêu đề, ảnh. Để trống thì trang khách không hiện gì
             thêm sau danh sách.
@@ -1259,7 +1259,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               Lưu mô tả tính năng
             </button>
             {noteHtml !== noteBaseline ? (
-              <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+              <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
             ) : null}
           </div>
         </div>
@@ -1267,11 +1267,11 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <BookOpen size={13} className="text-neutral-400" />
+          <BookOpen size={13} className="text-zinc-500" />
           Hướng dẫn cài đặt
         </span>
         <RichTextEditor initialHtml={software.guideHtml} onUpdate={setGuideHtml} />
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách, cách tải, cách bật,
           cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
           Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube, bấm vào
@@ -1289,24 +1289,24 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             Lưu hướng dẫn
           </button>
           {guideHtml !== guideBaseline ? (
-            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>
       </section>
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <Settings2 size={13} className="text-neutral-400" />
+          <Settings2 size={13} className="text-zinc-500" />
           Hướng dẫn thiết lập &amp; sử dụng
         </span>
         <RichTextEditor
           initialHtml={software.setupGuideHtml}
           onUpdate={setSetupGuideHtml}
         />
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Khu &ldquo;Hướng dẫn thiết lập &amp; sử dụng&rdquo; trên trang khách, ngay
           dưới hướng dẫn cài đặt, nhập key, bật tính năng, chỉnh thông số, thao tác
-          trong game. <span className="text-neutral-400">Chỉ khách đã thuê key của tool
+          trong game. <span className="text-zinc-500">Chỉ khách đã thuê key của tool
           này mới đọc được</span>; người khác thấy ô khoá &ldquo;Mở khoá sau khi thuê
           key&rdquo;. Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube
           (nên để &ldquo;Không công khai&rdquo;), bấm vào video để chỉnh rộng và căn lề
@@ -1325,7 +1325,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             Lưu hướng dẫn thiết lập
           </button>
           {setupGuideHtml !== setupGuideBaseline ? (
-            <span className="text-[11px] text-neutral-500">Có thay đổi chưa lưu</span>
+            <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
           ) : null}
         </div>
       </section>

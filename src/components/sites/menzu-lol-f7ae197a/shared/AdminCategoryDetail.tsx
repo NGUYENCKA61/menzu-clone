@@ -27,13 +27,13 @@ export interface AdminCategoryDetailView {
 }
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const CARD =
-  "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+  "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-zinc-500";
 
 /**
  * One category's own screen.
@@ -150,7 +150,7 @@ export function AdminCategoryDetail({
       {ok ? (
         <p
           role="status"
-          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
         >
           {ok}
         </p>
@@ -177,7 +177,7 @@ export function AdminCategoryDetail({
               Đường dẫn
             </label>
             <div className="flex items-center gap-1.5">
-              <span className="shrink-0 font-mono text-[11px] text-neutral-500">/</span>
+              <span className="shrink-0 font-mono text-[11px] text-zinc-500">/</span>
               <input
                 id="cat-slug"
                 value={slug}
@@ -185,9 +185,9 @@ export function AdminCategoryDetail({
                 className={`${FIELD} font-mono`}
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-neutral-500">
+            <p className="mt-1.5 text-[11px] text-zinc-500">
               Đổi đường dẫn sẽ làm mọi link cũ tới{" "}
-              <span className="font-mono text-neutral-400">/{category.slug}</span> trả về
+              <span className="font-mono text-zinc-500">/{category.slug}</span> trả về
               404.
             </p>
           </div>
@@ -208,7 +208,7 @@ export function AdminCategoryDetail({
 
           <div>
             <label htmlFor="cat-platform" className={LABEL}>
-              Nền tảng <span className="text-neutral-600">(chip lọc ở Danh sách hack game)</span>
+              Nền tảng <span className="text-zinc-400">(chip lọc ở Danh sách hack game)</span>
             </label>
             <select
               id="cat-platform"
@@ -216,16 +216,16 @@ export function AdminCategoryDetail({
               onChange={(event) => setPlatform(event.target.value)}
               className={`${FIELD} w-48`}
             >
-              <option value="" className="bg-neutral-900">
+              <option value="" className="bg-zinc-100">
                 Chưa phân loại
               </option>
               {CATEGORY_PLATFORMS.map((value) => (
-                <option key={value} value={value} className="bg-neutral-900">
+                <option key={value} value={value} className="bg-zinc-100">
                   {platformLabel(value)}
                 </option>
               ))}
             </select>
-            <p className="mt-1.5 text-[11px] text-neutral-500">
+            <p className="mt-1.5 text-[11px] text-zinc-500">
               Chưa phân loại thì danh mục chỉ hiện dưới chip &ldquo;Tất cả&rdquo;.
             </p>
           </div>
@@ -234,7 +234,7 @@ export function AdminCategoryDetail({
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>Ảnh bìa</span>
-            <p className="-mt-2 text-[11px] text-neutral-500">
+            <p className="-mt-2 text-[11px] text-zinc-500">
               Hiện trên ô danh mục ngoài trang chủ.
             </p>
             <input
@@ -258,7 +258,7 @@ export function AdminCategoryDetail({
               empty, that header uses the tile picture above, stretched. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>Ảnh đầu trang danh mục</span>
-            <p className="-mt-2 text-[11px] text-neutral-500">
+            <p className="-mt-2 text-[11px] text-zinc-500">
               Ảnh ngang chạy ngang đầu trang danh mục, nên từ 1920×600px trở lên.
               Để trống thì dùng ảnh bìa ở trên.
             </p>
@@ -288,7 +288,7 @@ export function AdminCategoryDetail({
               stands in, cropped square. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>Logo game</span>
-            <p className="-mt-2 text-[11px] text-neutral-500">
+            <p className="-mt-2 text-[11px] text-zinc-500">
               Logo vuông của game, hiện nhỏ cạnh tên danh mục. Nên dùng PNG nền
               trong, từ 128×128px. Để trống thì dùng ảnh bìa ở trên.
             </p>
@@ -341,7 +341,7 @@ export function AdminCategoryDetail({
                 />
               </div>
             </div>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Hai số này do shop tự đặt để in ra thẻ ngoài trang chủ, không phải số
               sản phẩm thật trong kho ({category.productCount}).
             </p>
@@ -353,7 +353,7 @@ export function AdminCategoryDetail({
         type="button"
         disabled={busy || !name.trim() || !slug.trim()}
         onClick={() => void save()}
-        className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
+        className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 transition-colors text-[13px] font-semibold text-zinc-900"
       >
         {busy ? "Đang lưu…" : "Lưu thay đổi"}
       </button>

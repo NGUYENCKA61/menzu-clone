@@ -20,10 +20,10 @@ export interface AdminCategoryView {
 }
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ICON_BUTTON =
-  "h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
+  "h-8 w-8 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-zinc-100 text-zinc-700 transition-colors inline-flex items-center justify-center";
 
 
 /**
@@ -150,9 +150,9 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col gap-4"
       >
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           Thêm danh mục
         </span>
 
@@ -176,7 +176,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
           </div>
           <div>
             <label htmlFor="cat-description" className={LABEL}>
-              Mô tả ngắn <span className="text-neutral-600">(không bắt buộc)</span>
+              Mô tả ngắn <span className="text-zinc-400">(không bắt buộc)</span>
             </label>
             <input
               id="cat-description"
@@ -190,7 +190,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
 
         <div>
           <label htmlFor="cat-image" className={LABEL}>
-            Ảnh bìa <span className="text-neutral-600">(không bắt buộc)</span>
+            Ảnh bìa <span className="text-zinc-400">(không bắt buộc)</span>
           </label>
           <input
             id="cat-image"
@@ -208,16 +208,16 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
             }}
           />
         </div>
-        <p className="text-[11px] text-neutral-500">
+        <p className="text-[11px] text-zinc-500">
           Đường dẫn được tạo tự động từ tên, &ldquo;Tài Khoản Đặc Biệt&rdquo; thành{" "}
-          <span className="font-mono text-neutral-400">/tai-khoan-dac-biet</span>.
+          <span className="font-mono text-zinc-500">/tai-khoan-dac-biet</span>.
           Danh mục mới xếp cuối danh sách, không xáo trộn thứ tự trang chủ đang có.
         </p>
 
         <button
           type="submit"
           disabled={busy || !newName.trim()}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-50 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang xử lý…" : "Thêm danh mục"}
         </button>
@@ -228,7 +228,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
       {ok ? (
         <p
           role="status"
-          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
         >
           {ok}
         </p>
@@ -260,7 +260,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
             return (
               <div
                 key={category.id}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex flex-col gap-3"
+                className="rounded-2xl border border-zinc-200 bg-white p-4 flex flex-col gap-3"
               >
                 {/* Meta wraps, the buttons do not: a long category name should
                     not push the actions onto their own line and leave the rows
@@ -274,7 +274,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                       reason the software table uses one: the value is whatever
                       path or URL the shop typed, and next/image would need every
                       host of it spelled out in an allow-list. */}
-                  <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+                  <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
                     {category.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -283,21 +283,21 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="grid h-full w-full place-items-center text-neutral-600">
+                      <span className="grid h-full w-full place-items-center text-zinc-400">
                         <ImagePlus size={14} />
                       </span>
                     )}
                   </span>
 
                   <div className="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <span className="text-xs font-black text-white">{category.name}</span>
-                    <span className="font-mono text-[11px] text-neutral-500">
+                    <span className="text-xs font-black text-zinc-900">{category.name}</span>
+                    <span className="font-mono text-[11px] text-zinc-500">
                       /{category.slug}
                     </span>
-                    <span className="text-[11px] text-neutral-400">
+                    <span className="text-[11px] text-zinc-500">
                       {category.productCount} sản phẩm
                     </span>
-                    <span className="text-[11px] text-neutral-500">
+                    <span className="text-[11px] text-zinc-500">
                       Đã bán {category.soldCount} · Đang bán {category.stockCount}
                     </span>
                   </div>
@@ -332,7 +332,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                         row below it down the screen. */}
                     <Link
                       href={`/admin/categories/${encodeURIComponent(category.slug)}`}
-                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+                      className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors inline-flex items-center gap-1.5"
                     >
                       Sửa
                     </Link>
@@ -346,7 +346,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
                       }
                       onClick={() => setDeleting(category)}
                       aria-label={`Xóa danh mục ${category.name}`}
-                      className="h-8 w-8 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-400 hover:text-red-400 transition-colors inline-flex items-center justify-center"
+                      className="h-8 w-8 rounded-lg border border-zinc-200 bg-zinc-50 hover:border-rose-200 hover:bg-rose-50 disabled:opacity-30 disabled:hover:bg-zinc-100 text-zinc-500 hover:text-rose-600 transition-colors inline-flex items-center justify-center"
                     >
                       <Trash2 size={13} />
                     </button>

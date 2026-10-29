@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminWarranty } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWarranty";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -67,7 +67,7 @@ export default async function AdminWarrantyPage({
   });
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Bảo hành"
       subtitle="Khách báo lỗi theo từng đơn, bấm vào một yêu cầu để trao đổi, xử lý hoặc hoàn tiền"
       username={admin.username}
@@ -97,6 +97,6 @@ export default async function AdminWarrantyPage({
           };
         })}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

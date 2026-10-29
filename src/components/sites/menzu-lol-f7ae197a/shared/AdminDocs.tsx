@@ -44,9 +44,9 @@ const CATEGORY_META: Record<string, (typeof DOC_SHELF_META)[keyof typeof DOC_SHE
 const CATEGORY_ORDER: string[] = [...ARTICLE_SHELVES];
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 
 function StatMini({
   label,
@@ -59,20 +59,20 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           {label}
         </span>
         <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}
         >
           <Icon size={15} />
         </span>
       </div>
       <span
         className={`text-[26px] font-black leading-none tabular-nums ${
-          value === "0" ? "text-neutral-600" : "text-white"
+          value === "0" ? "text-zinc-400" : "text-zinc-900"
         }`}
       >
         {value}
@@ -181,11 +181,11 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
     const Icon = meta?.icon ?? FileText;
 
     return (
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5 flex flex-col gap-3 transition-colors hover:border-white/[0.14]">
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 flex flex-col gap-3 transition-colors hover:border-zinc-300">
         <div className="flex items-center gap-3.5">
           <span
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
-              meta?.tint ?? "border-white/10 bg-white/5 text-neutral-400"
+              meta?.tint ?? "border-zinc-200 bg-zinc-50 text-zinc-500"
             }`}
           >
             <Icon size={17} />
@@ -193,29 +193,29 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <span className="text-sm font-black text-white">{doc.title}</span>
+              <span className="text-sm font-black text-zinc-900">{doc.title}</span>
               <span
                 className={`text-[12px] font-semibold px-1.5 py-0.5 rounded border ${
                   doc.body
-                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                    : "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                    : "border-amber-200 bg-amber-50 text-amber-600"
                 }`}
               >
                 {doc.body ? "Đã có nội dung" : "Đang biên soạn"}
               </span>
               {doc.featured ? (
-                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-[var(--menzu-accent)]/40 bg-[var(--menzu-accent)]/10 text-[var(--menzu-accent)]">
+                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-rose-200 bg-rose-50 text-rose-700">
                   Nổi bật
                 </span>
               ) : null}
               {doc.productCode ? (
-                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-500/10 text-sky-300">
+                <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-sky-500/40 bg-sky-50 text-sky-700">
                   Tài liệu tool {doc.productCode}
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-neutral-500">
-              <span className="font-mono text-neutral-600">/{doc.slug}</span>
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+              <span className="font-mono text-zinc-400">/{doc.slug}</span>
               <span className="inline-flex items-center gap-1 tabular-nums">
                 <Eye size={11} />
                 {doc.views.toLocaleString("vi-VN")}
@@ -231,7 +231,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               rel="noreferrer"
               title="Mở trang khách đang thấy"
               aria-label={`Xem bài ${doc.title} ngoài trang`}
-              className="h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] text-neutral-400 hover:bg-white/[0.08] hover:text-white transition-colors inline-flex items-center justify-center"
+              className="h-8 w-8 rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors inline-flex items-center justify-center"
             >
               <ExternalLink size={13} />
             </a>
@@ -239,7 +239,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                 preview instead of a strip squeezed into the list. */}
             <Link
               href={`/admin/docs/${doc.slug}`}
-              className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-neutral-300 text-[12px] font-semibold transition-colors inline-flex items-center gap-1.5"
+              className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 text-[12px] font-semibold transition-colors inline-flex items-center gap-1.5"
             >
               <PencilLine size={12} />
               Sửa
@@ -250,7 +250,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               onClick={() => setRemoving(doc)}
               title="Xóa bài viết"
               aria-label={`Xóa bài ${doc.title}`}
-              className="h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center"
+              className="h-8 w-8 rounded-lg border border-zinc-200 bg-white hover:border-rose-200 hover:bg-rose-50 disabled:opacity-30 text-zinc-500 hover:text-rose-600 transition-colors inline-flex items-center justify-center"
             >
               <Trash2 size={13} />
             </button>
@@ -267,25 +267,25 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           label="Tổng bài viết"
           value={String(docs.length)}
           icon={FileText}
-          tint="border-indigo-500/25 bg-indigo-500/10 text-indigo-400"
+          tint="border-indigo-200 bg-indigo-50 text-indigo-600"
         />
         <StatMini
           label="Đã có nội dung"
           value={String(written)}
           icon={BookOpenCheck}
-          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          tint="border-emerald-200 bg-emerald-50 text-emerald-600"
         />
         <StatMini
           label="Đang biên soạn"
           value={String(docs.length - written)}
           icon={PencilLine}
-          tint="border-amber-500/25 bg-amber-500/10 text-amber-400"
+          tint="border-amber-200 bg-amber-50 text-amber-600"
         />
         <StatMini
           label="Tổng lượt xem"
           value={totalViews.toLocaleString("vi-VN")}
           icon={Eye}
-          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+          tint="border-violet-200 bg-violet-50 text-violet-600"
         />
       </div>
 
@@ -299,14 +299,14 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           onClick={() => setCatFilter("")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors ${
             catFilter === ""
-              ? "bg-[var(--brand-dark)] text-white"
-              : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+              ? "bg-zinc-900 text-zinc-900"
+              : "border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Tất cả
           <span
             className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
-              catFilter === "" ? "bg-white/20" : "bg-white/[0.06] text-neutral-500"
+              catFilter === "" ? "bg-zinc-200 text-zinc-700" : "bg-zinc-50 text-zinc-500"
             }`}
           >
             {docs.length}
@@ -326,14 +326,14 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-[13px] font-semibold transition-colors ${
                 on
                   ? meta.tint
-                  : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                  : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
               }`}
             >
               <Icon size={13} />
               {meta.label}
               <span
                 className={`rounded-md px-1.5 py-0.5 text-[10px] tabular-nums ${
-                  on ? "bg-white/10" : "bg-white/[0.06] text-neutral-500"
+                  on ? "bg-zinc-100" : "bg-zinc-50 text-zinc-500"
                 }`}
               >
                 {count}
@@ -347,17 +347,17 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
         <label className="relative flex-1 min-w-[240px]">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Tìm tiêu đề, slug hoặc nội dung..."
-            className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+            className="w-full h-10 rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-[13px] text-zinc-900 outline-none focus:border-zinc-900 transition-colors"
           />
         </label>
         <div className="flex items-center gap-3">
-          <span className="text-[12px] text-neutral-500 tabular-nums">
+          <span className="text-[12px] text-zinc-500 tabular-nums">
             {q || catFilter ? `${shown.length}/${docs.length}` : docs.length} bài viết
           </span>
           <button
@@ -368,8 +368,8 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
             }}
             className={`h-10 px-4 rounded-xl text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
               creating
-                ? "border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10"
-                : "bg-[var(--brand-dark)] hover:bg-[var(--brand)] text-white"
+                ? "border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
+                : "bg-zinc-900 hover:bg-zinc-700 text-zinc-900"
             }`}
           >
             {creating ? <X size={14} /> : <Plus size={14} />}
@@ -379,9 +379,9 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
       </div>
 
       {creating ? (
-        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4">
-          <span className="flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
-            <Plus size={13} className="text-neutral-400" />
+        <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4">
+          <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
+            <Plus size={13} className="text-zinc-500" />
             Bài viết mới
           </span>
           <div className="flex flex-wrap items-end gap-3">
@@ -414,7 +414,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                       className={`inline-flex h-[42px] items-center gap-1.5 rounded-xl border px-3 text-[11px] font-bold transition-colors ${
                         on
                           ? meta.tint
-                          : "border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                          : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
                       }`}
                     >
                       <Icon size={13} />
@@ -428,13 +428,13 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               type="button"
               disabled={pending || !newTitle.trim()}
               onClick={create}
-              className="h-[42px] px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+              className="h-[42px] px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} />
               {pending ? "Đang tạo…" : "Tạo"}
             </button>
           </div>
-          <p className="text-[11px] text-neutral-500">
+          <p className="text-[11px] text-zinc-500">
             Đường dẫn sinh tự động từ tiêu đề và giữ nguyên về sau. Bài mới ở trạng thái
             &ldquo;đang biên soạn&rdquo;, bấm Sửa để viết nội dung rồi mới hiện đầy đủ cho
             khách.
@@ -459,12 +459,12 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
         return (
           <section key={category} className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-white whitespace-nowrap">
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold text-zinc-900 whitespace-nowrap">
                 <Icon size={14} className={meta.tint.split(" ").at(-1)} />
                 {meta.label}
               </h2>
-              <div className="flex-1 h-px bg-white/[0.08]" />
-              <span className="text-[11px] text-neutral-600 tabular-nums">
+              <div className="flex-1 h-px bg-zinc-200" />
+              <span className="text-[11px] text-zinc-400 tabular-nums">
                 {rows.length} bài
               </span>
             </div>

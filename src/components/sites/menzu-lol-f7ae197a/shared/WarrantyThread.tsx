@@ -23,6 +23,15 @@ export interface ThreadOpening {
  */
 const PAGE_PANE = "max-h-[440px] min-h-[160px] sm:max-h-[600px]";
 
+/** The white desk's status tones; the dark pages keep the lib's own. */
+const LIGHT_TILE: Record<string, string> = {
+  OPEN: "border-amber-200 bg-amber-50 text-amber-700",
+  IN_PROGRESS: "border-sky-200 bg-sky-50 text-sky-700",
+  REFUNDING: "border-violet-200 bg-violet-50 text-violet-700",
+  RESOLVED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  REFUNDED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+};
+
 /**
  * A warranty ticket's conversation, the same on both screens: the viewer's
  * own lines on the right in the accent, the other side's on the left. A desk
@@ -41,6 +50,7 @@ export function WarrantyThread({
   buyerAvatar = null,
   buyerInitial,
   size = PAGE_PANE,
+  light = false,
 }: {
   viewer: "buyer" | "shop";
   /** The buyer as the desk knows them; on their own page they are "Bạn". */
@@ -57,6 +67,12 @@ export function WarrantyThread({
    * admin's floating inbox has a panel of its own height to fill instead.
    */
   size?: string;
+  /**
+   * The white admin ticket page (30/10/2026 rebuild) reads this thread on
+   * paper instead of glass; the buyer's page and the floating inbox stay
+   * dark, so the default stays dark.
+   */
+  light?: boolean;
 }) {
   const lines = [
     ...(opening
@@ -86,9 +102,11 @@ export function WarrantyThread({
 
   if (lines.length === 0) return null;
 
-  // The buyer's pages and the desk each keep their own red.
-  const mineTone =
-    viewer === "buyer"
+  // The buyer's pages and the desk each keep their own red; the white desk
+  // answers in ink on zinc instead.
+  const mineTone = light
+    ? "border-zinc-300 bg-zinc-100"
+    : viewer === "buyer"
       ? "border-[var(--menzu-accent)]/25 bg-[var(--menzu-accent)]/10"
       : "border-[var(--brand)]/25 bg-[var(--brand)]/10";
 
@@ -96,7 +114,9 @@ export function WarrantyThread({
     <div
       ref={pane}
       data-pane
-      className={`${size} flex flex-col overflow-y-auto rounded-xl border border-line bg-black/30 p-4`}
+      className={`${size} flex flex-col overflow-y-auto rounded-xl border p-4 ${
+        light ? "border-zinc-200 bg-zinc-50" : "border-line bg-black/30"
+      }`}
     >
       <ol className="flex shrink-0 flex-col gap-3">
         {lines.map((line, index) => {
@@ -135,9 +155,11 @@ export function WarrantyThread({
             >
               <span
                 aria-hidden
-                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/40 text-[14px] font-semibold text-neutral-300 ${
-                  grouped ? "invisible" : "mt-[18px]"
-                }`}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border text-[14px] font-semibold ${
+                  light
+                    ? "border-zinc-200 bg-white text-zinc-500"
+                    : "border-white/10 bg-black/40 text-neutral-300"
+                } ${grouped ? "invisible" : "mt-[18px]"}`}
               >
                 {avatar ? (
                   <Image
@@ -159,15 +181,24 @@ export function WarrantyThread({
                 className={`flex min-w-0 flex-1 flex-col ${mine ? "items-end" : "items-start"}`}
               >
                 {grouped ? null : (
-                  <span className="mb-1 px-1 text-[13px] font-semibold text-neutral-500">
-                    <span className="text-neutral-300">{who}</span>, {line.at}
+                  <span
+                    className={`mb-1 px-1 text-[13px] font-semibold ${
+                      light ? "text-zinc-400" : "text-neutral-500"
+                    }`}
+                  >
+                    <span className={light ? "text-zinc-700" : "text-neutral-300"}>{who}</span>,{" "}
+                    {line.at}
                   </span>
                 )}
                 <div
-                  className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[14px] leading-relaxed text-neutral-100 sm:max-w-[75%] ${
+                  className={`max-w-[88%] rounded-2xl border px-3.5 py-2.5 text-[14px] leading-relaxed sm:max-w-[75%] ${
+                    light ? "text-zinc-800" : "text-neutral-100"
+                  } ${
                     mine
                       ? `rounded-tr-md ${mineTone}`
-                      : "rounded-tl-md border-white/10 bg-white/[0.04]"
+                      : light
+                        ? "rounded-tl-md border-zinc-200 bg-white"
+                        : "rounded-tl-md border-white/10 bg-white/[0.04]"
                   }`}
                 >
                   {line.body ? (
@@ -180,7 +211,9 @@ export function WarrantyThread({
                       href={line.imageUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className={`block overflow-hidden rounded-lg border border-white/10 ${line.body ? "mt-2" : ""}`}
+                      className={`block overflow-hidden rounded-lg border ${
+                        light ? "border-zinc-200" : "border-white/10"
+                      } ${line.body ? "mt-2" : ""}`}
                     >
                       <Image
                         src={line.imageUrl}
@@ -194,14 +227,22 @@ export function WarrantyThread({
                   ) : null}
                 </div>
                 {moved ? (
-                  <span className="mt-1 inline-flex items-center gap-1.5 px-1 text-[13px] text-neutral-500">
+                  <span
+                    className={`mt-1 inline-flex items-center gap-1.5 px-1 text-[13px] ${
+                      light ? "text-zinc-500" : "text-neutral-500"
+                    }`}
+                  >
                     Chuyển sang
                     <span
-                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[12px] font-semibold ${moved.tile}`}
+                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-px text-[12px] font-semibold ${
+                        light && line.status
+                          ? LIGHT_TILE[line.status]
+                          : moved.tile
+                      }`}
                     >
                       <span
                         aria-hidden
-                        className={`h-1 w-1 rounded-full ${moved.dot}`}
+                        className={`h-1 w-1 rounded-full ${light ? "bg-current" : moved.dot}`}
                       />
                       {moved.label}
                     </span>
@@ -216,7 +257,11 @@ export function WarrantyThread({
           about, not floating under the last bubble of a short thread in a
           tall pane (the owner, 19/10/2026: "chữ này bị lỗi nè"). */}
       {footer ? (
-        <div className="mt-auto shrink-0 pt-4 text-center text-[13px] text-neutral-500">
+        <div
+          className={`mt-auto shrink-0 pt-4 text-center text-[13px] ${
+            light ? "text-zinc-500" : "text-neutral-500"
+          }`}
+        >
           {footer}
         </div>
       ) : null}

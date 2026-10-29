@@ -65,7 +65,7 @@ export function AdminImagePicker({
 
   return (
     <div className="mt-2 flex flex-wrap items-center gap-3">
-      <div className="relative h-12 w-[68px] shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+      <div className="relative h-12 w-[68px] shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
         {value ? (
           // A plain img: the path is typed by hand or just uploaded, so it may
           // not be a host next/image is configured for — and this is a 68px
@@ -83,14 +83,14 @@ export function AdminImagePicker({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-[12px] font-bold text-neutral-700">
+          <span className="flex h-full w-full items-center justify-center text-[12px] font-bold text-zinc-300">
             Trống
           </span>
         )}
       </div>
 
       <label
-        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+        className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
           uploading ? "pointer-events-none opacity-60" : ""
         }`}
       >
@@ -110,10 +110,10 @@ export function AdminImagePicker({
         />
       </label>
 
-      <span className="text-[10px] text-neutral-600">{hint}</span>
+      <span className="text-[10px] text-zinc-400">{hint}</span>
 
       {small ? (
-        <p role="status" className="basis-full text-[11px] text-amber-400">
+        <p role="status" className="basis-full text-[11px] text-amber-600">
           Ảnh nhỏ ({small.width}×{small.height}px), sẽ bị mờ trên màn hình nét
         </p>
       ) : null}

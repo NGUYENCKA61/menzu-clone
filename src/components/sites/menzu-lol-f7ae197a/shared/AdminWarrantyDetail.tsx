@@ -93,11 +93,20 @@ export interface WarrantyTicketView {
 
 type Move = "IN_PROGRESS" | "RESOLVED" | "REFUND" | "TRANSFERRED";
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11]";
+/** The white desk's status tones; the shared lib keeps the labels. */
+const STATE_CHIP: Record<string, string> = {
+  OPEN: "border-amber-200 bg-amber-50 text-amber-700",
+  IN_PROGRESS: "border-sky-200 bg-sky-50 text-sky-700",
+  REFUNDING: "border-violet-200 bg-violet-50 text-violet-700",
+  RESOLVED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  REFUNDED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+};
+
+const CARD = "rounded-xl border border-zinc-200 bg-white";
 const LABEL =
-  "text-[12px] font-semibold text-neutral-500";
+  "text-[12px] font-semibold text-zinc-500";
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const BTN =
   "inline-flex h-9 items-center gap-2 rounded-lg px-3.5 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
 
@@ -268,34 +277,33 @@ export function AdminWarrantyDetail({
       <div className="flex flex-col gap-3">
         <Link
           href="/admin/warranty"
-          className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Tất cả yêu cầu
         </Link>
         <div className="flex flex-wrap items-center gap-2.5">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+              STATE_CHIP[ticket.status] ?? "border-zinc-200 bg-zinc-50 text-zinc-600"
+            }`}
           >
-            <span
-              aria-hidden
-              className={`h-1.5 w-1.5 rounded-full ${state.dot}`}
-            />
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
             {state.label}
           </span>
           {awaiting ? (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[12px] font-semibold text-white">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/5 px-2 py-0.5 text-[12px] font-semibold text-zinc-900">
               <MessageCircle
-                className="h-3 w-3 text-[var(--brand)]"
+                className="h-3 w-3 text-rose-600"
                 aria-hidden
               />
               Khách nhắn mới
             </span>
           ) : null}
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[12px] font-semibold text-zinc-700">
             <WarrantyIssueGlyph
               issue={ticket.issue}
-              className="h-3 w-3 shrink-0 text-neutral-400"
+              className="h-3 w-3 shrink-0 text-zinc-500"
             />
             {WARRANTY_ISSUE[ticket.issue].label}
           </span>
@@ -305,13 +313,13 @@ export function AdminWarrantyDetail({
               href={ticket.videoUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--brand)]/50 bg-[var(--brand)]/15 px-2 py-0.5 text-[12px] font-semibold text-white transition-colors hover:bg-[var(--brand)]/25"
+              className="inline-flex items-center gap-1.5 rounded-md border border-zinc-900 bg-zinc-900/5 px-2 py-0.5 text-[12px] font-semibold text-zinc-900 transition-colors hover:bg-zinc-700/25"
             >
               <Video className="h-3 w-3" aria-hidden />
               Xem video khách quay
             </a>
           ) : null}
-          <span className="text-[11px] font-semibold text-neutral-500">
+          <span className="text-[11px] font-semibold text-zinc-500">
             Báo lỗi {ticket.createdAt}
             {ticket.resolvedAt ? ` · xong ${ticket.resolvedAt}` : ""}
           </span>
@@ -321,14 +329,15 @@ export function AdminWarrantyDetail({
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
         {/* THE CONVERSATION */}
         <section className={`${CARD} min-w-0`}>
-          <div className="border-b border-white/[0.06] px-4 py-3 sm:px-5">
-            <h2 className="text-[15px] font-semibold text-white">
+          <div className="border-b border-zinc-100 px-4 py-3 sm:px-5">
+            <h2 className="text-[15px] font-semibold text-zinc-900">
               Trao đổi với khách
             </h2>
           </div>
           <div className="p-4 sm:p-5">
             <WarrantyThread
               viewer="shop"
+              light
               buyerName={ticket.username}
               buyerAvatar={ticket.avatarUrl}
               buyerInitial={ticket.username.slice(0, 1)}
@@ -338,7 +347,7 @@ export function AdminWarrantyDetail({
           </div>
 
           {open ? (
-            <div className="flex flex-col gap-3 border-t border-white/[0.06] p-4 sm:p-5">
+            <div className="flex flex-col gap-3 border-t border-zinc-100 p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className={LABEL}>
                   {refunding ? "Lý do hoàn tiền" : "Trả lời khách"}
@@ -352,7 +361,7 @@ export function AdminWarrantyDetail({
                     if (event.target.value) setNote(event.target.value);
                   }}
                   aria-label="Chèn câu trả lời mẫu"
-                  className="h-8 max-w-full rounded-lg border border-white/10 bg-neutral-950/60 px-2 text-[12px] text-neutral-300 outline-none transition-colors hover:border-white/20 sm:max-w-[320px]"
+                  className="h-8 max-w-full rounded-lg border border-zinc-200 bg-white px-2 text-[12px] text-zinc-700 outline-none transition-colors hover:border-zinc-300 sm:max-w-[320px]"
                 >
                   <option value="">Chèn câu trả lời mẫu…</option>
                   {replies.map((reply) => (
@@ -387,7 +396,7 @@ export function AdminWarrantyDetail({
               />
 
               {refunding ? (
-                <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-3.5">
                   <label className="flex flex-col gap-1.5">
                     <span className={LABEL}>
                       Số tiền hoàn (tối đa {money(ticket.orderTotal)})
@@ -408,8 +417,8 @@ export function AdminWarrantyDetail({
                         key={key}
                         className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 transition-colors ${
                           method === key
-                            ? "border-[var(--brand)]/50 bg-[var(--brand)]/10"
-                            : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                            ? "border-zinc-900 bg-zinc-50"
+                            : "border-zinc-200 bg-white hover:border-zinc-300"
                         }`}
                       >
                         <input
@@ -417,13 +426,13 @@ export function AdminWarrantyDetail({
                           name={`method-${ticket.id}`}
                           checked={method === key}
                           onChange={() => setMethod(key)}
-                          className="mt-0.5 accent-[var(--brand)]"
+                          className="mt-0.5 accent-zinc-900"
                         />
                         <span>
-                          <span className="block text-[12.5px] font-bold text-white">
+                          <span className="block text-[12.5px] font-bold text-zinc-900">
                             {REFUND_METHOD[key].label}
                           </span>
-                          <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">
+                          <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
                             {REFUND_METHOD[key].hint}
                           </span>
                         </span>
@@ -434,7 +443,7 @@ export function AdminWarrantyDetail({
               ) : null}
 
               {error ? (
-                <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[12px] font-semibold text-rose-300">
+                <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700">
                   {error}
                 </p>
               ) : null}
@@ -452,7 +461,7 @@ export function AdminWarrantyDetail({
                           busy !== null || note.trim().length === 0 || !amountOk
                         }
                         onClick={() => move("REFUND", { method, amount })}
-                        className={`${BTN} bg-[var(--brand-dark)] text-white hover:bg-[var(--brand)]`}
+                        className={`${BTN} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
                       >
                         <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                         {busy === "REFUND"
@@ -462,7 +471,7 @@ export function AdminWarrantyDetail({
                       <button
                         type="button"
                         onClick={() => setRefunding(false)}
-                        className={`${BTN} border border-white/10 text-neutral-300 hover:text-white`}
+                        className={`${BTN} border border-zinc-200 text-zinc-700 hover:text-zinc-900`}
                       >
                         Thôi
                       </button>
@@ -485,7 +494,7 @@ export function AdminWarrantyDetail({
                                 amount: String(refundDue),
                               })
                         }
-                        className={`${BTN} bg-emerald-600 text-white hover:bg-emerald-500`}
+                        className={`${BTN} bg-emerald-600 text-zinc-900 hover:bg-emerald-500`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                         {busy !== null
@@ -497,7 +506,7 @@ export function AdminWarrantyDetail({
                       <button
                         type="button"
                         onClick={() => setConfirming(null)}
-                        className={`${BTN} border border-white/10 text-neutral-300 hover:text-white`}
+                        className={`${BTN} border border-zinc-200 text-zinc-700 hover:text-zinc-900`}
                       >
                         Thôi
                       </button>
@@ -509,7 +518,7 @@ export function AdminWarrantyDetail({
                           type="button"
                           disabled={busy !== null}
                           onClick={() => move("IN_PROGRESS")}
-                          className={`${BTN} border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20`}
+                          className={`${BTN} border border-sky-500/40 bg-sky-50 text-sky-700 hover:bg-sky-500/20`}
                         >
                           <Wrench className="h-3.5 w-3.5" aria-hidden />
                           {busy === "IN_PROGRESS" ? "Đang lưu…" : "Đang xử lý"}
@@ -520,7 +529,7 @@ export function AdminWarrantyDetail({
                         disabled={busy !== null || note.trim().length === 0}
                         onClick={() => move("RESOLVED")}
                         title="Đóng yêu cầu, gửi kèm nội dung đang soạn cho khách"
-                        className={`${BTN} border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
+                        className={`${BTN} border border-emerald-500/40 bg-emerald-50 text-emerald-700 hover:bg-emerald-100`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                         {busy === "RESOLVED" ? "Đang lưu…" : "Đã xử lý"}
@@ -533,7 +542,7 @@ export function AdminWarrantyDetail({
                             setRefunding(true);
                             setMethod("WALLET");
                           }}
-                          className={`${BTN} border border-white/15 text-neutral-200 hover:bg-white/5 hover:text-white`}
+                          className={`${BTN} border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900`}
                         >
                           <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                           Hoàn tiền
@@ -554,7 +563,7 @@ export function AdminWarrantyDetail({
                             ? undefined
                             : "Khách chưa gửi số tài khoản"
                         }
-                        className={`${BTN} border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
+                        className={`${BTN} border border-emerald-500/40 bg-emerald-50 text-emerald-700 hover:bg-emerald-100`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                         Đã chuyển khoản
@@ -564,7 +573,7 @@ export function AdminWarrantyDetail({
                         disabled={busy !== null || note.trim().length === 0}
                         onClick={() => setConfirming("WALLET")}
                         title="Ghi lý do ở ô trên trước"
-                        className={`${BTN} border border-white/15 text-neutral-200 hover:bg-white/5 hover:text-white`}
+                        className={`${BTN} border border-zinc-200 text-zinc-800 hover:bg-zinc-100 hover:text-zinc-900`}
                       >
                         <Banknote className="h-3.5 w-3.5" aria-hidden />
                         Đổi sang hoàn qua tài khoản
@@ -577,14 +586,14 @@ export function AdminWarrantyDetail({
                     type="button"
                     disabled={busy !== null || note.trim().length === 0}
                     onClick={() => void sendMessage()}
-                    className={`${BTN} bg-[var(--brand-dark)] text-white hover:bg-[var(--brand)]`}
+                    className={`${BTN} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
                   >
                     <Send className="h-3.5 w-3.5" aria-hidden />
                     {busy === "MESSAGE" ? "Đang gửi…" : "Gửi tin"}
                   </button>
                 ) : null}
               </div>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-zinc-500">
                 {/* Email goes out only once SMTP is set in Cấu hình. */}
                 {mailOn
                   ? "Khách nhận thông báo (web + email) ngay khi bấm."
@@ -592,7 +601,7 @@ export function AdminWarrantyDetail({
               </p>
             </div>
           ) : (
-            <p className="border-t border-white/[0.06] px-4 py-4 text-[12px] text-neutral-500 sm:px-5">
+            <p className="border-t border-zinc-100 px-4 py-4 text-[12px] text-zinc-500 sm:px-5">
               Yêu cầu đã xong, khung trao đổi đã đóng.
             </p>
           )}
@@ -606,18 +615,18 @@ export function AdminWarrantyDetail({
               href={`/admin/users/${ticket.uid}`}
               className="group mt-3 flex items-center gap-3"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-[15px] font-semibold text-neutral-400">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-zinc-100 text-[15px] font-semibold text-zinc-500">
                 {ticket.username.slice(0, 1)}
               </span>
               <span className="min-w-0">
-                <span className="flex items-center gap-1.5 truncate text-sm font-bold text-white group-hover:text-[var(--brand)]">
+                <span className="flex items-center gap-1.5 truncate text-sm font-bold text-zinc-900 group-hover:text-rose-600">
                   {ticket.username}
                   <ExternalLink
-                    className="h-3 w-3 shrink-0 text-neutral-500"
+                    className="h-3 w-3 shrink-0 text-zinc-500"
                     aria-hidden
                   />
                 </span>
-                <span className="block truncate text-[11px] text-neutral-500">
+                <span className="block truncate text-[11px] text-zinc-500">
                   UID {ticket.uid}
                   {ticket.email ? ` · ${ticket.email}` : ""}
                 </span>
@@ -636,12 +645,12 @@ export function AdminWarrantyDetail({
                 {ticket.answers.map((answer, index) => (
                   <div key={index} className="flex flex-col gap-1">
                     <dt
-                      className="text-[11px] font-semibold text-neutral-500"
+                      className="text-[11px] font-semibold text-zinc-500"
                       title={answer.label}
                     >
                       {answer.short}
                     </dt>
-                    <dd className="text-[12px] font-bold text-neutral-200">
+                    <dd className="text-[12px] font-bold text-zinc-800">
                       {answer.value}
                     </dd>
                     {answer.imageUrls.length > 0 ? (
@@ -652,7 +661,7 @@ export function AdminWarrantyDetail({
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="block h-10 w-[60px] overflow-hidden rounded-md border border-white/10 bg-neutral-950"
+                            className="block h-10 w-[60px] overflow-hidden rounded-md border border-zinc-200 bg-zinc-50"
                           >
                             <Image
                               src={url}
@@ -674,7 +683,7 @@ export function AdminWarrantyDetail({
           <section className={`${CARD} p-4`}>
             <span className={LABEL}>Đơn hàng</span>
             <div className="mt-3 flex items-start gap-3">
-              <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.02]">
+              <div className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-white">
                 {ticket.productImage ? (
                   <Image
                     src={ticket.productImage}
@@ -686,50 +695,50 @@ export function AdminWarrantyDetail({
                 ) : null}
               </div>
               <div className="min-w-0">
-                <p className="line-clamp-2 text-[13px] font-bold leading-snug text-white">
+                <p className="line-clamp-2 text-[13px] font-bold leading-snug text-zinc-900">
                   {ticket.productName}
                 </p>
                 {ticket.packageLabel ? (
-                  <span className="mt-1.5 inline-flex rounded-md border border-white/15 bg-white/10 px-2 py-0.5 text-[12px] font-semibold text-neutral-300">
+                  <span className="mt-1.5 inline-flex rounded-md border border-zinc-200 bg-zinc-100 px-2 py-0.5 text-[12px] font-semibold text-zinc-700">
                     {ticket.packageLabel}
                   </span>
                 ) : null}
               </div>
             </div>
             <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-[12px]">
-              <dt className="text-neutral-500">Mã đơn</dt>
+              <dt className="text-zinc-500">Mã đơn</dt>
               <dd className="text-right">
                 <Link
                   href={`/admin/orders?q=${encodeURIComponent(ticket.orderCode)}`}
-                  className="font-mono font-semibold text-white hover:text-[var(--brand)]"
+                  className="font-mono font-semibold text-zinc-900 hover:text-rose-600"
                 >
                   {ticket.orderCode}
                 </Link>
               </dd>
-              <dt className="text-neutral-500">Tổng tiền</dt>
-              <dd className="text-right font-semibold tabular-nums text-white">
+              <dt className="text-zinc-500">Tổng tiền</dt>
+              <dd className="text-right font-semibold tabular-nums text-zinc-900">
                 {money(ticket.orderTotal)}
               </dd>
-              <dt className="text-neutral-500">Ngày mua</dt>
-              <dd className="text-right text-neutral-300">
+              <dt className="text-zinc-500">Ngày mua</dt>
+              <dd className="text-right text-zinc-700">
                 {ticket.purchasedAt}
               </dd>
               {ticket.isAccount ? (
                 <>
-                  <dt className="text-neutral-500">Nhận TK</dt>
-                  <dd className="text-right text-neutral-300">
+                  <dt className="text-zinc-500">Nhận TK</dt>
+                  <dd className="text-right text-zinc-700">
                     {ticket.loginTakenAt ?? "chưa nhận"}
                   </dd>
                 </>
               ) : null}
-              <dt className="text-neutral-500">Báo lỗi</dt>
-              <dd className="text-right text-neutral-300">
+              <dt className="text-zinc-500">Báo lỗi</dt>
+              <dd className="text-right text-zinc-700">
                 {ticket.reportedAfter}{" "}
                 <span
                   className={
                     ticket.reportedInWindow
-                      ? "text-emerald-400"
-                      : "text-neutral-500"
+                      ? "text-emerald-600"
+                      : "text-zinc-500"
                   }
                 >
                   (
@@ -739,8 +748,8 @@ export function AdminWarrantyDetail({
                   )
                 </span>
               </dd>
-              <dt className="text-neutral-500">Trạng thái đơn</dt>
-              <dd className="text-right text-neutral-300">
+              <dt className="text-zinc-500">Trạng thái đơn</dt>
+              <dd className="text-right text-zinc-700">
                 {ticket.orderStatusLabel}
               </dd>
             </dl>
@@ -752,11 +761,11 @@ export function AdminWarrantyDetail({
           (ticket.status === "REFUNDING" || ticket.status === "REFUNDED") ? (
             <section className={`${CARD} p-4`}>
               <span className={LABEL}>Hoàn tiền</span>
-              <p className="mt-3 flex items-center gap-2 text-sm font-bold text-white">
+              <p className="mt-3 flex items-center gap-2 text-sm font-bold text-zinc-900">
                 {ticket.refundMethod === "MANUAL" ? (
-                  <Landmark className="h-4 w-4 text-neutral-400" aria-hidden />
+                  <Landmark className="h-4 w-4 text-zinc-500" aria-hidden />
                 ) : (
-                  <Banknote className="h-4 w-4 text-neutral-400" aria-hidden />
+                  <Banknote className="h-4 w-4 text-zinc-500" aria-hidden />
                 )}
                 {ticket.status === "REFUNDED" ? "Đã hoàn" : "Hoàn"}{" "}
                 {money(ticket.refundAmount)}{" "}
@@ -770,35 +779,35 @@ export function AdminWarrantyDetail({
               {ticket.refundMethod === "MANUAL" ? (
                 ticket.bankAccount ? (
                   <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[12px]">
-                    <dt className="text-neutral-500">Ngân hàng</dt>
-                    <dd className="font-semibold text-white">
+                    <dt className="text-zinc-500">Ngân hàng</dt>
+                    <dd className="font-semibold text-zinc-900">
                       {ticket.bankName}
                     </dd>
-                    <dt className="text-neutral-500">Số tài khoản</dt>
-                    <dd className="flex flex-wrap items-center gap-2 font-mono font-semibold text-white">
+                    <dt className="text-zinc-500">Số tài khoản</dt>
+                    <dd className="flex flex-wrap items-center gap-2 font-mono font-semibold text-zinc-900">
                       {ticket.bankAccount}
                       {ticket.status === "REFUNDING" ? (
                         <button
                           type="button"
                           onClick={copyAccount}
-                          className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-sans text-[10px] font-bold text-neutral-300 hover:text-white"
+                          className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 px-2 py-0.5 font-sans text-[10px] font-bold text-zinc-700 hover:text-zinc-900"
                         >
                           <Copy className="h-3 w-3" aria-hidden />
                           {copied ? "Đã chép" : "Chép"}
                         </button>
                       ) : null}
                     </dd>
-                    <dt className="text-neutral-500">Chủ tài khoản</dt>
-                    <dd className="font-semibold text-white">
+                    <dt className="text-zinc-500">Chủ tài khoản</dt>
+                    <dd className="font-semibold text-zinc-900">
                       {ticket.accountHolder}
                     </dd>
-                    <dt className="text-neutral-500">Khách gửi lúc</dt>
-                    <dd className="text-neutral-400">
+                    <dt className="text-zinc-500">Khách gửi lúc</dt>
+                    <dd className="text-zinc-500">
                       {ticket.bankSubmittedAt}
                     </dd>
                   </dl>
                 ) : (
-                  <p className="mt-2 text-[12px] text-amber-300">
+                  <p className="mt-2 text-[12px] text-amber-700">
                     Đang chờ khách nhập số tài khoản.
                   </p>
                 )

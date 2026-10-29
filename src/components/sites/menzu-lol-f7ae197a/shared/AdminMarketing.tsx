@@ -49,18 +49,18 @@ function formatVnd(n: number): string {
 }
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3 py-2.5 text-sm text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const TAB_ON =
-  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/25 bg-white/[0.12] text-frost transition-colors";
+  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-zinc-300 bg-zinc-100 text-zinc-900 transition-colors";
 const TAB_OFF =
-  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "px-4 py-2 rounded-xl text-[14px] font-semibold border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 transition-colors";
 
 /** Bật = go, Tắt = warn: the button's color says what pressing it does. */
 const BTN_ON =
-  "h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-60 text-[12px] font-semibold text-emerald-400 transition-colors inline-flex items-center gap-1.5";
+  "h-8 px-3 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-60 text-[12px] font-semibold text-emerald-600 transition-colors inline-flex items-center gap-1.5";
 const BTN_OFF =
-  "h-8 px-3 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-60 text-[12px] font-semibold text-amber-400 transition-colors inline-flex items-center gap-1.5";
+  "h-8 px-3 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 disabled:opacity-60 text-[12px] font-semibold text-amber-600 transition-colors inline-flex items-center gap-1.5";
 
 function StatMini({
   label,
@@ -73,18 +73,18 @@ function StatMini({
   tint: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}>
           <Icon size={15} />
         </span>
       </div>
       <span
         className={`text-[26px] font-black leading-none tabular-nums ${
-          value === 0 ? "text-neutral-600" : "text-white"
+          value === 0 ? "text-zinc-400" : "text-zinc-900"
         }`}
       >
         {value}
@@ -203,25 +203,25 @@ export function AdminMarketing({
           label="Voucher đang bật"
           value={vouchers.filter((v) => v.active).length}
           icon={TicketPercent}
-          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          tint="border-emerald-200 bg-emerald-50 text-emerald-600"
         />
         <StatMini
           label="Tổng lượt dùng mã"
           value={vouchers.reduce((sum, v) => sum + v.usedCount, 0)}
           icon={TicketPercent}
-          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+          tint="border-violet-200 bg-violet-50 text-violet-600"
         />
         <StatMini
           label="Sale đang chạy"
           value={sales.filter((s) => s.running).length}
           icon={Zap}
-          tint="border-rose-500/25 bg-rose-500/10 text-rose-400"
+          tint="border-rose-500/25 bg-rose-50 text-rose-600"
         />
         <StatMini
           label="Sale chờ tới giờ"
           value={sales.filter((s) => s.active && !s.running).length}
           icon={CalendarClock}
-          tint="border-amber-500/25 bg-amber-500/10 text-amber-400"
+          tint="border-amber-200 bg-amber-50 text-amber-600"
         />
       </div>
 
@@ -263,10 +263,10 @@ export function AdminMarketing({
                 setScope("ALL"); setScopeCategory(""); setScopeProducts([]); setProductQuery("");
               }
             }}
-            className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+            className="rounded-xl border border-zinc-200 bg-white p-5 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4"
           >
-            <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
-              <TicketPercent size={13} className="text-neutral-400" />
+            <div className="sm:col-span-3 lg:col-span-4 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
+              <TicketPercent size={13} className="text-zinc-500" />
               Tạo voucher
             </div>
             <div>
@@ -305,9 +305,9 @@ export function AdminMarketing({
                 onChange={(e) => setScope(e.target.value as "ALL" | "CATEGORY" | "PRODUCT")}
                 className={FIELD}
               >
-                <option value="ALL" className="bg-neutral-900">Mọi sản phẩm</option>
-                <option value="CATEGORY" className="bg-neutral-900">Một danh mục</option>
-                <option value="PRODUCT" className="bg-neutral-900">Những sản phẩm chỉ định</option>
+                <option value="ALL" className="bg-zinc-100">Mọi sản phẩm</option>
+                <option value="CATEGORY" className="bg-zinc-100">Một danh mục</option>
+                <option value="PRODUCT" className="bg-zinc-100">Những sản phẩm chỉ định</option>
               </select>
             </div>
             {scope === "CATEGORY" ? (
@@ -320,9 +320,9 @@ export function AdminMarketing({
                   onChange={(e) => setScopeCategory(e.target.value)}
                   className={FIELD}
                 >
-                  <option value="" className="bg-neutral-900">Chọn danh mục</option>
+                  <option value="" className="bg-zinc-100">Chọn danh mục</option>
                   {categories.map((c) => (
-                    <option key={c.slug} value={c.slug} className="bg-neutral-900">
+                    <option key={c.slug} value={c.slug} className="bg-zinc-100">
                       {c.name}
                     </option>
                   ))}
@@ -332,7 +332,7 @@ export function AdminMarketing({
               <div className="sm:col-span-2">
                 <div className="flex items-baseline justify-between gap-3">
                   <label htmlFor="v-product-search" className={LABEL}>Sản phẩm chỉ định</label>
-                  <span className="text-[12px] font-semibold text-neutral-500">
+                  <span className="text-[12px] font-semibold text-zinc-500">
                     Đã chọn {scopeProducts.length}
                   </span>
                 </div>
@@ -346,17 +346,17 @@ export function AdminMarketing({
                 <div
                   role="group"
                   aria-label="Chọn sản phẩm áp dụng mã"
-                  className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] divide-y divide-white/[0.05]"
+                  className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-zinc-200 bg-white divide-y divide-zinc-100"
                 >
                   {pickable.length === 0 ? (
-                    <p className="px-3 py-3 text-xs text-neutral-500">Không có sản phẩm nào khớp.</p>
+                    <p className="px-3 py-3 text-xs text-zinc-500">Không có sản phẩm nào khớp.</p>
                   ) : (
                     pickable.map((p) => {
                       const checked = scopeProducts.includes(p.code);
                       return (
                         <label
                           key={p.code}
-                          className={`flex cursor-pointer items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-white/[0.04] ${checked ? "bg-white/[0.05]" : ""}`}
+                          className={`flex cursor-pointer items-center gap-3 px-3 py-2 text-xs transition-colors hover:bg-zinc-50 ${checked ? "bg-zinc-100" : ""}`}
                         >
                           <input
                             type="checkbox"
@@ -366,11 +366,11 @@ export function AdminMarketing({
                                 checked ? prev.filter((c) => c !== p.code) : [...prev, p.code],
                               )
                             }
-                            className="h-3.5 w-3.5 shrink-0 accent-[var(--brand)]"
+                            className="h-3.5 w-3.5 shrink-0 accent-zinc-900"
                           />
-                          <span className="min-w-0 flex-1 truncate font-bold text-white">{p.name}</span>
-                          <span className="shrink-0 font-mono text-[10px] font-black text-neutral-400">{p.code}</span>
-                          <span className="hidden shrink-0 text-[10px] text-neutral-500 sm:inline">{p.category}</span>
+                          <span className="min-w-0 flex-1 truncate font-bold text-zinc-900">{p.name}</span>
+                          <span className="shrink-0 font-mono text-[10px] font-black text-zinc-500">{p.code}</span>
+                          <span className="hidden shrink-0 text-[10px] text-zinc-500 sm:inline">{p.category}</span>
                         </label>
                       );
                     })
@@ -379,7 +379,7 @@ export function AdminMarketing({
               </div>
             ) : null}
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Tạo mã
               </button>
@@ -389,47 +389,47 @@ export function AdminMarketing({
           {vouchers.length === 0 ? (
             <AdminEmpty title="Chưa có voucher nào" body="Tạo mã đầu tiên bằng biểu mẫu bên trên." />
           ) : (
-            <div className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+            <div className="w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white">
               <table className="w-full min-w-[1000px] text-left">
                 <thead>
-                  <tr className="border-b border-white/10">
+                  <tr className="border-b border-zinc-200">
                     {["Mã", "Giảm", "Áp dụng", "Đơn tối thiểu", "Đã dùng", "Hiệu lực", "Trạng thái", ""].map((c) => (
-                      <th key={c} scope="col" className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap">{c}</th>
+                      <th key={c} scope="col" className="px-5 py-3.5 text-[12px] font-semibold text-zinc-500 whitespace-nowrap">{c}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {vouchers.map((v) => (
-                    <tr key={v.code} className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.015]">
-                      <td className="px-5 py-3 font-mono text-xs font-black text-white">{v.code}</td>
+                    <tr key={v.code} className="border-b border-zinc-100 last:border-0 transition-colors hover:bg-zinc-50/70">
+                      <td className="px-5 py-3 font-mono text-xs font-black text-zinc-900">{v.code}</td>
                       <td className="px-5 py-3 whitespace-nowrap">
                         {v.percentOff || v.amountOff ? (
-                          <span className="inline-flex rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-2 py-1 text-[11px] font-black tabular-nums text-emerald-400">
+                          <span className="inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-black tabular-nums text-emerald-600">
                             −{v.percentOff ? `${v.percentOff}%` : `${formatVnd(v.amountOff ?? 0)}đ`}
                           </span>
                         ) : (
-                          <span className="text-[11px] text-neutral-700">-</span>
+                          <span className="text-[11px] text-zinc-300">-</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-xs text-neutral-300 whitespace-nowrap">
+                      <td className="px-5 py-3 text-xs text-zinc-700 whitespace-nowrap">
                         {v.scopeLabel}
                       </td>
-                      <td className="px-5 py-3 text-xs text-neutral-400 tabular-nums">
+                      <td className="px-5 py-3 text-xs text-zinc-500 tabular-nums">
                         {v.minOrder ? `${formatVnd(v.minOrder)}đ` : "-"}
                       </td>
                       <td className="px-5 py-3 text-xs tabular-nums whitespace-nowrap">
-                        <span className={v.usedCount > 0 ? "font-bold text-white" : "text-neutral-600"}>
+                        <span className={v.usedCount > 0 ? "font-bold text-zinc-900" : "text-zinc-400"}>
                           {v.usedCount}
                         </span>
-                        <span className="text-neutral-600">
+                        <span className="text-zinc-400">
                           {v.maxUses ? ` / ${v.maxUses}` : " / ∞"}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-[11px] text-neutral-500 tabular-nums">
+                      <td className="px-5 py-3 text-[11px] text-zinc-500 tabular-nums">
                         {v.startsAt ?? "ngay"} → {v.expiresAt ?? "không hạn"}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`inline-flex px-2 py-1 rounded-lg border text-[12px] font-semibold ${v.active ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
+                        <span className={`inline-flex px-2 py-1 rounded-lg border text-[12px] font-semibold ${v.active ? "border-emerald-200 bg-emerald-50 text-emerald-600" : "border-zinc-200 bg-zinc-50 text-zinc-500"}`}>
                           {v.active ? "Bật" : "Tắt"}
                         </span>
                       </td>
@@ -471,10 +471,10 @@ export function AdminMarketing({
               });
               if (ok) { setProductCode(""); setSalePackage(""); setSalePrice(""); setSStart(""); setSEnd(""); }
             }}
-            className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
+            className="rounded-xl border border-zinc-200 bg-white p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4"
           >
-            <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-neutral-500">
-              <Zap size={13} className="text-neutral-400" />
+            <div className="sm:col-span-2 lg:col-span-6 -mb-1 flex items-center gap-2 text-[12px] font-semibold text-zinc-500">
+              <Zap size={13} className="text-zinc-500" />
               Lên lịch flash sale
             </div>
             <div>
@@ -540,7 +540,7 @@ export function AdminMarketing({
               <input id="s-end" type="datetime-local" required value={sEnd} onChange={(e) => setSEnd(e.target.value)} className={FIELD} />
             </div>
             <div className="flex items-end">
-              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center justify-center gap-1.5">
+              <button type="submit" disabled={pending} className="w-full h-[42px] rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center justify-center gap-1.5">
                 <Plus size={14} />
                 Lên lịch
               </button>
@@ -559,28 +559,28 @@ export function AdminMarketing({
                 return (
                 <div
                   key={s.id}
-                  className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-white/10 bg-white/[0.02] px-5 py-3.5 transition-colors hover:bg-white/[0.015]"
+                  className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-zinc-200 bg-white px-5 py-3.5 transition-colors hover:bg-zinc-50/70"
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-500/10 text-rose-400">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-500/25 bg-rose-50 text-rose-600">
                     <Zap size={14} />
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="font-mono text-xs font-black text-white">{s.productCode}</span>
-                    <span className="text-[11px] text-neutral-500">{s.packageLabel ? `Gói ${s.packageLabel}` : s.productRank}</span>
+                    <span className="font-mono text-xs font-black text-zinc-900">{s.productCode}</span>
+                    <span className="text-[11px] text-zinc-500">{s.packageLabel ? `Gói ${s.packageLabel}` : s.productRank}</span>
                   </span>
                   <span className="text-xs tabular-nums">
-                    <span className="line-through text-neutral-600">{formatVnd(s.price)}đ</span>{" "}
-                    <span className="text-emerald-400 font-bold">{formatVnd(s.salePrice)}đ</span>
+                    <span className="line-through text-zinc-400">{formatVnd(s.price)}đ</span>{" "}
+                    <span className="text-emerald-600 font-bold">{formatVnd(s.salePrice)}đ</span>
                   </span>
                   {cut > 0 ? (
-                    <span className="inline-flex rounded-lg border border-rose-500/25 bg-rose-500/10 px-2 py-1 text-[11px] font-black tabular-nums text-rose-400">
+                    <span className="inline-flex rounded-lg border border-rose-500/25 bg-rose-50 px-2 py-1 text-[11px] font-black tabular-nums text-rose-600">
                       −{cut}%
                     </span>
                   ) : null}
-                  <span className="text-[11px] text-neutral-500 tabular-nums">
+                  <span className="text-[11px] text-zinc-500 tabular-nums">
                     {s.startsAt} → {s.endsAt}
                   </span>
-                  <span className={`text-[12px] font-semibold px-2 py-1 rounded-lg border ${s.running ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : s.active ? "border-amber-500/30 bg-amber-500/10 text-amber-400" : "border-white/10 bg-white/5 text-neutral-500"}`}>
+                  <span className={`text-[12px] font-semibold px-2 py-1 rounded-lg border ${s.running ? "border-emerald-200 bg-emerald-50 text-emerald-600" : s.active ? "border-amber-200 bg-amber-50 text-amber-600" : "border-zinc-200 bg-zinc-50 text-zinc-500"}`}>
                     {s.running ? "Đang chạy" : s.active ? "Chờ tới giờ" : "Tắt"}
                   </span>
                   <div className="flex items-center gap-2 ml-auto">
@@ -593,7 +593,7 @@ export function AdminMarketing({
                       <Power size={12} />
                       {s.active ? "Tắt" : "Bật"}
                     </button>
-                    <button type="button" disabled={pending} onClick={() => setRemoving(s)} aria-label={`Xoá đợt sale ${s.productCode}`} className="h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-60 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center">
+                    <button type="button" disabled={pending} onClick={() => setRemoving(s)} aria-label={`Xoá đợt sale ${s.productCode}`} className="h-8 w-8 rounded-lg border border-zinc-200 bg-white hover:border-rose-200 hover:bg-rose-50 disabled:opacity-60 text-zinc-500 hover:text-rose-600 transition-colors inline-flex items-center justify-center">
                       <Trash2 size={13} />
                     </button>
                   </div>

@@ -13,9 +13,9 @@ import {
 } from "@/lib/refundRequests";
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-sm text-white outline-none transition-colors placeholder-neutral-600 focus:border-[var(--brand)]/60";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900";
 const LABEL =
-  "mb-2 block text-[12px] font-semibold text-neutral-500";
+  "mb-2 block text-[12px] font-semibold text-zinc-500";
 const ACTION =
   "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -90,18 +90,18 @@ export function AdminRefundDecide({
               aria-pressed={method === key}
               className={`rounded-xl border p-3 text-left transition-colors ${
                 method === key
-                  ? "border-[var(--brand)]/50 bg-[var(--brand)]/10"
-                  : "border-white/10 bg-white/[0.02] hover:border-white/25"
+                  ? "border-zinc-900 bg-zinc-50"
+                  : "border-zinc-200 bg-white hover:border-zinc-300"
               }`}
             >
               <span
                 className={`block text-[14px] font-semibold ${
-                  method === key ? "text-[var(--brand)]" : "text-neutral-300"
+                  method === key ? "text-rose-600" : "text-zinc-700"
                 }`}
               >
                 {REFUND_METHOD[key].label}
               </span>
-              <span className="mt-1 block text-[11px] leading-relaxed text-neutral-500">
+              <span className="mt-1 block text-[11px] leading-relaxed text-zinc-500">
                 {REFUND_METHOD[key].hint}
               </span>
             </button>
@@ -124,14 +124,14 @@ export function AdminRefundDecide({
           placeholder={String(suggested ?? orderTotal)}
           className={`${FIELD} max-w-xs`}
         />
-        <p className="mt-1.5 text-[11px] text-neutral-500">
+        <p className="mt-1.5 text-[11px] text-zinc-500">
           {typeof refundRate === "number" && suggested !== null ? (
             <>
-              Sản phẩm hứa hoàn <b className="text-neutral-300">{refundRate}%</b> ={" "}
+              Sản phẩm hứa hoàn <b className="text-zinc-700">{refundRate}%</b> ={" "}
               <button
                 type="button"
                 onClick={() => setAmount(String(suggested))}
-                className="font-black text-[var(--brand)] underline-offset-2 hover:underline"
+                className="font-black text-rose-600 underline-offset-2 hover:underline"
               >
                 {suggested.toLocaleString("vi-VN")}đ
               </button>
@@ -161,7 +161,7 @@ export function AdminRefundDecide({
       </div>
 
       {error ? (
-        <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-[12px] font-semibold text-rose-300">
+        <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700">
           {error}
         </p>
       ) : null}
@@ -184,7 +184,7 @@ export function AdminRefundDecide({
           type="button"
           disabled={busy}
           onClick={() => (method === "WALLET" ? setConfirming(true) : decide("APPROVED"))}
-          className={`${ACTION} bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25`}
+          className={`${ACTION} bg-emerald-50 text-emerald-600 hover:bg-emerald-500/25`}
         >
           <Check size={13} />
           {method === "WALLET" ? "Chấp nhận & cộng ví" : "Chấp nhận (chuyển tay)"}
@@ -193,17 +193,17 @@ export function AdminRefundDecide({
           type="button"
           disabled={busy}
           onClick={() => decide("REJECTED")}
-          className={`${ACTION} bg-rose-500/15 text-rose-400 hover:bg-rose-500/25`}
+          className={`${ACTION} bg-rose-50 text-rose-600 hover:bg-rose-500/25`}
         >
           <X size={13} />
           Từ chối
         </button>
         {method === "WALLET" ? (
-          <span className="text-[11px] text-neutral-500">
+          <span className="text-[11px] text-zinc-500">
             Tiền vào ví khách ngay khi bấm, kèm một dòng trong lịch sử giao dịch.
           </span>
         ) : (
-          <span className="text-[11px] text-neutral-500">
+          <span className="text-[11px] text-zinc-500">
             Chỉ ghi nhận quyết định, tiền vẫn phải chuyển ngoài web.
           </span>
         )}

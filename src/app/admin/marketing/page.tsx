@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AdminMarketing } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminMarketing";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { listCategories, listFlashSales, listProductPicks, listVouchers } from "@/lib/queries";
 import { dayStamp } from "@/lib/dayGroups";
@@ -28,7 +28,7 @@ export default async function AdminMarketingPage() {
   ]);
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Marketing"
       subtitle="Voucher và flash sale"
       username={admin.username}
@@ -54,6 +54,6 @@ export default async function AdminMarketingPage() {
           packageLabel: s.packageLabel,
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

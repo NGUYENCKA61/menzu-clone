@@ -36,10 +36,10 @@ export interface AdminSoftwareRow {
 // only one on a lighter, rounder, larger variant, so moving between it and a
 // detail screen changed the shape of every box on the way.
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const MINI =
-  "rounded-lg border border-white/10 bg-neutral-950 px-2 py-1 text-[11px] font-bold text-neutral-200";
+  "rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-[11px] font-bold text-zinc-800";
 
 const SOFTWARE_STATUS: Record<string, string> = {
   UNDETECTED: "Chưa phát hiện",
@@ -183,9 +183,9 @@ export function AdminSoftware({
     <div className="flex flex-col gap-6">
       <form
         onSubmit={handleCreate}
-        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-4"
+        className="rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col gap-4"
       >
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           Thêm phần mềm
         </span>
 
@@ -201,7 +201,7 @@ export function AdminSoftware({
               className={FIELD}
             >
               {categories.map((c) => (
-                <option key={c.slug} value={c.slug} className="bg-neutral-900">
+                <option key={c.slug} value={c.slug} className="bg-zinc-100">
                   {c.name}
                 </option>
               ))}
@@ -232,7 +232,7 @@ export function AdminSoftware({
 
         <div>
           <label className={LABEL}>
-            Ảnh sản phẩm <span className="text-neutral-600">(không bắt buộc)</span>
+            Ảnh sản phẩm <span className="text-zinc-400">(không bắt buộc)</span>
           </label>
           <input
             value={newImage}
@@ -256,8 +256,8 @@ export function AdminSoftware({
             role="alert"
             className={
               msg.tone === "ok"
-                ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-                : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+                ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
+                : "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[12px] font-semibold text-rose-600"
             }
           >
             {msg.text}
@@ -267,7 +267,7 @@ export function AdminSoftware({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang xử lý…" : "Thêm phần mềm"}
         </button>
@@ -284,11 +284,11 @@ export function AdminSoftware({
       ) : null}
 
       {software.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center text-sm text-neutral-500">
+        <p className="rounded-2xl border border-dashed border-zinc-200 bg-white px-5 py-10 text-center text-sm text-zinc-500">
           Chưa có phần mềm nào.
         </p>
       ) : shown.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-5 py-10 text-center text-sm text-neutral-500">
+        <p className="rounded-2xl border border-dashed border-zinc-200 bg-white px-5 py-10 text-center text-sm text-zinc-500">
           Không có phần mềm nào khớp &ldquo;{query.trim()}&rdquo;.
         </p>
       ) : null}
@@ -300,18 +300,18 @@ export function AdminSoftware({
       {shown.map((s) => (
         <div
           key={s.code}
-          className="rounded-2xl border border-white/10 bg-white/[0.02] flex flex-wrap items-center gap-3 px-5 py-4"
+          className="rounded-2xl border border-zinc-200 bg-white flex flex-wrap items-center gap-3 px-5 py-4"
         >
           {/* The cover, at the ratio the storefront card crops to, so what the
               shop sees here is what the customer sees there. Same landscape
               tile the category list wears; a plain img because the value is
               whatever path the shop set. */}
-          <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-neutral-950">
+          <span className="relative h-10 w-16 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
             {s.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={s.imageUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="grid h-full w-full place-items-center text-neutral-600">
+              <span className="grid h-full w-full place-items-center text-zinc-400">
                 <ImageIcon size={14} />
               </span>
             )}
@@ -322,15 +322,15 @@ export function AdminSoftware({
               href={`/admin/products/${encodeURIComponent(s.code)}`}
               className="group inline-flex items-center gap-1.5"
             >
-              <p className="text-sm font-black text-white truncate transition-colors group-hover:text-rose-400">
+              <p className="text-sm font-black text-zinc-900 truncate transition-colors group-hover:text-rose-600">
                 {s.name}
               </p>
               <Eye
                 size={13}
-                className="shrink-0 text-neutral-600 transition-colors group-hover:text-rose-400"
+                className="shrink-0 text-zinc-400 transition-colors group-hover:text-rose-600"
               />
             </Link>
-            <p className="text-[11px] text-neutral-500 mt-0.5">
+            <p className="text-[11px] text-zinc-500 mt-0.5">
               {s.categoryName}
               {s.packages.length > 0
                 ? ` · ${s.packages.length} gói từ ${formatVnd(
@@ -353,7 +353,7 @@ export function AdminSoftware({
             className={MINI}
           >
             {Object.entries(SOFTWARE_STATUS).map(([value, label]) => (
-              <option key={value} value={value} className="bg-neutral-900">
+              <option key={value} value={value} className="bg-zinc-100">
                 {label}
               </option>
             ))}
@@ -372,7 +372,7 @@ export function AdminSoftware({
             className={MINI}
           >
             {Object.entries(STOCK_STATUS).map(([value, label]) => (
-              <option key={value} value={value} className="bg-neutral-900">
+              <option key={value} value={value} className="bg-zinc-100">
                 {label}
               </option>
             ))}
@@ -380,7 +380,7 @@ export function AdminSoftware({
 
           <Link
             href={`/admin/products/${encodeURIComponent(s.code)}`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+            className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors inline-flex items-center gap-1.5"
           >
             Sửa
           </Link>
@@ -388,7 +388,7 @@ export function AdminSoftware({
           {/* The tier shelf as its own page — tiers and keys, nothing else. */}
           <Link
             href={`/admin/products/${encodeURIComponent(s.code)}/packages`}
-            className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center gap-1.5"
+            className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors inline-flex items-center gap-1.5"
           >
             Quản lý gói
           </Link>
@@ -399,7 +399,7 @@ export function AdminSoftware({
             title="Xoá phần mềm"
             aria-label={`Xoá ${s.name}`}
             onClick={() => setRemoving(s)}
-            className="p-2 rounded-lg text-neutral-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-30 transition-colors"
+            className="p-2 rounded-lg text-zinc-500 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-30 transition-colors"
           >
             <Trash2 size={14} />
           </button>

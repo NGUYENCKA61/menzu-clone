@@ -33,13 +33,13 @@ export interface AdminGroupRow {
 }
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
+const LABEL = "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ICON_BUTTON =
-  "h-7 w-7 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.03] text-neutral-400 hover:text-white transition-colors inline-flex items-center justify-center";
+  "h-7 w-7 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-white text-zinc-500 hover:text-zinc-900 transition-colors inline-flex items-center justify-center";
 /** The trash cans: quiet until hovered, then unmistakably red. */
 const DANGER_BUTTON =
-  "h-7 w-7 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 text-neutral-500 hover:text-red-400 transition-colors inline-flex items-center justify-center";
+  "h-7 w-7 rounded-lg border border-zinc-200 bg-white hover:border-rose-200 hover:bg-rose-50 disabled:opacity-30 text-zinc-500 hover:text-rose-600 transition-colors inline-flex items-center justify-center";
 
 function StatCard({
   label,
@@ -55,23 +55,23 @@ function StatCard({
 }) {
   const idle = value === "0";
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}>
           <Icon size={15} />
         </span>
       </div>
       <span
         className={`text-[26px] font-black leading-none tabular-nums ${
-          idle ? "text-neutral-600" : "text-white"
+          idle ? "text-zinc-400" : "text-zinc-900"
         }`}
       >
         {value}
       </span>
-      <span className="text-[11px] text-neutral-500">{sub}</span>
+      <span className="text-[11px] text-zinc-500">{sub}</span>
     </div>
   );
 }
@@ -161,7 +161,7 @@ export function AdminGroups({
           value={String(groups.length)}
           sub="hàng hiển thị trên trang chủ"
           icon={LayoutGrid}
-          tint="border-indigo-500/25 bg-indigo-500/10 text-indigo-400"
+          tint="border-indigo-200 bg-indigo-50 text-indigo-600"
         />
         <StatCard
           label="Đang hiện"
@@ -174,14 +174,14 @@ export function AdminGroups({
                 : `${groups.length - activeCount} nhóm đang ẩn`
           }
           icon={Eye}
-          tint="border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+          tint="border-emerald-200 bg-emerald-50 text-emerald-600"
         />
         <StatCard
           label="Đã xếp nhóm"
           value={String(usedCount)}
           sub={`trên tổng ${categories.length} danh mục`}
           icon={Tags}
-          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+          tint="border-violet-200 bg-violet-50 text-violet-600"
         />
         <StatCard
           label="Chưa vào nhóm"
@@ -190,8 +190,8 @@ export function AdminGroups({
           icon={TriangleAlert}
           tint={
             orphanCount > 0
-              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
-              : "border-white/10 bg-white/5 text-neutral-500"
+              ? "border-amber-200 bg-amber-50 text-amber-600"
+              : "border-zinc-200 bg-zinc-50 text-zinc-500"
           }
         />
       </div>
@@ -200,7 +200,7 @@ export function AdminGroups({
         <div className="relative min-w-[240px] flex-1">
           <Plus
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
           />
           <input
             value={newName}
@@ -212,7 +212,7 @@ export function AdminGroups({
                 })();
               }
             }}
-            className="h-10 w-full rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3.5 text-[13px] text-white outline-none transition-colors placeholder-neutral-600 focus:border-rose-500/50"
+            className="h-10 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3.5 text-[13px] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900"
             placeholder="Tên nhóm mới, ví dụ: Hot trending tháng này"
           />
         </div>
@@ -224,7 +224,7 @@ export function AdminGroups({
               setNewName("");
             }
           }}
-          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-[var(--menzu-accent-dark)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-zinc-900 px-4 text-[13px] font-semibold text-zinc-900 transition-colors hover:bg-zinc-700 disabled:opacity-50"
         >
           <Plus size={14} />
           Thêm nhóm
@@ -234,7 +234,7 @@ export function AdminGroups({
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {groups.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-[12px] text-neutral-500">
+        <p className="rounded-2xl border border-dashed border-zinc-200 px-4 py-8 text-center text-[12px] text-zinc-500">
           Chưa có nhóm nào. Trang chủ sẽ không hiện hàng danh mục nào cả.
         </p>
       ) : (
@@ -242,11 +242,11 @@ export function AdminGroups({
           {groups.map((group, index) => (
         <section
           key={group.id}
-          className={`overflow-hidden rounded-xl border border-white/[0.08] bg-[#0e0e11] transition-opacity ${group.isActive ? "" : "opacity-70"}`}
+          className={`overflow-hidden rounded-xl border border-zinc-200 bg-white transition-opacity ${group.isActive ? "" : "opacity-70"}`}
         >
-          <div className="flex flex-wrap items-center gap-3 border-b border-white/[0.07] bg-white/[0.02] px-5 py-4">
+          <div className="flex flex-wrap items-center gap-3 border-b border-zinc-200 bg-white px-5 py-4">
             {/* The row's face: which slot on the home page this group holds. */}
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-indigo-500/25 bg-indigo-500/10 text-indigo-400">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-600">
               <LayoutGrid size={15} />
             </span>
             <div className="min-w-[200px] flex-1">
@@ -255,8 +255,8 @@ export function AdminGroups({
                 <span
                   className={`ml-2 inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[12px] font-semibold ${
                     group.isActive
-                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      : "border border-white/10 bg-white/5 text-neutral-500"
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-600"
+                      : "border border-zinc-200 bg-zinc-50 text-zinc-500"
                   }`}
                 >
                   {group.isActive ? <Eye size={9} /> : <EyeOff size={9} />}
@@ -305,22 +305,22 @@ export function AdminGroups({
           </div>
 
           <div className="flex flex-col gap-4 p-5">
-          <label className="flex cursor-pointer flex-wrap items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] px-3.5 py-2.5">
+          <label className="flex cursor-pointer flex-wrap items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5">
             <input
               type="checkbox"
               checked={group.isActive}
               onChange={(event) => send("PUT", { id: group.id, isActive: event.target.checked })}
-              className="h-4 w-4 shrink-0 accent-[var(--brand)]"
+              className="h-4 w-4 shrink-0 accent-zinc-900"
             />
-            <span className="text-xs font-bold text-white">Hiện trên trang chủ</span>
-            <span className="text-[11px] text-neutral-500">, tắt vẫn giữ nguyên nhóm và các danh mục đã chọn
+            <span className="text-xs font-bold text-zinc-900">Hiện trên trang chủ</span>
+            <span className="text-[11px] text-zinc-500">, tắt vẫn giữ nguyên nhóm và các danh mục đã chọn
             </span>
           </label>
 
           <div>
             <span className={LABEL}>Danh mục trong nhóm ({group.categoryIds.length})</span>
             {group.categoryIds.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-white/10 px-3 py-3 text-[11px] text-neutral-500">
+              <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500">
                 Chưa chọn danh mục nào, nhóm này sẽ không hiện trên trang chủ.
               </p>
             ) : (
@@ -330,15 +330,15 @@ export function AdminGroups({
                   return (
                     <div
                       key={categoryId}
-                      className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-neutral-950/50 px-3 py-2 transition-colors hover:border-white/[0.12]"
+                      className="flex items-center gap-2.5 rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2 transition-colors hover:border-zinc-200"
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-white/[0.07] bg-white/[0.03] text-[10px] font-black tabular-nums text-neutral-500">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-white text-[10px] font-black tabular-nums text-zinc-500">
                         {position + 1}
                       </span>
-                      <span className="flex-1 truncate text-xs font-bold text-white">
+                      <span className="flex-1 truncate text-xs font-bold text-zinc-900">
                         {category?.name ?? categoryId}
                       </span>
-                      <span className="shrink-0 rounded border border-white/[0.07] bg-white/[0.04] px-1.5 py-0.5 text-[10px] tabular-nums text-neutral-400">
+                      <span className="shrink-0 rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[10px] tabular-nums text-zinc-500">
                         {category?.productCount ?? 0} sp
                       </span>
                       <button
@@ -376,7 +376,7 @@ export function AdminGroups({
 
             {categories.some((category) => !group.categoryIds.includes(category.id)) ? (
               <div className="mt-3">
-                <span className="mb-1.5 block text-[12px] font-semibold text-neutral-600">
+                <span className="mb-1.5 block text-[12px] font-semibold text-zinc-400">
                   Thêm vào nhóm
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -388,7 +388,7 @@ export function AdminGroups({
                         type="button"
                         disabled={busy}
                         onClick={() => toggleCategory(group, category.id)}
-                        className="rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2.5 py-1.5 text-[11px] font-semibold text-neutral-400 transition-colors hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-400 disabled:opacity-50"
+                        className="rounded-lg border border-dashed border-zinc-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-zinc-500 transition-colors hover:border-emerald-500/40 hover:bg-emerald-50 hover:text-emerald-600 disabled:opacity-50"
                       >
                         + {category.name}
                       </button>

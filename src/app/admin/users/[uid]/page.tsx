@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminUserDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminUserDetail";
 import { getAdmin } from "@/lib/admin";
 import { listUsers } from "@/lib/queries";
@@ -53,14 +53,14 @@ export default async function AdminUserDetailPage({
   if (!user) notFound();
 
   return (
-    <AdminShell
+    <AdminChrome
       title={user.username}
       subtitle="Hồ sơ khách hàng và thao tác quản trị"
       username={admin.username}
       aside={
         <Link
           href="/admin/users"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           Danh sách người dùng
@@ -91,6 +91,6 @@ export default async function AdminUserDetailPage({
           createdAt: formatDate(user.createdAt) ?? "",
         }}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

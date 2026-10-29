@@ -30,17 +30,17 @@ const RANK: Record<VerificationStatus, number> = {
 };
 
 const CHIP: Record<VerificationStatus, string> = {
-  PENDING: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-  APPROVED: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  REJECTED: "border-red-500/40 bg-red-500/10 text-red-300",
+  PENDING: "border-amber-300 bg-amber-50 text-amber-700",
+  APPROVED: "border-emerald-500/40 bg-emerald-50 text-emerald-700",
+  REJECTED: "border-rose-300 bg-rose-50 text-rose-700",
 };
 
 const PER_PAGE = 20;
 
 const LABEL =
-  "text-[12px] font-semibold text-neutral-500";
+  "text-[12px] font-semibold text-zinc-500";
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-3 text-sm text-white outline-none transition-colors placeholder-neutral-500 focus:border-indigo-500/60";
+  "w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-indigo-500/60";
 
 type Dialog = {
   row: AdminVerificationRow;
@@ -167,19 +167,19 @@ export function AdminVerifications({
               onClick={() => setFilter(key)}
               className={`h-9 rounded-xl border px-3 text-[13px] font-semibold transition-colors ${
                 filter === key
-                  ? "border-indigo-500/40 bg-indigo-500/10 text-white"
-                  : "border-white/10 bg-white/[0.02] text-neutral-400 hover:text-white"
+                  ? "border-indigo-500/40 bg-indigo-50 text-zinc-900"
+                  : "border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
               }`}
             >
               {label}
-              <span className="ml-1.5 text-neutral-500">{count(key)}</span>
+              <span className="ml-1.5 text-zinc-500">{count(key)}</span>
             </button>
           ))}
         </div>
         <label className="relative block sm:w-72">
           <Search
             size={15}
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500"
             aria-hidden
           />
           <input
@@ -207,12 +207,12 @@ export function AdminVerifications({
           {pageRows.map((r) => (
             <article
               key={r.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
+              className="rounded-2xl border border-zinc-200 bg-white p-5"
             >
               <div className="flex flex-wrap items-center gap-3">
                 <Link
                   href={`/admin/users/${r.uid}`}
-                  className="text-sm font-black text-white hover:underline"
+                  className="text-sm font-black text-zinc-900 hover:underline"
                 >
                   {r.username}
                 </Link>
@@ -224,10 +224,10 @@ export function AdminVerifications({
                   ) : null}
                   {VERIFICATION_STATUS_LABEL[r.status]}
                 </span>
-                <span className="text-[12px] text-neutral-500">
+                <span className="text-[12px] text-zinc-500">
                   Gửi {r.createdAt}
                 </span>
-                <span className="text-[12px] text-neutral-600">
+                <span className="text-[12px] text-zinc-400">
                   · tham gia {r.joinedAt}
                 </span>
               </div>
@@ -235,7 +235,7 @@ export function AdminVerifications({
               <dl className="mt-4 grid gap-x-6 gap-y-3 text-[13px] sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <dt className={LABEL}>Facebook</dt>
-                  <dd className="mt-1 text-neutral-200">
+                  <dd className="mt-1 text-zinc-800">
                     {r.facebookName}
                     <a
                       href={r.facebookUrl}
@@ -245,17 +245,17 @@ export function AdminVerifications({
                     >
                       Mở <ExternalLink size={12} aria-hidden />
                     </a>
-                    <span className="block break-all text-[11px] text-neutral-500">
+                    <span className="block break-all text-[11px] text-zinc-500">
                       {r.facebookUrl}
                     </span>
                   </dd>
                 </div>
                 <div>
                   <dt className={LABEL}>Zalo</dt>
-                  <dd className="mt-1 text-neutral-200">
+                  <dd className="mt-1 text-zinc-800">
                     {r.zaloName ?? "(không tên)"}
                     {r.zaloNow !== r.zaloName ? (
-                      <span className="block text-[11px] text-amber-300">
+                      <span className="block text-[11px] text-amber-700">
                         Hiện liên kết: {r.zaloNow ?? "đã huỷ liên kết"}
                       </span>
                     ) : null}
@@ -263,30 +263,30 @@ export function AdminVerifications({
                 </div>
                 <div>
                   <dt className={LABEL}>Số điện thoại</dt>
-                  <dd className="mt-1 font-mono text-neutral-200">
+                  <dd className="mt-1 font-mono text-zinc-800">
                     {r.phone}
-                    <span className="block font-sans text-[11px] text-emerald-400">
+                    <span className="block font-sans text-[11px] text-emerald-600">
                       Đã xác minh qua Zalo {r.phoneVerifiedAt}
                     </span>
                   </dd>
                 </div>
                 <div>
                   <dt className={LABEL}>Ngân hàng</dt>
-                  <dd className="mt-1 text-neutral-200">
+                  <dd className="mt-1 text-zinc-800">
                     {r.bankName} ·{" "}
                     <span className="font-mono">{r.bankAccount}</span>
-                    <span className="block font-bold text-white">
+                    <span className="block font-bold text-zinc-900">
                       {r.accountHolder}
                     </span>
                   </dd>
                 </div>
                 <div>
                   <dt className={LABEL}>Nạp qua ngân hàng</dt>
-                  <dd className="mt-1 text-neutral-200">
+                  <dd className="mt-1 text-zinc-800">
                     {r.topUps > 0
                       ? `${r.topUps} lần · ${r.topUpTotal.toLocaleString("vi-VN")}đ`
                       : "Chưa nạp lần nào"}
-                    <span className="block text-[11px] text-neutral-500">
+                    <span className="block text-[11px] text-zinc-500">
                       Đối chiếu tên người chuyển trong app ngân hàng với tên
                       trên.
                     </span>
@@ -295,11 +295,11 @@ export function AdminVerifications({
                 {r.reviewedAt ? (
                   <div>
                     <dt className={LABEL}>Quyết định</dt>
-                    <dd className="mt-1 text-neutral-200">
+                    <dd className="mt-1 text-zinc-800">
                       {VERIFICATION_STATUS_LABEL[r.status]} ·{" "}
                       {r.reviewedBy ?? "admin"} · {r.reviewedAt}
                       {r.note ? (
-                        <span className="block text-[12px] text-neutral-400">
+                        <span className="block text-[12px] text-zinc-500">
                           {r.note}
                         </span>
                       ) : null}
@@ -314,14 +314,14 @@ export function AdminVerifications({
                     <button
                       type="button"
                       onClick={() => open(r, "approve")}
-                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-emerald-400"
+                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[13px] font-semibold text-zinc-900 transition-colors hover:bg-emerald-400"
                     >
                       Duyệt
                     </button>
                     <button
                       type="button"
                       onClick={() => open(r, "reject")}
-                      className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
+                      className="h-10 rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-[13px] font-semibold text-zinc-700 transition-colors hover:border-rose-300 hover:text-rose-600"
                     >
                       Từ chối
                     </button>
@@ -330,7 +330,7 @@ export function AdminVerifications({
                   <button
                     type="button"
                     onClick={() => open(r, "revoke")}
-                    className="h-10 rounded-xl border border-white/10 bg-white/[0.04] px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:border-red-500/40 hover:text-red-400"
+                    className="h-10 rounded-xl border border-zinc-200 bg-zinc-50 px-4 text-[13px] font-semibold text-zinc-700 transition-colors hover:border-rose-300 hover:text-rose-600"
                   >
                     Thu hồi cấp 2
                   </button>
@@ -372,10 +372,10 @@ export function AdminVerifications({
               placeholder="VD: Tên chủ tài khoản ngân hàng không trùng tên Facebook"
               className={FIELD}
             />
-            {error ? <p className="text-[12px] text-red-400">{error}</p> : null}
+            {error ? <p className="text-[12px] text-rose-600">{error}</p> : null}
           </div>
         ) : error ? (
-          <p className="text-[12px] text-red-400">{error}</p>
+          <p className="text-[12px] text-rose-600">{error}</p>
         ) : null}
       </ConfirmDialog>
     </div>

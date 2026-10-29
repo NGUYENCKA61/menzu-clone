@@ -41,14 +41,14 @@ import { AdminPartners, type AdminPartnerRow } from "./AdminPartners";
 import { AdminError } from "./AdminStates";
 
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const CARD =
-  "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+  "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 const HEADING =
-  "text-[12px] font-semibold text-neutral-500";
-const HINT = "mt-1.5 text-[11px] text-neutral-500";
+  "text-[12px] font-semibold text-zinc-500";
+const HINT = "mt-1.5 text-[11px] text-zinc-500";
 
 /**
  * The colour the shop falls back to, so the picker offers it rather than the
@@ -58,7 +58,7 @@ const HINT = "mt-1.5 text-[11px] text-neutral-500";
  */
 const DEFAULT_BRAND_COLOR = "#E13D3F";
 const ICON_BUTTON =
-  "h-7 w-7 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-white/5 text-neutral-300 transition-colors inline-flex items-center justify-center";
+  "h-7 w-7 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-30 disabled:hover:bg-zinc-100 text-zinc-700 transition-colors inline-flex items-center justify-center";
 
 const TABS = ["Bán hàng & nạp tiền", "Nhận diện", "Bố cục trang chủ"] as const;
 type Tab = (typeof TABS)[number];
@@ -109,7 +109,7 @@ function SlugPicker({
   return (
     <div className="flex flex-col gap-3">
       {selected.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-white/10 px-3 py-3 text-[11px] text-neutral-500">
+        <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500">
           {empty}
         </p>
       ) : (
@@ -117,12 +117,12 @@ function SlugPicker({
           {selected.map((slug, index) => (
             <div
               key={slug}
-              className="flex items-center gap-2 rounded-xl border border-white/5 bg-neutral-950/40 px-3 py-2"
+              className="flex items-center gap-2 rounded-xl border border-zinc-100 bg-zinc-50/40 px-3 py-2"
             >
-              <span className="w-5 shrink-0 text-[12px] font-semibold text-neutral-600">
+              <span className="w-5 shrink-0 text-[12px] font-semibold text-zinc-400">
                 {index + 1}
               </span>
-              <span className="flex-1 truncate text-xs font-bold text-white">
+              <span className="flex-1 truncate text-xs font-bold text-zinc-900">
                 {bySlug.get(slug) ?? slug}
               </span>
               <button
@@ -165,7 +165,7 @@ function SlugPicker({
               key={option.slug}
               type="button"
               onClick={() => onChange([...selected, option.slug])}
-              className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-neutral-300 transition-colors hover:border-white/20 hover:bg-white/10 hover:text-white"
+              className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-[11px] font-semibold text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900"
             >
               + {option.name}
             </button>
@@ -243,12 +243,12 @@ function Toggle({
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+        className="mt-0.5 h-4 w-4 shrink-0 accent-zinc-900"
       />
       <span>
-        <span className="block text-xs font-bold text-white">{label}</span>
+        <span className="block text-xs font-bold text-zinc-900">{label}</span>
         {hint ? (
-          <span className="block text-[11px] text-neutral-500 mt-0.5">
+          <span className="block text-[11px] text-zinc-500 mt-0.5">
             {hint}
           </span>
         ) : null}
@@ -964,8 +964,8 @@ export function AdminSettings({
               aria-pressed={tab === option}
               className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[14px] font-semibold transition-colors ${
                 tab === option
-                  ? "border border-white/25 bg-white/[0.12] text-frost"
-                  : "border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white"
+                  ? "border border-zinc-300 bg-zinc-100 text-zinc-900"
+                  : "border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
               }`}
             >
               <Icon size={13} />
@@ -1090,7 +1090,7 @@ export function AdminSettings({
                 </p>
               </div>
 
-              <div className="sm:col-span-2 grid grid-cols-1 gap-3 rounded-xl border border-white/[0.06] bg-neutral-950/40 p-4 sm:grid-cols-2">
+              <div className="sm:col-span-2 grid grid-cols-1 gap-3 rounded-xl border border-zinc-100 bg-zinc-50/40 p-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <span className={LABEL}>Gạch thẻ tự động qua TheSieuRe</span>
                   <p className={HINT}>
@@ -1157,7 +1157,7 @@ export function AdminSettings({
                 hint="Tắt sẽ ẩn tab Thẻ Cào cùng danh sách nhà mạng."
               />
               {!bank && !card ? (
-                <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-semibold text-amber-600">
                   Tắt cả hai nghĩa là khách không nạp được tiền vào ví bằng cách
                   nào, trang Nạp thẻ sẽ chỉ còn thông báo tạm ngưng.
                 </p>
@@ -1167,14 +1167,14 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển,
               còn hệ thống đối soát tất cả, tiền về bên nào cũng khớp được lệnh
               nạp.
             </p>
 
             {accounts.length === 0 ? (
-              <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-semibold text-amber-600">
                 Chưa có tài khoản nào, tab Ngân Hàng của khách sẽ báo tạm chưa
                 nhận chuyển khoản, và máy chủ từ chối tạo lệnh nạp qua ngân
                 hàng.
@@ -1184,10 +1184,10 @@ export function AdminSettings({
             {accounts.map((account, index) => (
               <div
                 key={index}
-                className="rounded-xl border border-white/5 bg-neutral-950/40 p-4 flex flex-col gap-3"
+                className="rounded-xl border border-zinc-100 bg-zinc-50/40 p-4 flex flex-col gap-3"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] font-semibold text-neutral-500">
+                  <span className="text-[12px] font-semibold text-zinc-500">
                     Tài khoản {index + 1}
                   </span>
                   <button
@@ -1195,7 +1195,7 @@ export function AdminSettings({
                     onClick={() =>
                       setAccounts(accounts.filter((_, i) => i !== index))
                     }
-                    className="h-7 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-[12px] font-semibold text-red-400 transition-colors"
+                    className="h-7 px-3 rounded-lg border border-rose-200 bg-rose-50 hover:bg-rose-100 text-[12px] font-semibold text-rose-600 transition-colors"
                   >
                     Xóa
                   </button>
@@ -1294,7 +1294,7 @@ export function AdminSettings({
                   { code: "", name: "", account: "", holder: "", apiUrl: "" },
                 ])
               }
-              className="self-start h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
+              className="self-start h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors"
             >
               + Thêm ngân hàng
             </button>
@@ -1367,14 +1367,14 @@ export function AdminSettings({
                 <button
                   type="button"
                   onClick={() => setCronKey(randomKey())}
-                  className="h-11 shrink-0 rounded-xl border border-white/10 bg-white/5 px-3.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/10"
+                  className="h-11 shrink-0 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
                 >
                   Tạo key
                 </button>
               </div>
               <p className={HINT}>
                 Key riêng cho địa chỉ chạy nền bên dưới, để{" "}
-                <span className="font-bold text-white">
+                <span className="font-bold text-zinc-900">
                   không phải đem API key đi dán
                 </span>{" "}
                 vào web hẹn giờ của người khác. Key này chỉ khiến shop tự đọc
@@ -1386,7 +1386,7 @@ export function AdminSettings({
             </div>
 
             <div>
-              <p className="text-[11px] text-neutral-500">
+              <p className="text-[11px] text-zinc-500">
                 Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới
                 đây gọi thử tất cả và cho biết đọc được giao dịch hay không.
               </p>
@@ -1396,11 +1396,11 @@ export function AdminSettings({
                   type="button"
                   disabled={testing}
                   onClick={handleTestConnection}
-                  className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[12px] font-semibold text-neutral-300 transition-colors"
+                  className="h-8 px-3 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 disabled:opacity-50 text-[12px] font-semibold text-zinc-700 transition-colors"
                 >
                   {testing ? "Đang gọi…" : "Kiểm tra kết nối"}
                 </button>
-                <span className="text-[11px] text-neutral-500">
+                <span className="text-[11px] text-zinc-500">
                   Lưu cấu hình trước rồi bấm, máy chủ gọi thử và cho biết có đọc
                   được giao dịch không.
                 </span>
@@ -1411,8 +1411,8 @@ export function AdminSettings({
                   role="status"
                   className={`mt-2.5 rounded-xl border px-4 py-2.5 text-[11px] font-semibold ${
                     testResult.ok
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      : "border-red-500/30 bg-red-500/10 text-red-400"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                      : "border-rose-200 bg-rose-50 text-rose-600"
                   }`}
                 >
                   {testResult.text}
@@ -1420,17 +1420,17 @@ export function AdminSettings({
               ) : null}
             </div>
 
-            <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
+            <div className="rounded-xl border border-zinc-100 bg-zinc-50/40 px-4 py-3">
               <span className={LABEL}>Địa chỉ chạy nền 24/7 (khuyến nghị)</span>
               {/* The whole address, key and all, when there is a cron key to
                   print: it goes straight into a scheduler's box, and half an
                   address is an invitation to paste the wrong secret into the
                   other half. */}
-              <p className="font-mono text-xs text-neutral-300 break-all">
+              <p className="font-mono text-xs text-zinc-700 break-all">
                 {origin}/api/wallet/sync?key=
                 {cronKey.trim() ? cronKey.trim() : <>&lt;API-KEY&gt;</>}
               </p>
-              <p className="mt-1.5 text-[11px] text-neutral-500">
+              <p className="mt-1.5 text-[11px] text-zinc-500">
                 Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy
                 mỗi phút.
                 {cronKey.trim()
@@ -1441,12 +1441,12 @@ export function AdminSettings({
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/5 bg-neutral-950/40 px-4 py-3">
+            <div className="rounded-xl border border-zinc-100 bg-zinc-50/40 px-4 py-3">
               <span className={LABEL}>Địa chỉ để dán vào bên trung gian</span>
-              <p className="font-mono text-xs text-neutral-300 break-all">
+              <p className="font-mono text-xs text-zinc-700 break-all">
                 {origin}/api/wallet/webhook
               </p>
-              <p className="mt-1.5 text-[11px] text-neutral-500">
+              <p className="mt-1.5 text-[11px] text-zinc-500">
                 Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi
                 kèm header{" "}
                 <span className="font-mono">
@@ -1457,13 +1457,13 @@ export function AdminSettings({
             </div>
 
             {auto && !apiKey && !accounts.some((account) => account.apiUrl) ? (
-              <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-semibold text-amber-600">
                 Bật nạp tự động thì cần địa chỉ API đối soát ở ít nhất một ngân
                 hàng, hoặc API key cho webhook, lưu sẽ bị từ chối.
               </p>
             ) : null}
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <Toggle
                 checked={adminTwoFactor}
                 onChange={setAdminTwoFactor}
@@ -1472,14 +1472,14 @@ export function AdminSettings({
               />
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>
                 CAPTCHA đăng nhập (Cloudflare Turnstile)
               </span>
               <p className={HINT}>
                 Lấy hai khóa ở dash.cloudflare.com → Turnstile → Add site. Phải
                 điền
-                <span className="font-bold text-neutral-300"> cả hai</span> thì
+                <span className="font-bold text-zinc-700"> cả hai</span> thì
                 CAPTCHA mới bật; để trống một ô là coi như tắt, trang đăng nhập
                 giữ nguyên như cũ.
               </p>
@@ -1522,25 +1522,25 @@ export function AdminSettings({
               </div>
 
               {Boolean(tsSite) !== Boolean(tsSecret) ? (
-                <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-[11px] font-semibold text-amber-400">
+                <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[11px] font-semibold text-amber-600">
                   Mới có một khóa. CAPTCHA vẫn đang tắt cho tới khi điền đủ cả
                   hai.
                 </p>
               ) : null}
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Đăng nhập Google / Discord (OAuth)</span>
               <p className={HINT}>
                 Google: console.cloud.google.com → APIs &amp; Services →
                 Credentials → OAuth client ID (Web), khai Redirect URI
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   {" "}
                   /api/auth/google/callback
                 </span>
                 . Discord: discord.com/developers → New Application → OAuth2,
                 khai
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   {" "}
                   /api/auth/discord/callback
                 </span>
@@ -1605,7 +1605,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>
                 Số liệu tin cậy, dải số trên phần Đánh giá
               </span>
@@ -1672,16 +1672,16 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Đồng bộ trạng thái hack từ Telegram</span>
               <p className={HINT}>
                 Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi
                 chú. Cú pháp:{" "}
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   MÃ_TOOL trạng_thái ghi chú
                 </span>
                 , ví dụ{" "}
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   VALTOOL01 die Đang vá, chờ 24h
                 </span>
                 . Nhận các từ: undetected/ok/ngon/an toàn · detected/die/dính ·
@@ -1689,7 +1689,7 @@ export function AdminSettings({
                 phần chú thích ảnh.
                 <br />
                 Cách bật: nhắn @BotFather lấy token → thêm bot vào kênh → mở
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   {" "}
                   https://api.telegram.org/bot&lt;TOKEN&gt;/setWebhook?url=&lt;tên
                   miền&gt;/api/integrations/telegram&amp;secret_token=&lt;secret&gt;
@@ -1728,7 +1728,7 @@ export function AdminSettings({
                     <button
                       type="button"
                       onClick={() => setTgSecret(randomWebhookSecret())}
-                      className="shrink-0 rounded-lg border border-white/15 px-3 text-[12px] font-bold text-neutral-300 transition-colors hover:border-white/30 hover:text-white"
+                      className="shrink-0 rounded-lg border border-zinc-200 px-3 text-[12px] font-bold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900"
                     >
                       Tự sinh
                     </button>
@@ -1750,14 +1750,14 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Cảnh báo sắp hết hàng</span>
               <p className={HINT}>
                 Khi một gói tụt xuống còn bằng ngưỡng này, shop được báo, kèm
                 tên sản phẩm, tên gói, số còn lại và link vào trang nhập thêm.
                 Báo thêm một lần nữa khi gói hết sạch, rồi im cho tới khi shop
                 nhập hàng mới. Tính cho cả key tool lẫn kho acc random. Để{" "}
-                <span className="font-mono text-neutral-300">0</span> là tắt.
+                <span className="font-mono text-zinc-700">0</span> là tắt.
                 Telegram thì bot nhắn riêng cho admin của kênh ở trên, nên cần
                 đã điền bot token và ID kênh, và admin phải từng bấm Start với
                 bot. Email thì cần phần SMTP bên dưới đã điền.
@@ -1826,7 +1826,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Bot bán hàng Telegram</span>
               <p className={HINT}>
                 Bot thứ hai, dành cho khách: xem hàng, mua bằng ví, nhận key
@@ -1866,7 +1866,7 @@ export function AdminSettings({
                     <button
                       type="button"
                       onClick={() => setShopSecret(randomWebhookSecret())}
-                      className="shrink-0 rounded-lg border border-white/15 px-3 text-[12px] font-bold text-neutral-300 transition-colors hover:border-white/30 hover:text-white"
+                      className="shrink-0 rounded-lg border border-zinc-200 px-3 text-[12px] font-bold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-900"
                     >
                       Tự sinh
                     </button>
@@ -1888,7 +1888,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Bot thông báo Zalo (tài khoản phụ)</span>
               <p className={HINT}>
                 Một tài khoản Zalo phụ do bot trên VPS đăng nhập, gửi thông báo
@@ -1929,16 +1929,16 @@ export function AdminSettings({
                 <div>
                   <span className={LABEL}>Trạng thái bot</span>
                   {zaloBotState === null ? (
-                    <p className="mt-2 text-[12px] text-neutral-500">
+                    <p className="mt-2 text-[12px] text-zinc-500">
                       Bot chưa chạy hoặc chưa báo về. Trên VPS: docker compose
                       up -d zalo-bot.
                     </p>
                   ) : zaloBotState.state === "qr" ? (
                     <div className="mt-2 flex flex-col gap-2">
-                      <p className="text-[12px] font-semibold text-amber-300">
+                      <p className="text-[12px] font-semibold text-amber-700">
                         Đang chờ quét mã QR
                         {zaloBotState.note ? (
-                          <span className="block font-normal text-neutral-400">
+                          <span className="block font-normal text-zinc-500">
                             {zaloBotState.note}
                           </span>
                         ) : null}
@@ -1955,16 +1955,16 @@ export function AdminSettings({
                           <img
                             src={`${zaloBotState.qrUrl}?t=${encodeURIComponent(zaloBotState.at)}`}
                             alt="Mã QR đăng nhập Zalo"
-                            className="h-40 w-40 rounded-lg border border-white/10 bg-white"
+                            className="h-40 w-40 rounded-lg border border-zinc-200 bg-white"
                           />
                         </a>
                       ) : null}
                     </div>
                   ) : zaloBotState.state === "online" ? (
-                    <p className="mt-2 text-[12px] font-semibold text-emerald-400">
+                    <p className="mt-2 text-[12px] font-semibold text-emerald-600">
                       Đang chạy
                       {zaloBotState.name ? ` (${zaloBotState.name})` : ""}
-                      <span className="block font-normal text-neutral-500">
+                      <span className="block font-normal text-zinc-500">
                         Báo về lúc{" "}
                         {new Date(zaloBotState.at).toLocaleString("vi-VN", {
                           timeZone: "Asia/Ho_Chi_Minh",
@@ -1972,9 +1972,9 @@ export function AdminSettings({
                       </span>
                     </p>
                   ) : (
-                    <p className="mt-2 text-[12px] font-semibold text-red-400">
+                    <p className="mt-2 text-[12px] font-semibold text-rose-600">
                       Mất kết nối
-                      <span className="block font-normal text-neutral-500">
+                      <span className="block font-normal text-zinc-500">
                         {zaloBotState.note ?? ""} (
                         {new Date(zaloBotState.at).toLocaleString("vi-VN", {
                           timeZone: "Asia/Ho_Chi_Minh",
@@ -1987,7 +1987,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Nhóm Zalo của shop (bot quản lý)</span>
               <p className={HINT}>
                 Thêm tài khoản bot vào nhóm và cho làm quản trị viên, rồi bấm
@@ -2006,22 +2006,22 @@ export function AdminSettings({
                         key={group.id}
                         className={`flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-[12px] ${
                           used
-                            ? "border-emerald-500/30 bg-emerald-500/[0.06]"
-                            : "border-white/5 bg-white/[0.02]"
+                            ? "border-emerald-200 bg-emerald-500/[0.06]"
+                            : "border-zinc-100 bg-white"
                         }`}
                       >
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-zinc-900">
                           {group.name}
                         </span>
-                        <span className="text-neutral-500">
+                        <span className="text-zinc-500">
                           {group.members} thành viên · ID{" "}
-                          <span className="font-mono text-neutral-300">
+                          <span className="font-mono text-zinc-700">
                             {group.id}
                           </span>
                         </span>
                         <span
                           className={
-                            group.admin ? "text-emerald-400" : "text-amber-300"
+                            group.admin ? "text-emerald-600" : "text-amber-700"
                           }
                         >
                           {group.admin
@@ -2041,8 +2041,8 @@ export function AdminSettings({
                           }
                           className={`ml-auto rounded-lg border px-2.5 py-1 text-[12px] font-semibold ${
                             used
-                              ? "border-emerald-500/40 text-emerald-300 hover:text-white"
-                              : "border-white/10 text-neutral-300 hover:text-white"
+                              ? "border-emerald-500/40 text-emerald-700 hover:text-zinc-900"
+                              : "border-zinc-200 text-zinc-700 hover:text-zinc-900"
                           }`}
                         >
                           {used ? "Đang dùng · Bỏ" : "Dùng nhóm này"}
@@ -2101,7 +2101,7 @@ export function AdminSettings({
                     placeholder="VD: @{name} chào mừng vào nhóm {shop}! Đọc ghim trước khi hỏi nhé."
                     className={FIELD}
                   />
-                  <p className="mt-1.5 text-[11px] text-neutral-500">
+                  <p className="mt-1.5 text-[11px] text-zinc-500">
                     {"{name}"} là tên người vào, {"{shop}"} là tên shop. Bắt đầu
                     bằng @{"{name}"} để bot gắn thẻ. Để trống là không chào.
                   </p>
@@ -2143,35 +2143,35 @@ export function AdminSettings({
               {zaloGroupEvents.length > 0 ? (
                 <div className="mt-4">
                   <span className={LABEL}>Bot vừa làm gì trong nhóm</span>
-                  <ul className="mt-2 flex flex-col divide-y divide-white/5 rounded-xl border border-white/10 bg-white/[0.02]">
+                  <ul className="mt-2 flex flex-col divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white">
                     {zaloGroupEvents.map((row) => (
                       <li
                         key={row.id}
                         className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-[12px]"
                       >
-                        <span className="font-mono text-neutral-500">
+                        <span className="font-mono text-zinc-500">
                           {row.at}
                         </span>
                         {zaloGroupIds.length !== 1 ? (
-                          <span className="text-neutral-400">{row.group}</span>
+                          <span className="text-zinc-500">{row.group}</span>
                         ) : null}
                         <span
                           className={`font-bold ${
                             row.kind === "REMOVED"
-                              ? "text-red-400"
+                              ? "text-rose-600"
                               : row.kind === "WARNED" ||
                                   row.kind === "JOIN_REFUSED"
-                                ? "text-amber-300"
-                                : "text-emerald-400"
+                                ? "text-amber-700"
+                                : "text-emerald-600"
                           }`}
                         >
                           {ZALO_GROUP_EVENT_LABEL[row.kind] ?? row.kind}
                         </span>
                         {row.name ? (
-                          <span className="text-white">{row.name}</span>
+                          <span className="text-zinc-900">{row.name}</span>
                         ) : null}
                         {row.note ? (
-                          <span className="text-neutral-400">{row.note}</span>
+                          <span className="text-zinc-500">{row.note}</span>
                         ) : null}
                       </li>
                     ))}
@@ -2180,18 +2180,18 @@ export function AdminSettings({
               ) : null}
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Link rút gọn có tiền (key miễn phí)</span>
               <p className={HINT}>
                 Tool miễn phí (gói 1đ) phát key qua link rút gọn: khách bấm Lấy
                 key, vượt link, nhận key vào Lịch sử mua. Dán địa chỉ API tạo
                 link từ mục API trong tài khoản dịch vụ (link4m, yeumoney…),
                 thay chỗ điền key bằng{" "}
-                <span className="font-mono text-neutral-300">{"{api}"}</span> và
+                <span className="font-mono text-zinc-700">{"{api}"}</span> và
                 chỗ điền link bằng{" "}
-                <span className="font-mono text-neutral-300">{"{url}"}</span>.
+                <span className="font-mono text-zinc-700">{"{url}"}</span>.
                 Ví dụ:{" "}
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   https://link4m.co/api-shorten/v2?api={"{api}"}&url={"{url}"}
                 </span>
                 . Để trống thì key phát thẳng, không qua link.
@@ -2227,7 +2227,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Trợ lý AI (ô chat hỗ trợ trên web)</span>
               <p className={HINT}>
                 Ô chat ở góc trang chỉ hiện khi có model trả lời. Claude dùng
@@ -2272,8 +2272,8 @@ export function AdminSettings({
                         }}
                         className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-bold ${
                           assistantPreset?.id === preset.id
-                            ? "border-emerald-500/40 text-emerald-300"
-                            : "border-white/10 text-neutral-300 hover:text-white"
+                            ? "border-emerald-500/40 text-emerald-700"
+                            : "border-zinc-200 text-zinc-700 hover:text-zinc-900"
                         }`}
                       >
                         {preset.name}
@@ -2329,7 +2329,7 @@ export function AdminSettings({
                         href={assistantPreset.keyUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-neutral-300 underline"
+                        className="text-zinc-700 underline"
                       >
                         {assistantPreset.keyUrl}
                       </a>
@@ -2341,15 +2341,15 @@ export function AdminSettings({
               </div>
             </div>
 
-            <div className="border-t border-white/5 pt-5">
+            <div className="border-t border-zinc-100 pt-5">
               <span className={LABEL}>Gửi email, quên mật khẩu (SMTP)</span>
               <p className={HINT}>
                 Dùng Gmail: host{" "}
-                <span className="font-mono text-neutral-300">
+                <span className="font-mono text-zinc-700">
                   smtp.gmail.com
                 </span>
                 , port 587, user là địa chỉ Gmail, pass là
-                <span className="font-bold text-neutral-300">
+                <span className="font-bold text-zinc-700">
                   {" "}
                   App Password
                 </span>{" "}
@@ -2429,7 +2429,7 @@ export function AdminSettings({
               </div>
             </div>
 
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca
               lệch: khách quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền.
               Bật auto rồi thì bình thường bạn không phải đụng tới nó.
@@ -2510,7 +2510,7 @@ export function AdminSettings({
                     onChange={(event) =>
                       setBrandColor(event.target.value.toUpperCase())
                     }
-                    className="h-9 w-10 shrink-0 rounded-lg border border-white/10 bg-neutral-950/60 cursor-pointer"
+                    className="h-9 w-10 shrink-0 rounded-lg border border-zinc-200 bg-white cursor-pointer"
                   />
                 </div>
                 <p className={HINT}>
@@ -2545,7 +2545,7 @@ export function AdminSettings({
                 {/* The hero frame's own 16:9, cropped the way the page crops it
                     (object-cover, no dim), so a wide promo banner shows here
                     exactly how much of its sides the homepage will cut. */}
-                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white sm:w-[200px]">
                   {heroBanner ? (
                     // A plain img: the value can be any path the shop typed, and
                     // next/image would need each one in its allow-list.
@@ -2568,7 +2568,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                         heroBannerUploading
                           ? "pointer-events-none opacity-60"
                           : ""
@@ -2589,7 +2589,7 @@ export function AdminSettings({
                         }}
                       />
                     </label>
-                    <span className="text-[10px] text-neutral-600">
+                    <span className="text-[10px] text-zinc-400">
                       PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu
                       960×540
                     </span>
@@ -2599,8 +2599,8 @@ export function AdminSettings({
                       role="alert"
                       className={
                         heroBannerMsg.tone === "ok"
-                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                          ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                          : "rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                       }
                     >
                       {heroBannerMsg.text}
@@ -2621,7 +2621,7 @@ export function AdminSettings({
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* Preview at the backdrop's own wide shape, under the same 70%
                     dim it gets on the page, so this shows what visitors see. */}
-                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white sm:w-[200px]">
                   {siteBackground ? (
                     // A plain img: the value can be any path the shop typed, and
                     // next/image would need each one in its allow-list.
@@ -2644,7 +2644,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                         siteBgUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2661,7 +2661,7 @@ export function AdminSettings({
                         }}
                       />
                     </label>
-                    <span className="text-[10px] text-neutral-600">
+                    <span className="text-[10px] text-zinc-400">
                       PNG / JPG / WebP · tối thiểu 960×540
                     </span>
                   </div>
@@ -2670,8 +2670,8 @@ export function AdminSettings({
                       role="alert"
                       className={
                         siteBgMsg.tone === "ok"
-                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                          ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                          : "rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                       }
                     >
                       {siteBgMsg.text}
@@ -2692,7 +2692,7 @@ export function AdminSettings({
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* The banner's own wide shape; no dim, the page fades it
                     itself along the left and the bottom. */}
-                <div className="relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] sm:w-[200px]">
+                <div className="relative aspect-[3/1] w-full shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-white sm:w-[200px]">
                   {profileBanner ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -2701,7 +2701,7 @@ export function AdminSettings({
                       className="absolute inset-0 h-full w-full object-cover"
                     />
                   ) : (
-                    <span className="absolute inset-0 grid place-items-center text-[12px] font-semibold text-neutral-600">
+                    <span className="absolute inset-0 grid place-items-center text-[12px] font-semibold text-zinc-400">
                       Bìa danh mục đầu
                     </span>
                   )}
@@ -2716,7 +2716,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                         bannerUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2737,12 +2737,12 @@ export function AdminSettings({
                       <button
                         type="button"
                         onClick={() => setProfileBanner("")}
-                        className="inline-flex h-9 items-center rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+                        className="inline-flex h-9 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
                       >
                         Dùng bìa danh mục
                       </button>
                     ) : null}
-                    <span className="text-[10px] text-neutral-600">
+                    <span className="text-[10px] text-zinc-400">
                       PNG / JPG / WebP · tối thiểu 960×540
                     </span>
                   </div>
@@ -2751,8 +2751,8 @@ export function AdminSettings({
                       role="alert"
                       className={
                         bannerMsg.tone === "ok"
-                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                          ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                          : "rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                       }
                     >
                       {bannerMsg.text}
@@ -2771,7 +2771,7 @@ export function AdminSettings({
               <div className="flex flex-col gap-3 sm:flex-row">
                 {/* Previewed at the strength it shows on the page — the block
                     draws it at 10%, so full-strength here would oversell it. */}
-                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-white/10 bg-[#0f1111] sm:w-[200px]">
+                <div className="relative aspect-[16/9] w-full shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-[#0f1111] sm:w-[200px]">
                   {flashSaleBackground ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -2793,7 +2793,7 @@ export function AdminSettings({
                   />
                   <div className="flex flex-wrap items-center gap-3">
                     <label
-                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                      className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                         flashBgUploading ? "pointer-events-none opacity-60" : ""
                       }`}
                     >
@@ -2810,7 +2810,7 @@ export function AdminSettings({
                         }}
                       />
                     </label>
-                    <span className="text-[10px] text-neutral-600">
+                    <span className="text-[10px] text-zinc-400">
                       PNG / JPG / WebP · tối thiểu 960×540
                     </span>
                   </div>
@@ -2819,8 +2819,8 @@ export function AdminSettings({
                       role="alert"
                       className={
                         flashBgMsg.tone === "ok"
-                          ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                          : "rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                          ? "rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                          : "rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                       }
                     >
                       {flashBgMsg.text}
@@ -2838,7 +2838,7 @@ export function AdminSettings({
 
           <section className={CARD}>
             <span className={HEADING}>Bố cục trang đăng nhập / đăng ký</span>
-            <p className="text-[11px] text-neutral-500 -mt-2">
+            <p className="text-[11px] text-zinc-500 -mt-2">
               Ảnh lớn bên trái hai trang đó, và dòng chữ đè lên nó.
             </p>
 
@@ -2846,7 +2846,7 @@ export function AdminSettings({
               {/* Preview at the panel's own shape — tall and half a card — so
                   what is judged here is what the visitor will see, not a
                   square thumbnail of the same file. */}
-              <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
+              <div className="relative w-full sm:w-[150px] shrink-0 aspect-[3/4] overflow-hidden rounded-xl border border-zinc-200 bg-white">
                 {panelImages[Math.min(picked, panelImages.length - 1)] ? (
                   // A plain img: the value can be any path the shop typed, and
                   // next/image would need each one in its allow-list.
@@ -2859,10 +2859,10 @@ export function AdminSettings({
                 ) : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 p-3 text-center">
-                  <span className="block text-[12px] font-semibold text-[var(--menzu-accent)]">
+                  <span className="block text-[12px] font-semibold text-rose-600">
                     {panelSubtitle}
                   </span>
-                  <span className="mt-0.5 block text-[15px] font-semibold leading-none text-white">
+                  <span className="mt-0.5 block text-[15px] font-semibold leading-none text-zinc-900">
                     {loginTitle.split("\n").map((line, index) => (
                       <span key={index} className="block">
                         {line}
@@ -2883,15 +2883,15 @@ export function AdminSettings({
                         key={`${src}-${index}`}
                         className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors ${
                           index === picked
-                            ? "border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/10"
-                            : "border-white/10 bg-neutral-950/60"
+                            ? "border-zinc-900 bg-rose-600/10"
+                            : "border-zinc-200 bg-white"
                         }`}
                       >
                         <button
                           type="button"
                           onClick={() => setPicked(index)}
                           title="Xem trước ảnh này"
-                          className="flex-1 min-w-0 truncate text-left font-mono text-[11px] text-neutral-300"
+                          className="flex-1 min-w-0 truncate text-left font-mono text-[11px] text-zinc-700"
                         >
                           {index + 1}. {src}
                         </button>
@@ -2947,7 +2947,7 @@ export function AdminSettings({
                             );
                             setPicked(0);
                           }}
-                          className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-30 disabled:hover:bg-red-500/10 inline-flex items-center justify-center"
+                          className="h-7 w-7 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 disabled:opacity-30 disabled:hover:bg-rose-50 inline-flex items-center justify-center"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -2963,7 +2963,7 @@ export function AdminSettings({
 
                 <div className="flex flex-wrap items-center gap-2">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-[var(--menzu-accent-dark)] px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[var(--menzu-accent)] ${
+                    className={`inline-flex h-9 cursor-pointer items-center rounded-lg bg-zinc-900 px-4 text-[13px] font-semibold text-zinc-900 transition-colors hover:bg-zinc-700 ${
                       uploading ? "opacity-70 cursor-wait" : ""
                     }`}
                   >
@@ -3025,13 +3025,13 @@ export function AdminSettings({
                       setPicked(0);
                       setUploadError(null);
                     }}
-                    className="h-9 rounded-lg border border-white/10 bg-white/5 px-4 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10"
+                    className="h-9 rounded-lg border border-zinc-200 bg-zinc-50 px-4 text-[13px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
                   >
                     Khôi phục ảnh mặc định
                   </button>
                 </div>
 
-                <div className="rounded-lg border border-white/10 bg-neutral-950/40 px-3 py-3 flex flex-col gap-3">
+                <div className="rounded-lg border border-zinc-200 bg-zinc-50/40 px-3 py-3 flex flex-col gap-3">
                   <Toggle
                     checked={slideOn}
                     onChange={setSlideOn}
@@ -3041,7 +3041,7 @@ export function AdminSettings({
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor="slide-seconds"
-                      className="text-[11px] text-neutral-400"
+                      className="text-[11px] text-zinc-500"
                     >
                       Mỗi ảnh giữ
                     </label>
@@ -3055,7 +3055,7 @@ export function AdminSettings({
                       disabled={!slideOn}
                       className={`${FIELD} w-20 disabled:opacity-40`}
                     />
-                    <span className="text-[11px] text-neutral-400">
+                    <span className="text-[11px] text-zinc-500">
                       giây (2–60)
                     </span>
                   </div>
@@ -3064,7 +3064,7 @@ export function AdminSettings({
                 {uploadError ? (
                   <p
                     role="alert"
-                    className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[11px] font-semibold text-red-400"
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[11px] font-semibold text-rose-600"
                   >
                     {uploadError}
                   </p>
@@ -3142,7 +3142,7 @@ export function AdminSettings({
           <div className="flex flex-col gap-4">
             <div>
               <span className={HEADING}>Đối tác uy tín</span>
-              <p className="mt-1 text-[11px] text-neutral-500">
+              <p className="mt-1 text-[11px] text-zinc-500">
                 Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ.
                 Trống thì mục tự ẩn.
               </p>
@@ -3266,7 +3266,7 @@ export function AdminSettings({
         <>
           <section className={CARD}>
             <span className={HEADING}>Các khối trên trang chủ</span>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               Bỏ tick để ẩn một khối, mũi tên để đổi thứ tự. Trang chủ hiển thị
               đúng theo thứ tự trong danh sách này.
             </p>
@@ -3280,23 +3280,23 @@ export function AdminSettings({
                 return (
                   <div
                     key={id}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-neutral-950/40 px-3 py-2"
+                    className="flex items-center gap-3 rounded-xl border border-zinc-100 bg-zinc-50/40 px-3 py-2"
                   >
                     <input
                       type="checkbox"
                       checked={enabled}
                       onChange={() => toggleBlock(index)}
                       aria-label={`Hiện khối ${label}`}
-                      className="h-4 w-4 shrink-0 accent-[var(--brand)]"
+                      className="h-4 w-4 shrink-0 accent-zinc-900"
                     />
                     <span
                       className={`flex-1 text-xs font-bold ${
-                        enabled ? "text-white" : "text-neutral-600 line-through"
+                        enabled ? "text-zinc-900" : "text-zinc-400 line-through"
                       }`}
                     >
                       {label}
                     </span>
-                    <span className="text-[12px] font-semibold text-neutral-600">
+                    <span className="text-[12px] font-semibold text-zinc-400">
                       {index + 1}
                     </span>
                     <button
@@ -3333,7 +3333,7 @@ export function AdminSettings({
             <div>
               <span className={LABEL}>
                 Thẻ trên tiêu đề{" "}
-                <span className="text-neutral-600">(trống = ẩn)</span>
+                <span className="text-zinc-400">(trống = ẩn)</span>
               </span>
               <input
                 value={heroBadge}
@@ -3417,7 +3417,7 @@ export function AdminSettings({
               <div
                 role="radiogroup"
                 aria-label="Hero hiển thị"
-                className="inline-flex rounded-lg border border-white/10 bg-neutral-950/60 p-1"
+                className="inline-flex rounded-lg border border-zinc-200 bg-white p-1"
               >
                 {(
                   [
@@ -3434,8 +3434,8 @@ export function AdminSettings({
                     onClick={() => setHeroMedia(value)}
                     className={`h-8 rounded-md px-4 text-[12px] font-bold transition-colors ${
                       heroMedia === value
-                        ? "bg-white/[0.12] text-frost"
-                        : "text-neutral-400 hover:text-white"
+                        ? "bg-zinc-100 text-zinc-900"
+                        : "text-zinc-500 hover:text-zinc-900"
                     }`}
                   >
                     {label}
@@ -3445,7 +3445,7 @@ export function AdminSettings({
             </div>
 
             {heroMedia === "none" ? (
-              <p className="text-[12px] leading-relaxed text-neutral-400">
+              <p className="text-[12px] leading-relaxed text-zinc-500">
                 Khung video/ảnh bên phải đang ẩn: chữ đầu trang đứng một mình
                 trên ảnh nền. Chọn Video hoặc Ảnh để hiện lại, các file cũ vẫn
                 được giữ.
@@ -3462,7 +3462,7 @@ export function AdminSettings({
 
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                       heroVideoUploading ? "pointer-events-none opacity-60" : ""
                     }`}
                   >
@@ -3484,7 +3484,7 @@ export function AdminSettings({
                       }}
                     />
                   </label>
-                  <span className="text-[10px] text-neutral-600">
+                  <span className="text-[10px] text-zinc-400">
                     MP4 / WebM · tối đa 200MB · server tự nén sau khi tải lên,
                     file nặng chờ 1–3 phút
                   </span>
@@ -3495,8 +3495,8 @@ export function AdminSettings({
                     role="alert"
                     className={
                       heroVideoMsg.tone === "ok"
-                        ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                        : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                        ? "mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                        : "mt-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                     }
                   >
                     {heroVideoMsg.text}
@@ -3519,7 +3519,7 @@ export function AdminSettings({
                     {heroImages.map((src, index) => (
                       <div
                         key={`${src}-${index}`}
-                        className="flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-950/60 px-2 py-1.5"
+                        className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2 py-1.5"
                       >
                         <div className="relative aspect-[16/9] w-20 shrink-0 overflow-hidden rounded-md bg-[#111111]">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -3529,7 +3529,7 @@ export function AdminSettings({
                             className="absolute inset-0 h-full w-full object-cover"
                           />
                         </div>
-                        <span className="flex-1 min-w-0 truncate font-mono text-[11px] text-neutral-300">
+                        <span className="flex-1 min-w-0 truncate font-mono text-[11px] text-zinc-700">
                           {index + 1}. {src}
                         </span>
                         <button
@@ -3573,7 +3573,7 @@ export function AdminSettings({
                               heroImages.filter((_, i) => i !== index),
                             )
                           }
-                          className="h-7 w-7 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition-colors hover:bg-red-500/20 inline-flex items-center justify-center"
+                          className="h-7 w-7 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 inline-flex items-center justify-center"
                         >
                           <Trash2 size={13} />
                         </button>
@@ -3581,14 +3581,14 @@ export function AdminSettings({
                     ))}
                   </div>
                 ) : (
-                  <p className="rounded-lg border border-dashed border-white/10 px-3 py-3 text-[12px] text-neutral-500">
+                  <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-3 text-[12px] text-zinc-500">
                     Chưa có ảnh nào, hero đang dùng ảnh banner ở thẻ Nhận diện.
                   </p>
                 )}
 
                 <div className="mt-2 flex flex-wrap items-center gap-3">
                   <label
-                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] font-semibold text-neutral-200 transition-colors hover:bg-white/10 ${
+                    className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-[12px] font-semibold text-zinc-800 transition-colors hover:bg-zinc-100 ${
                       heroImgUploading || heroImages.length >= HERO_IMAGES_MAX
                         ? "pointer-events-none opacity-60"
                         : ""
@@ -3607,7 +3607,7 @@ export function AdminSettings({
                       }}
                     />
                   </label>
-                  <span className="text-[10px] text-neutral-600">
+                  <span className="text-[10px] text-zinc-400">
                     PNG / JPG / WebP · nên khổ 16:9, vd 1920×1080 · tối thiểu
                     960×540
                   </span>
@@ -3618,8 +3618,8 @@ export function AdminSettings({
                     role="alert"
                     className={
                       heroImgMsg.tone === "ok"
-                        ? "mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-semibold text-emerald-400"
-                        : "mt-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[11px] font-semibold text-red-400"
+                        ? "mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-600"
+                        : "mt-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] font-semibold text-rose-600"
                     }
                   >
                     {heroImgMsg.text}
@@ -3688,7 +3688,7 @@ export function AdminSettings({
               </p>
             </div>
 
-            <div className="border-t border-white/[0.07] pt-4">
+            <div className="border-t border-zinc-200 pt-4">
               <span className={LABEL}>Các nhóm danh mục</span>
               {sectionSwitch(
                 "groups",
@@ -3698,7 +3698,7 @@ export function AdminSettings({
                 Tên nhóm và danh mục trong từng nhóm nằm ở{" "}
                 <Link
                   href="/admin/groups"
-                  className="font-bold text-[var(--menzu-accent)] underline"
+                  className="font-bold text-rose-600 underline"
                 >
                   Nhóm danh mục
                 </Link>
@@ -3745,7 +3745,7 @@ export function AdminSettings({
                 {faq.map((entry, index) => (
                   <div
                     key={index}
-                    className="flex flex-col gap-2 rounded-xl border border-white/5 bg-neutral-950/40 p-3"
+                    className="flex flex-col gap-2 rounded-xl border border-zinc-100 bg-zinc-50/40 p-3"
                   >
                     <div className="flex items-center gap-2">
                       <input
@@ -3784,7 +3784,7 @@ export function AdminSettings({
               <button
                 type="button"
                 onClick={() => setFaq([...faq, { q: "", a: "" }])}
-                className="mt-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 hover:text-white"
+                className="mt-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[13px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
               >
                 + Thêm câu hỏi
               </button>
@@ -3804,7 +3804,7 @@ export function AdminSettings({
       {saved ? (
         <p
           role="status"
-          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
         >
           Đã lưu cấu hình. Thay đổi có hiệu lực ngay với khách đang truy cập.
         </p>
@@ -3812,15 +3812,15 @@ export function AdminSettings({
 
       {/* Sticky so Lưu never scrolls out of reach on this long form —
           cosmetic wrapper only, the submit itself is unchanged. */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center gap-3 border-t border-white/[0.06] bg-[#0a0a0c]/95 px-1 py-3 backdrop-blur-sm">
+      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center gap-3 border-t border-zinc-100 bg-[#0a0a0c]/95 px-1 py-3 backdrop-blur-sm">
         <button
           type="submit"
           disabled={busy}
-          className="h-10 px-5 rounded-xl bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 transition-colors text-[13px] font-semibold text-white"
+          className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 transition-colors text-[13px] font-semibold text-zinc-900"
         >
           {busy ? "Đang lưu…" : "Lưu cấu hình"}
         </button>
-        <span className="text-[11px] text-neutral-500">
+        <span className="text-[11px] text-zinc-500">
           Lưu cả ba thẻ cùng lúc, kể cả thẻ bạn chưa mở.
         </span>
       </div>

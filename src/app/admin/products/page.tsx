@@ -11,7 +11,7 @@ import {
 import { AdminCategories } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminCategories";
 import { AdminProducts } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProducts";
 import { AdminProductTabs } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminProductTabs";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminSoftware } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSoftware";
 import { AdminWeaponImages } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminWeaponImages";
 import { readLogin } from "@/lib/accountLogin";
@@ -37,7 +37,7 @@ const PLACEHOLDER_SKIN = /^(ULTRA|EXCLUSIVE|PREMIUM|DELUXE|SELECT) #\d+$/i;
 export const metadata: Metadata = { title: "Sản phẩm | Quản trị" };
 export const dynamic = "force-dynamic";
 
-const SECTION_NOTE = "text-xs text-neutral-400";
+const SECTION_NOTE = "text-xs text-zinc-500";
 
 function StatCard({
   label,
@@ -53,23 +53,23 @@ function StatCard({
 }) {
   const idle = value === "0";
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[12px] font-semibold text-neutral-500">
+        <span className="text-[12px] font-semibold text-zinc-500">
           {label}
         </span>
-        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-mist`}>
+        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500`}>
           <Icon size={15} />
         </span>
       </div>
       <span
         className={`min-w-0 break-all text-[20px] font-black leading-none tabular-nums sm:text-[26px] ${
-          idle ? "text-neutral-600" : "text-white"
+          idle ? "text-zinc-400" : "text-zinc-900"
         }`}
       >
         {value}
       </span>
-      <span className="text-[11px] text-neutral-500">{sub}</span>
+      <span className="text-[11px] text-zinc-500">{sub}</span>
     </div>
   );
 }
@@ -146,7 +146,7 @@ export default async function AdminProductsPage() {
   ).length;
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Sản phẩm"
       subtitle="Danh mục, tài khoản, phần mềm và kho ảnh, mỗi thứ một thẻ"
       username={admin.username}
@@ -157,7 +157,7 @@ export default async function AdminProductsPage() {
           value={String(categories.length)}
           sub="nhóm hàng ngoài trang chủ"
           icon={LayoutGrid}
-          tint="border-indigo-500/25 bg-indigo-500/10 text-indigo-400"
+          tint="border-indigo-200 bg-indigo-50 text-indigo-600"
         />
         <StatCard
           label="Tài khoản game"
@@ -168,8 +168,8 @@ export default async function AdminProductsPage() {
           icon={Boxes}
           tint={
             unlistedLogins > 0
-              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
-              : "border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
+              ? "border-amber-200 bg-amber-50 text-amber-600"
+              : "border-emerald-200 bg-emerald-50 text-emerald-600"
           }
         />
         <StatCard
@@ -177,7 +177,7 @@ export default async function AdminProductsPage() {
           value={String(softwareRows.length)}
           sub={`${softwarePackages} gói thời hạn`}
           icon={KeyRound}
-          tint="border-violet-500/25 bg-violet-500/10 text-violet-400"
+          tint="border-violet-200 bg-violet-50 text-violet-600"
         />
         <StatCard
           label="Kho ảnh vật phẩm"
@@ -190,8 +190,8 @@ export default async function AdminProductsPage() {
           icon={ImageIcon}
           tint={
             missing.length > 0
-              ? "border-amber-500/25 bg-amber-500/10 text-amber-400"
-              : "border-sky-500/25 bg-sky-500/10 text-sky-400"
+              ? "border-amber-200 bg-amber-50 text-amber-600"
+              : "border-sky-500/25 bg-sky-50 text-sky-600"
           }
         />
       </div>
@@ -286,6 +286,6 @@ export default async function AdminProductsPage() {
           />
         </section>
       </AdminProductTabs>
-    </AdminShell>
+    </AdminChrome>
   );
 }

@@ -11,9 +11,9 @@ export interface AdminPackageDetailView {
   keys: PackageKeysView;
 }
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-zinc-500";
 
 /**
  * One tier's own screen: its numbers, and its key store with room to breathe.
@@ -47,7 +47,7 @@ export function AdminPackageDetail({ pkg }: { pkg: AdminPackageDetailView }) {
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <KeyRound size={13} className="text-neutral-400" />
+          <KeyRound size={13} className="text-zinc-500" />
           Kho key
         </span>
         <AdminPackageKeys packageId={pkg.id} keys={pkg.keys} />
@@ -70,18 +70,18 @@ function Stat({
     <div
       className={`rounded-xl border p-3 ${
         tone === "warn"
-          ? "border-amber-500/30 bg-amber-500/10"
-          : "border-white/[0.08] bg-[#0e0e11]"
+          ? "border-amber-200 bg-amber-50"
+          : "border-zinc-200 bg-white"
       }`}
     >
       <p
         className={`text-lg font-black tabular-nums ${
-          tone === "warn" ? "text-amber-400" : "text-white"
+          tone === "warn" ? "text-amber-600" : "text-zinc-900"
         }`}
       >
         {value}
       </p>
-      <p className="mt-0.5 text-[12px] font-bold text-neutral-500">
+      <p className="mt-0.5 text-[12px] font-bold text-zinc-500">
         {label}
       </p>
     </div>

@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { AdminCategoryDetail } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminCategoryDetail";
 import { WarrantyQuestionsEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/WarrantyQuestionsEditor";
 import { DETAIL_QUESTIONS } from "@/lib/warrantyDetails";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 
@@ -49,14 +49,14 @@ export default async function AdminCategoryDetailPage({
   if (!category) notFound();
 
   return (
-    <AdminShell
+    <AdminChrome
       title={category.name}
       subtitle="Chi tiết danh mục, tên, đường dẫn, ảnh bìa và số liệu thẻ"
       username={admin.username}
       aside={
         <Link
           href="/admin/products"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           Danh sách sản phẩm
@@ -90,6 +90,6 @@ export default async function AdminCategoryDetailPage({
           inheritName="bộ mặc định"
         />
       </div>
-    </AdminShell>
+    </AdminChrome>
   );
 }

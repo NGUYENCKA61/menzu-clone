@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminSpinPrizeEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminSpinPrizeEditor";
 import { getAdmin } from "@/lib/admin";
 import { totalWeight, type Prize } from "@/lib/spin";
@@ -12,7 +12,7 @@ import { listSpinPrizes } from "@/lib/spinPrizes";
 export const metadata: Metadata = { title: "Phần quà vòng quay | Quản trị" };
 export const dynamic = "force-dynamic";
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5";
 
 /** The id the list uses to mean "a slice that does not exist yet". */
 const NEW = "moi";
@@ -69,7 +69,7 @@ export default async function AdminSpinPrizePage({
   const sliceCount = isNew ? prizes.length + 1 : prizes.length;
 
   return (
-    <AdminShell
+    <AdminChrome
       title={isNew ? "Thêm phần quà" : prize.label}
       subtitle={
         isNew
@@ -80,7 +80,7 @@ export default async function AdminSpinPrizePage({
       aside={
         <Link
           href="/admin/operations?tab=spin"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 transition-colors hover:text-zinc-900"
         >
           <ArrowLeft size={14} />
           Vòng quay
@@ -100,6 +100,6 @@ export default async function AdminSpinPrizePage({
           editingIndex={isNew ? prizes.length : prizes.findIndex((p) => p.id === id)}
         />
       </section>
-    </AdminShell>
+    </AdminChrome>
   );
 }

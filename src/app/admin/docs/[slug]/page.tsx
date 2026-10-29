@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { AdminDocEditor } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDocEditor";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { isHtmlBody, plainToDocHtml } from "@/lib/docHtml";
@@ -56,14 +56,14 @@ export default async function AdminDocEditorPage({
     : "";
 
   return (
-    <AdminShell
+    <AdminChrome
       title={doc.title}
       subtitle="Soạn nội dung bài viết Wiki"
       username={admin.username}
       aside={
         <Link
           href="/admin/docs"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
         >
           <ArrowLeft size={14} />
           Danh sách bài viết
@@ -89,6 +89,6 @@ export default async function AdminDocEditorPage({
           }),
         }}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

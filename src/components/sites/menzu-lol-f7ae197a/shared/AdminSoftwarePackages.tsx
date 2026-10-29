@@ -27,13 +27,13 @@ export interface PackageRowView {
   keysPending: number;
 }
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
 const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
+  "flex items-center gap-2 text-[12px] font-semibold text-zinc-500";
 const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
+  "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-900 outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-400";
 const LABEL =
-  "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+  "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -179,8 +179,8 @@ export function AdminSoftwarePackages({
           role={msg.tone === "err" ? "alert" : "status"}
           className={
             msg.tone === "ok"
-              ? "rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-[12px] font-semibold text-emerald-400"
-              : "rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[12px] font-semibold text-red-400"
+              ? "rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-[12px] font-semibold text-emerald-600"
+              : "rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-[12px] font-semibold text-rose-600"
           }
         >
           {msg.text}
@@ -189,7 +189,7 @@ export function AdminSoftwarePackages({
 
       <form onSubmit={addPackage} className={CARD}>
         <span className={CARD_HEAD}>
-          <Plus size={13} className="text-neutral-400" />
+          <Plus size={13} className="text-zinc-500" />
           Thêm gói mới
         </span>
         {/* Tên → thời hạn → giá → đơn vị, as the shop ordered them. "Vĩnh
@@ -260,7 +260,7 @@ export function AdminSoftwarePackages({
             // from — and durationValid above already guarantees there is.
             !(label.trim() || autoLabel(length, unit))
           }
-          className="self-start h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
+          className="self-start h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5"
         >
           <Plus size={12} />
           {busy ? "Đang thêm…" : "Thêm gói"}
@@ -269,12 +269,12 @@ export function AdminSoftwarePackages({
 
       <section className={CARD}>
         <span className={CARD_HEAD}>
-          <Package size={13} className="text-neutral-400" />
+          <Package size={13} className="text-zinc-500" />
           Gói hiện có ({packages.length})
         </span>
 
         {packages.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-white/10 px-3 py-4 text-center text-[11px] text-neutral-500">
+          <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500">
             Chưa có gói nào, khách không có gì để mua cho tới khi gói đầu tiên lên kệ.
           </p>
         ) : (
@@ -287,7 +287,7 @@ export function AdminSoftwarePackages({
                 // a price is right.
                 <div
                   key={pkg.id}
-                  className="flex flex-wrap items-end gap-2 rounded-lg border border-[var(--brand)]/40 bg-neutral-950/50 px-3 py-2.5"
+                  className="flex flex-wrap items-end gap-2 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2.5"
                 >
                   <div className="min-w-[110px] flex-1">
                     <label htmlFor={`edit-label-${pkg.id}`} className={LABEL}>
@@ -348,14 +348,14 @@ export function AdminSoftwarePackages({
                       !durationValid(editLength, editUnit)
                     }
                     onClick={() => void saveEdit()}
-                    className="h-[30px] px-3 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors"
+                    className="h-[30px] px-3 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-zinc-900 transition-colors"
                   >
                     Lưu
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="h-[30px] px-3 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-[12px] font-semibold text-neutral-300 transition-colors"
+                    className="h-[30px] px-3 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-100 text-[12px] font-semibold text-zinc-700 transition-colors"
                   >
                     Hủy
                   </button>
@@ -367,27 +367,27 @@ export function AdminSoftwarePackages({
               // and made every row read as clutter.
               <div
                 key={pkg.id}
-                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-white/10 bg-white/[0.02] px-3.5 py-2.5"
+                className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-zinc-200 bg-white px-3.5 py-2.5"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-white">
+                  <p className="text-[13px] font-bold text-zinc-900">
                     {pkg.label}
-                    <span className="ml-2 text-[11px] font-semibold text-neutral-500">
+                    <span className="ml-2 text-[11px] font-semibold text-zinc-500">
                       {formatDurationInline(pkg.durationHours)}
                     </span>
                   </p>
                   <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
-                    <span className="font-black tabular-nums text-rose-400">
+                    <span className="font-black tabular-nums text-rose-600">
                       {formatVnd(pkg.price)}đ
                     </span>
-                    <span className="tabular-nums text-neutral-500">
+                    <span className="tabular-nums text-zinc-500">
                       {pkg.orderCount} đơn
                     </span>
                     {/* Amber when a paid customer is waiting on stock — the
                         one figure on this page that demands action. */}
                     <span
                       className={`inline-flex items-center gap-1 font-bold tabular-nums ${
-                        pkg.keysPending > 0 ? "text-amber-400" : "text-neutral-500"
+                        pkg.keysPending > 0 ? "text-amber-600" : "text-zinc-500"
                       }`}
                     >
                       <KeyRound size={10} aria-hidden />
@@ -399,7 +399,7 @@ export function AdminSoftwarePackages({
                 </div>
                 <Link
                   href={`/admin/packages/${encodeURIComponent(pkg.id)}`}
-                  className="h-7 shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 text-[12px] font-semibold text-neutral-300 transition-colors hover:bg-white/10 inline-flex items-center gap-1"
+                  className="h-7 shrink-0 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 inline-flex items-center gap-1"
                 >
                   <KeyRound size={10} aria-hidden />
                   Quản lý license
@@ -409,7 +409,7 @@ export function AdminSoftwarePackages({
                   disabled={busy}
                   onClick={() => startEdit(pkg)}
                   aria-label={`Sửa gói ${pkg.label}`}
-                  className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-[var(--brand)]/40 hover:bg-[var(--brand)]/10 disabled:opacity-30 text-neutral-500 hover:text-white transition-colors inline-flex items-center justify-center"
+                  className="h-7 w-7 shrink-0 rounded-lg border border-zinc-200 bg-white hover:border-zinc-400 hover:bg-zinc-100 disabled:opacity-30 text-zinc-500 hover:text-zinc-900 transition-colors inline-flex items-center justify-center"
                 >
                   <Pencil size={12} />
                 </button>
@@ -426,7 +426,7 @@ export function AdminSoftwarePackages({
                   }
                   onClick={() => setRemoving(pkg)}
                   aria-label={`Xoá gói ${pkg.label}`}
-                  className="h-7 w-7 shrink-0 rounded-lg border border-white/[0.07] bg-white/[0.03] hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-30 disabled:hover:border-white/[0.07] disabled:hover:bg-white/[0.03] text-neutral-500 hover:text-red-400 disabled:hover:text-neutral-500 transition-colors inline-flex items-center justify-center"
+                  className="h-7 w-7 shrink-0 rounded-lg border border-zinc-200 bg-white hover:border-rose-200 hover:bg-rose-50 disabled:opacity-30 disabled:hover:border-zinc-200 disabled:hover:bg-white text-zinc-500 hover:text-rose-600 disabled:hover:text-zinc-500 transition-colors inline-flex items-center justify-center"
                 >
                   <Trash2 size={12} />
                 </button>

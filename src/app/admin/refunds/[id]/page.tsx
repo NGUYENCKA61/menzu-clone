@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 import { AdminRefundDecide } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminRefundDecide";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
@@ -20,8 +20,8 @@ import { dayStamp } from "@/lib/dayGroups";
 export const metadata: Metadata = { title: "Chi tiết hoàn trả | Quản trị" };
 export const dynamic = "force-dynamic";
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5";
-const LABEL = "text-[12px] font-semibold text-neutral-500";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5";
+const LABEL = "text-[12px] font-semibold text-zinc-500";
 
 function formatWhen(date: Date): string {
   return dayStamp(date);
@@ -32,7 +32,7 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
   return (
     <div className="min-w-0 px-4 py-3">
       <span className={LABEL}>{label}</span>
-      <div className="mt-1 truncate text-[13px] font-bold text-white">
+      <div className="mt-1 truncate text-[13px] font-bold text-zinc-900">
         {children}
       </div>
     </div>
@@ -106,14 +106,14 @@ export default async function AdminRefundDetailPage({
   const owed = Math.max(0, order.keysOwed - order._count.licenseKeys);
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Chi tiết hoàn trả"
       subtitle={`Đơn ${order.code} · ${row.user.username}`}
       username={admin.username}
       aside={
         <Link
           href="/admin/operations"
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-neutral-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-zinc-500 transition-colors hover:text-zinc-900"
         >
           <ArrowLeft size={14} />
           Vận hành
@@ -122,7 +122,7 @@ export default async function AdminRefundDetailPage({
     >
       {/* THE FACTS, ACROSS THE TOP */}
       <section className={`${CARD} !p-0`}>
-        <div className="grid grid-cols-2 divide-x divide-white/[0.06] sm:grid-cols-4">
+        <div className="grid grid-cols-2 divide-x divide-zinc-100 sm:grid-cols-4">
           <Fact label="Trạng thái">
             <span
               className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
@@ -139,7 +139,7 @@ export default async function AdminRefundDetailPage({
       {/* WHO, AND WHAT THEY BOUGHT */}
       <section className={CARD}>
         <div className="flex flex-wrap items-center gap-4">
-          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-neutral-950">
+          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
             {order.product.imageUrl ? (
               <Image
                 src={order.product.imageUrl}
@@ -153,12 +153,12 @@ export default async function AdminRefundDetailPage({
           <div className="min-w-0 flex-1">
             <Link
               href={productHref(order.product.category.slug, order.product.slug)}
-              className="inline-flex items-center gap-1.5 text-sm font-black text-white transition-colors hover:text-[var(--brand)]"
+              className="inline-flex items-center gap-1.5 text-sm font-black text-zinc-900 transition-colors hover:text-rose-600"
             >
               {productName}
-              <ExternalLink size={12} className="text-neutral-500" />
+              <ExternalLink size={12} className="text-zinc-500" />
             </Link>
-            <p className="mt-1 text-[11px] font-semibold text-neutral-500">
+            <p className="mt-1 text-[11px] font-semibold text-zinc-500">
               {order.product.category.name}
               {order.package ? ` · ${order.package.label}` : ""}
               {order.quantity > 1 ? ` · ×${order.quantity}` : ""} · mua{" "}
@@ -167,17 +167,17 @@ export default async function AdminRefundDetailPage({
             {/* The one fact about the order that can decide this by itself: a
                 shop that never delivered the key has little to argue. */}
             {owed > 0 ? (
-              <p className="mt-1.5 inline-flex rounded-md border border-[var(--brand)]/30 bg-[var(--brand)]/10 px-2 py-0.5 text-[12px] font-semibold text-[var(--brand)]">
+              <p className="mt-1.5 inline-flex rounded-md border border-zinc-300 bg-zinc-50 px-2 py-0.5 text-[12px] font-semibold text-rose-600">
                 Còn nợ {owed} key
               </p>
             ) : null}
           </div>
           <div className="shrink-0 text-right">
             <p className={LABEL}>Khách</p>
-            <p className="mt-1 text-[13px] font-bold text-white">
+            <p className="mt-1 text-[13px] font-bold text-zinc-900">
               {row.user.username}
             </p>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] text-zinc-500">
               UID {row.user.uid} · ví {formatVnd(Number(row.user.balance))}đ
             </p>
           </div>
@@ -187,7 +187,7 @@ export default async function AdminRefundDetailPage({
       {/* WHAT THEY SAID */}
       <section className={CARD}>
         <span className={LABEL}>Lý do khách gửi</span>
-        <p className="mt-2.5 whitespace-pre-line text-[14px] leading-relaxed text-neutral-200">
+        <p className="mt-2.5 whitespace-pre-line text-[14px] leading-relaxed text-zinc-800">
           {row.reason}
         </p>
         {row.imageUrl ? (
@@ -195,7 +195,7 @@ export default async function AdminRefundDetailPage({
             href={row.imageUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 block w-full max-w-[560px] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 transition-colors hover:border-white/25"
+            className="mt-4 block w-full max-w-[560px] overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 transition-colors hover:border-zinc-300"
           >
             <Image
               src={row.imageUrl}
@@ -206,7 +206,7 @@ export default async function AdminRefundDetailPage({
             />
           </a>
         ) : (
-          <p className="mt-3 text-[12px] text-neutral-600">
+          <p className="mt-3 text-[12px] text-zinc-400">
             Khách không đính ảnh nào.
           </p>
         )}
@@ -229,24 +229,24 @@ export default async function AdminRefundDetailPage({
         ) : (
           <>
             <span className={LABEL}>Đã xử lý</span>
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-neutral-300">
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-zinc-700">
               <span
                 className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
               >
                 {state.label}
               </span>
               {row.decidedAt ? (
-                <span className="text-[12px] text-neutral-500">
+                <span className="text-[12px] text-zinc-500">
                   {formatWhen(row.decidedAt)}
                 </span>
               ) : null}
               {row.method ? (
                 <span>
-                  <b className="text-white">{REFUND_METHOD[row.method].label}</b>
+                  <b className="text-zinc-900">{REFUND_METHOD[row.method].label}</b>
                   {row.amount !== null ? (
                     <>
                       {" · "}
-                      <b className="text-[var(--brand)]">
+                      <b className="text-rose-600">
                         {formatVnd(Number(row.amount))}đ
                       </b>
                     </>
@@ -255,13 +255,13 @@ export default async function AdminRefundDetailPage({
               ) : null}
             </div>
             {row.adminNote ? (
-              <p className="mt-3 rounded-r-lg border-l-2 border-[var(--brand)] bg-[var(--brand)]/[0.06] px-3.5 py-2.5 text-[13px] leading-relaxed text-neutral-300">
+              <p className="mt-3 rounded-r-lg border-l-2 border-zinc-900 bg-zinc-50 px-3.5 py-2.5 text-[13px] leading-relaxed text-zinc-700">
                 {row.adminNote}
               </p>
             ) : null}
           </>
         )}
       </section>
-    </AdminShell>
+    </AdminChrome>
   );
 }
