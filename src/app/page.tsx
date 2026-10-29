@@ -255,11 +255,12 @@ export default async function Home({
             off in Cấu hình — and a front page with no h1 tells a crawler
             nothing about what the site is. This one is always here, read by
             screen readers and search engines and drawn by neither. */}
-        {!visibleBlocks(settings).includes("hero") ? (
-          <h1 className="sr-only">
-            {settings.brandName}: hack game và tài khoản game
-          </h1>
-        ) : null}
+        {/* Always, hero or not: the typed hero title is a <p> now, so this
+            is the page's one h1 and it says what the shop sells in real text
+            a crawler reads, not an aria-label (SEO review 28/10). */}
+        <h1 className="sr-only">
+          {settings.brandName}: hack game và tài khoản game
+        </h1>
         <div className="w-full">
           <div className="w-full max-w-[1320px] mx-auto px-4 lg:px-6 py-6 lg:py-10 pb-16 lg:pb-24">
             {/* A wider beat between blocks than the rows keep inside them, so

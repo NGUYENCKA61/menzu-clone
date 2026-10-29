@@ -161,6 +161,10 @@ function vipFromParam(value?: string): number | undefined {
 export default async function CategoryPage({ params, searchParams }: PageProps) {
   const { categorySlug: slug } = await params;
   const query = await searchParams;
+
+  // A capitalised address is the same shelf: a real 308 onto the lowercase
+  // one, now that nothing streams a 200 first (SEO review 28/10).
+  if (slug !== slug.toLowerCase()) permanentRedirect(categoryHref(slug.toLowerCase()));
   const page = Math.max(1, Number(query.page ?? 1) || 1);
   // LAB: ?ban=cu shows the tool cards, the "Về …" heading and the FAQ as they
   // were before 19/10/2026, to set beside the new ("rà soát trang chi tiết

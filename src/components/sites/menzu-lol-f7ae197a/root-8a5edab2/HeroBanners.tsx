@@ -166,7 +166,7 @@ export function HeroBanners({
               once, not letter by letter. It also carries what the shop sells,
               read and indexed but not drawn (H1_TOPIC): the drawn title is
               the brand alone (SEO review, 13/10/2026). */}
-          <h1
+          <p
             aria-label={`${title.replace(/\n/g, " ")}${H1_TOPIC}`}
             // One unbreakable word in a column capped at 440px: at 46px it is
             // 485px wide and its last letters ran under the video card on
@@ -200,7 +200,7 @@ export function HeroBanners({
               </span>
             ))}
             <span className="sr-only">{H1_TOPIC}</span>
-          </h1>
+          </p>
 
           {subtitle ? (
             // LAB: 16px from 640px up, so the line holds its own beside the

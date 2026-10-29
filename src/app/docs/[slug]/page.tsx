@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,6 +12,9 @@ import { DocBody, DocHtml } from "@/lib/docFormat";
 import { embedVideos, isHtmlBody, outlineDocHtml, sanitizeDocHtml, type DocHeading } from "@/lib/docHtml";
 import { getDocArticle, listRelatedDocs, listToolArticles } from "@/lib/queries";
 import { docHref, productHref, toolDocsHref } from "@/lib/routes";
+
+/** One read per request, shared by generateMetadata and the page. */
+const articleBySlug = cache((slug: string) => getDocArticle(slug));
 import { articleJsonLd, breadcrumbJsonLd, JsonLd } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { getShopSettings } from "@/lib/settingsStore";
@@ -32,7 +36,7 @@ const dateFormat = new Intl.DateTimeFormat("vi-VN", {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getDocArticle(slug);
+  const article = await articleBySlug(slug);
   if (!article) return { title: "Không tìm thấy bài viết" };
 
   return {
@@ -66,7 +70,7 @@ export default async function DocArticlePage({ params, searchParams }: PageProps
   // beside the new one ("làm url trang wiki bản cũ để tui so sánh thêm đi").
   // A production build always shows the new.
   const old = process.env.NODE_ENV !== "production" && (await searchParams)?.ban === "cu";
-  const article = await getDocArticle(slug);
+  const article = await articleBySlug(slug);
   if (!article) notFound();
   // A tool's article: the body opens for as long as the reader's key says
   // (lib/docsAccess.ts), and the neighbours are the tool's other pages.

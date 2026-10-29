@@ -77,18 +77,21 @@ describe("sitemap lastmod", () => {
     }
   });
 
-  it("sends no lastmod for tools, their docs pages, or random-account listings", async () => {
+  it("sends no lastmod for tools, their docs pages, listings, or categories", async () => {
     const map = await lastmods();
     expect(map.has("/hack-valorant-moi/hack-valorant")).toBe(true);
     expect(map.get("/hack-valorant-moi/hack-valorant")).toBeUndefined();
     expect(map.get("/tai-lieu/hack-valorant")).toBeUndefined();
     expect(map.get("/acc-valorant/acc-random")).toBeUndefined();
+    // A bulk admin edit stamps every shelf the same minute; eight identical
+    // dates read as noise, so categories carry none (SEO review 28/10).
+    expect(map.has("/hack-valorant-moi")).toBe(true);
+    expect(map.get("/hack-valorant-moi")).toBeUndefined();
   });
 
-  it("keeps the real dates: a one-off account, a category, a wiki article", async () => {
+  it("keeps the real dates: a one-off account, a wiki article", async () => {
     const map = await lastmods();
     expect(map.get("/acc-valorant/acc-vlr-1")).toEqual(new Date("2026-10-01T00:00:00Z"));
-    expect(map.get("/hack-valorant-moi")).toEqual(new Date("2026-09-20T00:00:00Z"));
     expect(map.get("/docs/spoofer-la-gi")).toEqual(new Date("2026-10-05T00:00:00Z"));
   });
 

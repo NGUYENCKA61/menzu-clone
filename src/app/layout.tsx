@@ -71,6 +71,9 @@ export async function generateMetadata(): Promise<Metadata> {
   },
   description: DESCRIPTION,
   applicationName: brandName,
+  // Saved to an iPhone home screen without this, Safari screenshots the page
+  // for the icon; the manifest's icons only count once installed as an app.
+  icons: { apple: "/seo/icon-192.png" },
   keywords: [
     "hack game",
     "hack valorant",

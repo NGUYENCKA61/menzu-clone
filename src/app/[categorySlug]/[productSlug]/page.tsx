@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { cache } from "react";
 
 import { AccountDetailView } from "@/components/sites/menzu-lol-f7ae197a/shared/AccountDetailView";
 import { isFreeTool } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
@@ -26,6 +27,15 @@ import { productBehindOldSlug } from "@/lib/slugHistory";
 import { softwareBuyable } from "@/lib/softwareStock";
 import { toolDocsAccess } from "@/lib/toolDocs";
 import { toolPageTitle } from "@/lib/toolTitle";
+
+// generateMetadata and the page both need the same rows, and with the
+// loading boundary gone (the 28/10 SEO review: it turned every 404 and 308
+// into a streamed 200) both now run before the first byte. One per-request
+// memo spares the second trip; keyed by the slug string, since cache()
+// compares object arguments by reference.
+const productBySlug = cache((slug: string) => resolveProduct({ slug }));
+const softwareBySlug = cache((slug: string) => getSoftwareDetail(slug));
+const accountBySlug = cache((slug: string) => getAccountDetail(slug));
 
 /**
  * The quantity a guest had set before the login gate, carried back through
@@ -74,7 +84,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // the canonical below answers with the product's own either way.
   const { productSlug } = await params;
   const slug = decodeSegment(productSlug);
-  const found = await resolveProduct({ slug });
+  const found = await productBySlug(slug);
   if (found) return productMetadata(slug, found);
 
   // A renamed product's old address: the page redirects to the new one, and
@@ -82,7 +92,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // the document carries the product's real title and its canonical, not
   // "Không tìm thấy".
   const moved = await productBehindOldSlug(slug);
-  const target = moved ? await resolveProduct({ slug: moved.slug }) : null;
+  const target = moved ? await productBySlug(moved.slug) : null;
   return target ? productMetadata(target.slug, target) : NOT_FOUND_METADATA;
 }
 
@@ -96,7 +106,7 @@ async function productMetadata(
   const canonical = productHref(found.categorySlug, found.slug);
 
   if (found.isSoftware) {
-    const software = await getSoftwareDetail(slug);
+    const software = await softwareBySlug(slug);
     if (!software) return NOT_FOUND_METADATA;
 
     // The cheapest tier is the honest headline: it is what the buyer can
@@ -145,7 +155,7 @@ async function productMetadata(
     };
   }
 
-  const account = await getAccountDetail(slug);
+  const account = await accountBySlug(slug);
   if (!account) return NOT_FOUND_METADATA;
 
   // The listing's own name leads, then its code once and the price, which
@@ -191,7 +201,13 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const slug = decodeSegment(productSlug);
   const category = decodeSegment(categorySlug);
 
-  const found = await resolveProduct({ slug });
+  // A shared link with a capital letter is the same page, not a soft 404:
+  // fold it onto the lowercase address with a real 308 (SEO review 28/10).
+  if (slug !== slug.toLowerCase() || category !== category.toLowerCase()) {
+    permanentRedirect(productHref(category.toLowerCase(), slug.toLowerCase()));
+  }
+
+  const found = await productBySlug(slug);
   if (!found) {
     // No product answers on this slug now; one may have before it was
     // renamed. Its old address redirects, permanently, to its current one,
@@ -205,7 +221,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   }
 
   if (found.isSoftware) {
-    const software = await getSoftwareDetail(slug);
+    const software = await softwareBySlug(slug);
     if (!software) notFound();
     const { pkg, sl, ban } = await searchParams;
     // LAB: ?ban=cu shows the pill, "Hướng dẫn liên quan" and the similar row
@@ -316,7 +332,7 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
 
   // The account view emits its own Product and BreadcrumbList — accounts had
   // structured data from the start; it was only the tools that had none.
-  const account = await getAccountDetail(slug);
+  const account = await accountBySlug(slug);
   if (!account) notFound();
   const { sl } = await searchParams;
   // Who is looking, for an account sold to level 2 only; and the NFA guides

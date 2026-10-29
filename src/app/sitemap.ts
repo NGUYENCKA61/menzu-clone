@@ -144,7 +144,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...categories.map((category) => ({
       url: `${SITE_URL}${categoryHref(category.slug)}`,
-      lastModified: category.updatedAt,
+      // No lastModified: a bulk admin edit stamps every shelf the same
+      // minute, and eight identical dates read as noise, not news.
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
