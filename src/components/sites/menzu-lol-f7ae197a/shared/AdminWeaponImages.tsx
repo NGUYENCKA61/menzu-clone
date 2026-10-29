@@ -180,7 +180,7 @@ export function AdminWeaponImages({
           </div>
         </div>
 
-        <p className="text-[11px] leading-relaxed text-zinc-500">
+        <p className="text-[11px] leading-relaxed text-zinc-500 admin-hint">
           Mở trang súng trên wiki → chuột phải vào ảnh → <em>Copy image address</em> →
           dán vào đây. Máy chủ tự tải ảnh về, card đọc ảnh từ web mình chứ không
           mượn của người ta. Tên phải khớp tên gõ trong danh sách vật phẩm của tài
@@ -242,7 +242,7 @@ export function AdminWeaponImages({
           <span className="text-[12px] font-semibold text-zinc-500">
             Chưa có ảnh ({missingTotal})
           </span>
-          <p className="mt-1 text-[11px] text-zinc-500">
+          <p className="mt-1 text-[11px] text-zinc-500 admin-hint">
             Vật phẩm đang được liệt kê trên tài khoản mà kho chưa có ảnh. Card hiện
             tên thay cho ảnh, vẫn bán được bình thường.
           </p>
@@ -304,7 +304,7 @@ export function AdminWeaponImages({
             Lưu
           </button>
         </div>
-        <p className="mt-2 text-[11px] text-zinc-500">
+        <p className="mt-2 text-[11px] text-zinc-500 admin-hint">
           Chip nhỏ trong ô tìm skin ở trang danh mục, tự xoay vòng các cây súng VIP
           (Premium) có trong acc đang bán của danh mục đó, bấm vào là lọc theo cây đang
           hiện. Chọn một cây để ghim nó đứng đầu vòng xoay; chọn &ldquo;tự xoay&rdquo;

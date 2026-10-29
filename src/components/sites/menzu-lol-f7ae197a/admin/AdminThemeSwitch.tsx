@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { HelpCircle, Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
 /**
@@ -59,6 +59,67 @@ export function AdminThemeSwitch() {
         <span
           className={`absolute top-[2px] h-3.5 w-3.5 rounded-full bg-white transition-[left] ${
             dark ? "left-[16px]" : "left-[2px]"
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
+/**
+ * "Giải thích": shows or hides every .admin-hint guidance paragraph
+ * (src/app/admin-ui.css). Off by default — the screens read like a console;
+ * on for setup days. Same storage-and-flag pattern as the theme.
+ */
+const HELP_KEY = "ttt-admin-help";
+const HELP_EVENT = "ttt-admin-help-change";
+
+function helpSubscribe(onChange: () => void): () => void {
+  window.addEventListener(HELP_EVENT, onChange);
+  return () => window.removeEventListener(HELP_EVENT, onChange);
+}
+
+function helpOn(): boolean {
+  return document.documentElement.dataset.adminHelp === "on";
+}
+
+function flipHelp() {
+  const next = !helpOn();
+  try {
+    localStorage.setItem(HELP_KEY, next ? "on" : "off");
+  } catch {
+    // Private window: the switch still works for this page.
+  }
+  const root = document.documentElement;
+  if (next) root.dataset.adminHelp = "on";
+  else delete root.dataset.adminHelp;
+  window.dispatchEvent(new Event(HELP_EVENT));
+}
+
+export function AdminHelpSwitch() {
+  const on = useSyncExternalStore(helpSubscribe, helpOn, () => false);
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={flipHelp}
+      title="Hiện hoặc ẩn các dòng giải thích dưới từng ô"
+      className="flex w-full items-center justify-between gap-2 text-[12.5px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900"
+    >
+      <span className="inline-flex items-center gap-1.5">
+        <HelpCircle size={13} />
+        Giải thích
+      </span>
+      <span
+        aria-hidden
+        className={`relative h-[18px] w-8 shrink-0 rounded-full transition-colors ${
+          on ? "bg-zinc-900" : "bg-zinc-300"
+        }`}
+      >
+        <span
+          className={`absolute top-[2px] h-3.5 w-3.5 rounded-full bg-white transition-[left] ${
+            on ? "left-[16px]" : "left-[2px]"
           }`}
         />
       </span>

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "./theme-light.css";
 import "./admin-dark.css";
+import "./admin-ui.css";
 import { SITE_URL, siteDescription } from "@/lib/seo";
 import { PageBackdrop } from "@/components/sites/menzu-lol-f7ae197a/root-8a5edab2/PageBackdrop";
 import { THEME_BOOT_SCRIPT } from "@/components/sites/menzu-lol-f7ae197a/shared/ThemeToggle";

@@ -593,7 +593,7 @@ export function AdminWarrantyDetail({
                   </button>
                 ) : null}
               </div>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-zinc-500 admin-hint">
                 {/* Email goes out only once SMTP is set in Cấu hình. */}
                 {mailOn
                   ? "Khách nhận thông báo (web + email) ngay khi bấm."

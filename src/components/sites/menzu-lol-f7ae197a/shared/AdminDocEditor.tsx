@@ -134,7 +134,7 @@ export function AdminDocEditor({
               {hasBody ? "Đã có nội dung" : "Đang biên soạn"}
             </span>
           </div>
-          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500 admin-hint">
             <span>{meta?.label ?? doc.category}</span>
             <span className="font-mono text-zinc-400">/docs/{doc.slug}</span>
             <span className="inline-flex items-center gap-1 tabular-nums">
@@ -232,7 +232,7 @@ export function AdminDocEditor({
               </option>
             ))}
           </select>
-          <p className="mt-1.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
             Gắn thì bài này rời khỏi Wiki công khai, hiện trong trang tài liệu
             của tool (/tai-lieu) và chỉ khách đang trong hạn xem theo key mới
             đọc được nội dung.
@@ -248,7 +248,7 @@ export function AdminDocEditor({
               setSaved(false);
             }}
           />
-          <p className="mt-1.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
             Soạn trực tiếp như Word, đậm, nghiêng, màu, ảnh hiện ngay trong khung, và
             trang khách sẽ hiển thị đúng như bạn thấy. Để trống thì bài hiện trạng thái
             &ldquo;đang biên soạn&rdquo; và không được Google lập chỉ mục.

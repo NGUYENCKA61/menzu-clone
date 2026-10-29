@@ -22,7 +22,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { AdminThemeSwitch, AdminThemeSwitchIcon } from "./AdminThemeSwitch";
+import { AdminHelpSwitch, AdminThemeSwitch, AdminThemeSwitchIcon } from "./AdminThemeSwitch";
 import { avatarTone, initials } from "./format";
 
 /**
@@ -146,6 +146,7 @@ export function AdminChrome({
 
         <div className="flex flex-col gap-3 border-t border-zinc-200 px-4 py-4">
           <AdminThemeSwitch />
+          <AdminHelpSwitch />
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900"

@@ -272,7 +272,7 @@ export function AdminPackageKeys({
           </div>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
             {keys.shelf.length === 0 ? (
-              <p className="px-1 py-2 text-[11px] text-zinc-500">
+              <p className="px-1 py-2 text-[11px] text-zinc-500 admin-hint">
                 Kho trống. Khách vẫn mua được, đơn sẽ nằm chờ tới khi có key.
               </p>
             ) : (
@@ -290,7 +290,7 @@ export function AdminPackageKeys({
                   </div>
                 ))}
                 {keys.shelfTruncated ? (
-                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500">
+                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500 admin-hint">
                     …và {keys.available - keys.shelf.length} key nữa không hiện ở đây.
                   </p>
                 ) : null}
@@ -308,7 +308,7 @@ export function AdminPackageKeys({
           <span className={HEAD}>Đã thuê ({keys.sold})</span>
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-2.5">
             {keys.recent.length === 0 ? (
-              <p className="px-1 py-2 text-[11px] text-zinc-500">
+              <p className="px-1 py-2 text-[11px] text-zinc-500 admin-hint">
                 Chưa giao key nào cho khách.
               </p>
             ) : (
@@ -336,7 +336,7 @@ export function AdminPackageKeys({
                   </div>
                 ))}
                 {keys.sold > keys.recent.length ? (
-                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500">
+                  <p className="px-1.5 py-1.5 text-[11px] text-zinc-500 admin-hint">
                     …và {keys.sold - keys.recent.length} key đã giao trước đó.
                   </p>
                 ) : null}

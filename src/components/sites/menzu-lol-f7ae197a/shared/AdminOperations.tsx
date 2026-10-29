@@ -34,7 +34,7 @@ export interface FeedbackView {
 
 /** The one hand-typed figure on this screen: what a transfer actually carried. */
 const LABEL = "mb-1.5 block text-[12px] font-semibold text-zinc-600";
-const HINT = "mt-1.5 text-[11px] text-zinc-500";
+const HINT = "mt-1.5 text-[11px] text-zinc-500 admin-hint";
 
 /**
  * The reasons a top-up is actually refused, one tap each.
@@ -476,7 +476,7 @@ export function AdminOperations({
                     ) : null}
 
                     {row.amount > 0 ? (
-                      <p className="mt-2 text-[11px] text-zinc-500">
+                      <p className="mt-2 text-[11px] text-zinc-500 admin-hint">
                         Trị giá GD:{" "}
                         <span className="font-black tabular-nums text-emerald-600">
                           {formatVnd(row.amount)}đ

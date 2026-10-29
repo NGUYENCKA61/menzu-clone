@@ -464,7 +464,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               </span>
             ) : null}
           </div>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500 admin-hint">
             <span>{account.categoryName}</span>
             {account.rank ? <span>Rank {account.rank}</span> : null}
             <span className="tabular-nums">{account.orderCount} đơn</span>
@@ -562,7 +562,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 Lưu
               </button>
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               &ldquo;Đã ẩn&rdquo; rút tài khoản khỏi kệ nhưng giữ nguyên link; &ldquo;Đã
               bán&rdquo; hiện nhãn hết hàng trên trang khách.
             </p>
@@ -847,7 +847,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 ) : null}
               </>
             ) : (
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-zinc-500 admin-hint">
                 Tắt: sản phẩm là một tài khoản duy nhất, giao thông tin đăng nhập ở ô bên dưới.
               </p>
             )}
@@ -940,7 +940,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
                 <span className="text-[11px] text-zinc-500">Có thay đổi chưa lưu</span>
               ) : null}
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               Mọi acc đều giao tự động: khách thanh toán xong bấm Lấy thông tin trong
               Lịch sử mua (bắt buộc quay màn hình) là thấy. Trang sản phẩm ngoài kệ
               không hiện. Cần cả tên đăng nhập lẫn mật khẩu; để trống cả hai rồi lưu
@@ -1013,7 +1013,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
               Ảnh phụ ({account.gallery.length})
             </span>
             {account.gallery.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500">
+              <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500 admin-hint">
                 Chưa có ảnh phụ, trang khách chỉ hiện ảnh bìa.
               </p>
             ) : (
@@ -1078,7 +1078,7 @@ export function AdminAccountDetail({ account }: { account: AccountDetailView }) 
           Mô tả sản phẩm
         </span>
         <RichTextEditor initialHtml={account.descriptionHtml} onUpdate={setDescHtml} />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Có nội dung ở đây thì card ngoài danh mục và panel mua hiện lời này
           (rút thành chữ thường). Để trống rồi lưu thì quay về câu mặc định.
         </p>

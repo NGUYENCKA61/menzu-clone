@@ -208,7 +208,7 @@ export function AdminCategories({ categories }: { categories: AdminCategoryView[
             }}
           />
         </div>
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Đường dẫn được tạo tự động từ tên, &ldquo;Tài Khoản Đặc Biệt&rdquo; thành{" "}
           <span className="font-mono text-zinc-500">/tai-khoan-dac-biet</span>.
           Danh mục mới xếp cuối danh sách, không xáo trộn thứ tự trang chủ đang có.

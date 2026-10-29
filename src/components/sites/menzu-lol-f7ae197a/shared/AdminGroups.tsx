@@ -320,7 +320,7 @@ export function AdminGroups({
           <div>
             <span className={LABEL}>Danh mục trong nhóm ({group.categoryIds.length})</span>
             {group.categoryIds.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500">
+              <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500 admin-hint">
                 Chưa chọn danh mục nào, nhóm này sẽ không hiện trên trang chủ.
               </p>
             ) : (

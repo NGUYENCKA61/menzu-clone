@@ -623,7 +623,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               {software.status === "AVAILABLE" ? "Đang bán" : "Đã ẩn"}
             </span>
           </div>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500 admin-hint">
             <span>{software.categoryName}</span>
             <span className="tabular-nums">{software.packages.length} gói</span>
             <span className="tabular-nums">{totalOrders} đơn</span>
@@ -679,7 +679,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="VD: Bản private an toàn, cập nhật liên tục, aimbot mượt và ESP rõ ràng, dễ cài cho cả người mới."
                   className={`${FIELD} resize-y leading-relaxed`}
                 />
-                <p className="mt-1.5 flex justify-between gap-3 text-[11px] text-zinc-500">
+                <p className="mt-1.5 flex justify-between gap-3 text-[11px] text-zinc-500 admin-hint">
                   <span>
                     1–2 câu, hiện ngay dưới tên sản phẩm ở trang khách và trên thẻ
                     sản phẩm. Để trống thì không hiện gì.
@@ -709,7 +709,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     className={`${FIELD} font-mono`}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                   Đổi đường dẫn là link cũ hỏng, chỉ sửa khi sản phẩm chưa được
                   chia sẻ đi đâu.
                 </p>
@@ -739,7 +739,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder={DEFAULT_DOWNLOAD_NAME}
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                   Hiện dưới &ldquo;Link tải hack&rdquo; trong đơn hàng của khách.
                   Để trống thì hiện &ldquo;{DEFAULT_DOWNLOAD_NAME}&rdquo;.
                 </p>
@@ -757,7 +757,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="https://…"
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                   Hiện cùng &ldquo;Link tải&rdquo; trong đơn hàng của khách, ngay
                   cạnh key. Để trống nếu chưa có.
                 </p>
@@ -834,7 +834,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                     onIcon={setIcon2}
                   />
                 </div>
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                   Hiện cạnh trạng thái ở trang khách. Gõ gì hiện nấy, &ldquo;TOP #1 BÁN CHẠY&rdquo;, &ldquo;MỚI RA MẮT&rdquo;,
                   &ldquo;SẮP HẾT HÀNG&rdquo;. Mỗi nhãn chọn màu riêng bằng dãy
                   chấm bên phải. Để trống cả hai thì không hiện nhãn nào.
@@ -875,7 +875,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                   placeholder="VD: 80"
                   className={FIELD}
                 />
-                <p className="mt-1.5 text-[11px] text-zinc-500">
+                <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                   Mức bảo hành / hoàn trả khách nhận được nếu sản phẩm gặp sự cố
                   ngoài ý muốn. Hiện dưới mục &ldquo;Chính sách bảo hành &amp;
                   hoàn tiền&rdquo; ở trang khách. Để trống thì không hiện dòng
@@ -1020,7 +1020,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
                 })}
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               Trạng thái hack hiện thành pill trên card ngoài cửa hàng, khách nhìn nó để
               quyết định mua. Card ngoài luôn hiện; ô bên phải chỉ quyết định
               trang chi tiết, nơi pill đứng chung hàng với nhãn nổi bật.
@@ -1044,7 +1044,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
               {/* The note's formatting rules (lib/statusNote), named where the
                   note is written, so a dash turning into a bullet is never a
                   surprise. */}
-              <p className="text-[11px] leading-relaxed text-zinc-500">
+              <p className="text-[11px] leading-relaxed text-zinc-500 admin-hint">
                 **chữ đậm** · dòng bắt đầu bằng &quot;- &quot; là gạch đầu dòng · dòng trống để
                 tách đoạn · link dán vào tự bấm được
               </p>
@@ -1136,7 +1136,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           Mô tả sản phẩm
         </span>
         <RichTextEditor initialHtml={software.descriptionHtml} onUpdate={setDescHtml} />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Có nội dung ở đây thì khu &ldquo;Mô tả sản phẩm&rdquo; trên trang khách hiện
           đúng bài này, đậm, màu, ảnh y như trong khung. Để trống rồi lưu thì trang
           khách quay về đoạn hướng dẫn và bảo hành viết sẵn. Khu &ldquo;Tính năng nổi
@@ -1173,7 +1173,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           }
           className={`${FIELD} resize-y leading-relaxed`}
         />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Mỗi dòng một yêu cầu, dạng <span className="font-mono text-zinc-500">Nhãn: giá trị</span>, nhãn in bên trái, giá trị in đậm bên phải trong khung &ldquo;Yêu cầu hệ
           thống&rdquo; trên trang khách. Dòng không có dấu hai chấm bị bỏ qua. Xoá hết thì
           trang khách in lại danh sách mặc định chung của shop chứ không trống.
@@ -1210,7 +1210,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           }
           className={`${FIELD} resize-y leading-relaxed`}
         />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Mỗi dòng một tính năng, dạng <span className="font-mono text-zinc-500">Tên: mô tả</span>.
           Phần trước dấu hai chấm đầu tiên được in đậm trên trang khách, phần sau viết
           thường. Không có dấu hai chấm thì cả dòng là tên, &ldquo;No recoil&rdquo; cũng là
@@ -1243,7 +1243,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
             Mô tả tính năng
           </span>
           <RichTextEditor initialHtml={software.featuresNoteHtml} onUpdate={setNoteHtml} />
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-zinc-500 admin-hint">
             Đoạn viết nằm ngay dưới danh sách gạch đầu dòng ở trên. Soạn y như ô mô tả
             sản phẩm, đậm, màu, tiêu đề, ảnh. Để trống thì trang khách không hiện gì
             thêm sau danh sách.
@@ -1271,7 +1271,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           Hướng dẫn cài đặt
         </span>
         <RichTextEditor initialHtml={software.guideHtml} onUpdate={setGuideHtml} />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Khu &ldquo;Hướng dẫn cài đặt&rdquo; trên trang khách, cách tải, cách bật,
           cách nhập key. Soạn y như ô mô tả: đậm, màu, đánh số, chèn ảnh chụp màn hình.
           Muốn chèn video: bấm nút &ldquo;Video&rdquo; rồi dán link YouTube, bấm vào
@@ -1303,7 +1303,7 @@ export function AdminSoftwareDetail({ software }: { software: SoftwareDetailView
           initialHtml={software.setupGuideHtml}
           onUpdate={setSetupGuideHtml}
         />
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Khu &ldquo;Hướng dẫn thiết lập &amp; sử dụng&rdquo; trên trang khách, ngay
           dưới hướng dẫn cài đặt, nhập key, bật tính năng, chỉnh thông số, thao tác
           trong game. <span className="text-zinc-500">Chỉ khách đã thuê key của tool

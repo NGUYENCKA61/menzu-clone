@@ -274,7 +274,7 @@ export function AdminSoftwarePackages({
         </span>
 
         {packages.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500">
+          <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-[11px] text-zinc-500 admin-hint">
             Chưa có gói nào, khách không có gì để mua cho tới khi gói đầu tiên lên kệ.
           </p>
         ) : (

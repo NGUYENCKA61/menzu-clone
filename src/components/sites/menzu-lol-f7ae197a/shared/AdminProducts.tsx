@@ -462,7 +462,7 @@ export function AdminProducts({
                 className="shrink-0 text-zinc-400 transition-colors group-hover:text-rose-600"
               />
             </Link>
-            <p className="text-[11px] text-zinc-500 mt-0.5">
+            <p className="text-[11px] text-zinc-500 mt-0.5 admin-hint">
               {p.categoryName} · {formatVnd(p.price)}đ
               {p.rank ? ` · ${p.rank}` : ""}
               {p.tag ? ` · ${p.tag}` : ""}

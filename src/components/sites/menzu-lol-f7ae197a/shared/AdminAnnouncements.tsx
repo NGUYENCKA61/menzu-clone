@@ -494,7 +494,7 @@ export function AdminAnnouncements({
             </div>
           ) : (
             <div className="flex items-end">
-              <p className="pb-2.5 text-[11px] text-zinc-500">
+              <p className="pb-2.5 text-[11px] text-zinc-500 admin-hint">
                 Hiện cho tất cả khách vào web, kể cả người chưa đăng nhập.
               </p>
             </div>
@@ -585,7 +585,7 @@ export function AdminAnnouncements({
               placeholder="Áo thun THICHTHIHACK size L"
               className={FIELD}
             />
-            <p className="mt-2 text-[11px] leading-relaxed text-zinc-500">
+            <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 admin-hint">
               Điền tên quà thì thông báo sẽ có nút{" "}
               <span className="font-bold text-amber-700">Điền địa chỉ nhận</span> cho
               khách nhập tên, số điện thoại và địa chỉ, giống khi quay trúng quà
@@ -596,7 +596,7 @@ export function AdminAnnouncements({
           </div>
         ) : null}
 
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-zinc-500 admin-hint">
           Để trống thời gian bắt đầu là chạy ngay, để trống kết thúc là chạy đến khi
           tự tắt. Thông báo mới luôn ở trạng thái nháp, bấm{" "}
           <span className="font-bold text-zinc-700">Đăng</span> ở bảng dưới mới hiện
@@ -779,7 +779,7 @@ export function AdminAnnouncements({
                         : `${row.recipients.length} người`}
                     </p>
                     {row.audience === "USERS" ? (
-                      <p className="mt-1 text-[11px] text-zinc-500 truncate">
+                      <p className="mt-1 text-[11px] text-zinc-500 truncate admin-hint">
                         {row.recipients.join(", ")}
                       </p>
                     ) : null}

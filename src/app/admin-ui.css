@@ -1,0 +1,16 @@
+/**
+ * Admin-wide behaviours that ride on <html> flags (30/10/2026, the owner:
+ * "tất cả trang… đập đi xây lại… bớt rối"):
+ *
+ * data-admin-help: every explanatory paragraph under a field carries the
+ * .admin-hint marker. Hidden by default, the screens read like a console
+ * instead of a manual; the sidebar's "Giải thích" switch shows them all for
+ * setup days. Amber warnings never carry the marker, so alerts stay.
+ */
+
+.admin-app .admin-hint {
+  display: none;
+}
+html[data-admin-help="on"] .admin-app .admin-hint {
+  display: block;
+}

@@ -135,7 +135,7 @@ export function AdminSpinPrizes({
                       <ImageIcon size={11} className="shrink-0 text-zinc-400" />
                     ) : null}
                   </div>
-                  <p className="mt-0.5 truncate text-[11px] text-zinc-500">
+                  <p className="mt-0.5 truncate text-[11px] text-zinc-500 admin-hint">
                     <span className="font-mono">{prize.id}</span> ·{" "}
                     {PRIZE_KIND_LABEL[prize.kind].label}
                     {PRIZE_KIND_LABEL[prize.kind].unit

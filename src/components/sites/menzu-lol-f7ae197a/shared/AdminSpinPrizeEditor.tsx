@@ -27,7 +27,7 @@ const FIELD =
   "w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900";
 const LABEL =
   "mb-1.5 block text-[12px] font-semibold text-zinc-500";
-const HINT = "mt-1.5 text-[11px] leading-relaxed text-zinc-500";
+const HINT = "mt-1.5 text-[11px] leading-relaxed text-zinc-500 admin-hint";
 const ACTION =
   "inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -587,7 +587,7 @@ export function AdminSpinPrizeEditor({
             onSlice={go}
             className="h-auto w-full rounded-full border-4 border-zinc-200"
           />
-          <p className="mt-3 text-[11px] leading-relaxed text-zinc-500">
+          <p className="mt-3 text-[11px] leading-relaxed text-zinc-500 admin-hint">
             Đây là bánh xe khách nhìn thấy, không thêm không bớt, vẽ bằng đúng
             đoạn mã vẽ bánh xe thật, nên chữ tràn nan ở đây thì trang khách cũng
             tràn. <b className="text-zinc-700">Bấm vào nan khác</b> để sửa

@@ -46,9 +46,43 @@ const LABEL =
   "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const CARD =
   "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
+const TAB_JUMP: Record<string, { href: string; label: string }[]> = {
+  "Bán hàng & nạp tiền": [
+    { href: "#nap-tien", label: "Nạp tiền" },
+    { href: "#ngan-hang", label: "Ngân hàng" },
+    { href: "#nap-tu-dong", label: "Nạp tự động" },
+    { href: "#xac-thuc-2-lop", label: "2 lớp" },
+    { href: "#captcha", label: "CAPTCHA" },
+    { href: "#oauth", label: "Google/Discord" },
+    { href: "#so-lieu", label: "Số liệu" },
+    { href: "#telegram-trang-thai", label: "Trạng thái hack" },
+    { href: "#het-hang", label: "Hết hàng" },
+    { href: "#bot-ban-hang", label: "Bot bán hàng" },
+    { href: "#zalo-bot", label: "Bot Zalo" },
+    { href: "#nhom-zalo", label: "Nhóm Zalo" },
+    { href: "#link-rut-gon", label: "Link rút gọn" },
+    { href: "#tro-ly-ai", label: "Trợ lý AI" },
+    { href: "#smtp", label: "Email" },
+    { href: "#ban-hang", label: "Bán hàng" },
+  ],
+  "Nhận diện": [
+    { href: "#ten-hinh-anh", label: "Tên và ảnh" },
+    { href: "#trang-dang-nhap", label: "Trang đăng nhập" },
+    { href: "#lien-he", label: "Liên hệ" },
+  ],
+  "Bố cục trang chủ": [
+    { href: "#khoi-trang-chu", label: "Các khối" },
+    { href: "#hero", label: "Hero" },
+    { href: "#danh-muc", label: "Danh mục" },
+    { href: "#huong-dan", label: "Hướng dẫn" },
+    { href: "#hang-san-pham", label: "Hàng sản phẩm" },
+    { href: "#seo", label: "SEO" },
+  ],
+};
+
 const HEADING =
-  "text-[12px] font-semibold text-zinc-500";
-const HINT = "mt-1.5 text-[11px] text-zinc-500";
+  "text-[15px] font-bold text-zinc-900";
+const HINT = "mt-1.5 text-[11px] text-zinc-500 admin-hint";
 
 /**
  * The colour the shop falls back to, so the picker offers it rather than the
@@ -109,7 +143,7 @@ function SlugPicker({
   return (
     <div className="flex flex-col gap-3">
       {selected.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500">
+        <p className="rounded-xl border border-dashed border-zinc-200 px-3 py-3 text-[11px] text-zinc-500 admin-hint">
           {empty}
         </p>
       ) : (
@@ -975,9 +1009,22 @@ export function AdminSettings({
         })}
       </div>
 
+      {/* One hop to any card: the sale tab alone holds sixteen of them. */}
+      <nav aria-label="Mục trong thẻ" className="flex flex-wrap gap-1.5">
+        {(TAB_JUMP[tab] ?? []).map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11.5px] font-semibold text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
       {tab === "Bán hàng & nạp tiền" ? (
         <>
-          <section className={CARD}>
+          <section id="nap-tien" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Nạp tiền</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1165,9 +1212,9 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
+          <section id="ngan-hang" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Tài khoản nhận chuyển khoản</span>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               Khai bao nhiêu ngân hàng cũng được. Khách chọn một bên để chuyển,
               còn hệ thống đối soát tất cả, tiền về bên nào cũng khớp được lệnh
               nạp.
@@ -1320,7 +1367,7 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
+          <section id="nap-tu-dong" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Nạp tự động</span>
 
             <Toggle
@@ -1386,7 +1433,7 @@ export function AdminSettings({
             </div>
 
             <div>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-zinc-500 admin-hint">
                 Địa chỉ đối soát khai riêng ở từng ngân hàng phía trên. Nút dưới
                 đây gọi thử tất cả và cho biết đọc được giao dịch hay không.
               </p>
@@ -1430,7 +1477,7 @@ export function AdminSettings({
                 {origin}/api/wallet/sync?key=
                 {cronKey.trim() ? cronKey.trim() : <>&lt;API-KEY&gt;</>}
               </p>
-              <p className="mt-1.5 text-[11px] text-zinc-500">
+              <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                 Dán vào một dịch vụ hẹn giờ miễn phí (cron-job.org…) và cho chạy
                 mỗi phút.
                 {cronKey.trim()
@@ -1446,7 +1493,7 @@ export function AdminSettings({
               <p className="font-mono text-xs text-zinc-700 break-all">
                 {origin}/api/wallet/webhook
               </p>
-              <p className="mt-1.5 text-[11px] text-zinc-500">
+              <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                 Dành cho dịch vụ tự bắn dữ liệu sang (Casso, SePay). Chúng gửi
                 kèm header{" "}
                 <span className="font-mono">
@@ -1463,17 +1510,27 @@ export function AdminSettings({
               </p>
             ) : null}
 
-            <div className="border-t border-zinc-100 pt-5">
+            <p className="text-[11px] text-zinc-500 admin-hint">
+              Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca
+              lệch: khách quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền.
+              Bật auto rồi thì bình thường bạn không phải đụng tới nó.
+            </p>
+
+          </section>
+
+          <section id="xac-thuc-2-lop" className={CARD + " scroll-mt-28"}>
+            <span className={HEADING}>Xác thực hai lớp cho admin</span>
               <Toggle
                 checked={adminTwoFactor}
                 onChange={setAdminTwoFactor}
                 label="Xác thực hai lớp cho admin"
                 hint="Admin nhập đúng mật khẩu còn phải nhập mã 6 số gửi tới Telegram của shop và email đã xác minh của admin. Không có Telegram lẫn SMTP thì không ai vào được admin, nên cấu hình một trong hai trước khi bật."
               />
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>
+          </section>
+
+          <section id="captcha" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>
                 CAPTCHA đăng nhập (Cloudflare Turnstile)
               </span>
               <p className={HINT}>
@@ -1527,10 +1584,11 @@ export function AdminSettings({
                   hai.
                 </p>
               ) : null}
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Đăng nhập Google / Discord (OAuth)</span>
+          </section>
+
+          <section id="oauth" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Đăng nhập Google / Discord (OAuth)</span>
               <p className={HINT}>
                 Google: console.cloud.google.com → APIs &amp; Services →
                 Credentials → OAuth client ID (Web), khai Redirect URI
@@ -1603,10 +1661,11 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>
+          </section>
+
+          <section id="so-lieu" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>
                 Số liệu tin cậy, dải số trên phần Đánh giá
               </span>
               <p className={HINT}>
@@ -1670,10 +1729,11 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Đồng bộ trạng thái hack từ Telegram</span>
+          </section>
+
+          <section id="telegram-trang-thai" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Đồng bộ trạng thái hack từ Telegram</span>
               <p className={HINT}>
                 Nhắn trong kênh của shop là trạng thái tự đổi, kèm ảnh và ghi
                 chú. Cú pháp:{" "}
@@ -1748,10 +1808,11 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Cảnh báo sắp hết hàng</span>
+          </section>
+
+          <section id="het-hang" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Cảnh báo sắp hết hàng</span>
               <p className={HINT}>
                 Khi một gói tụt xuống còn bằng ngưỡng này, shop được báo, kèm
                 tên sản phẩm, tên gói, số còn lại và link vào trang nhập thêm.
@@ -1824,10 +1885,11 @@ export function AdminSettings({
                   </p>
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Bot bán hàng Telegram</span>
+          </section>
+
+          <section id="bot-ban-hang" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Bot bán hàng Telegram</span>
               <p className={HINT}>
                 Bot thứ hai, dành cho khách: xem hàng, mua bằng ví, nhận key
                 trong chat, nạp tiền bằng mã chuyển khoản như trên web. Tạo bot
@@ -1886,10 +1948,11 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Bot thông báo Zalo (tài khoản phụ)</span>
+          </section>
+
+          <section id="zalo-bot" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Bot thông báo Zalo (tài khoản phụ)</span>
               <p className={HINT}>
                 Một tài khoản Zalo phụ do bot trên VPS đăng nhập, gửi thông báo
                 bảo hành, đơn hàng, nạp tiền cho khách đã liên kết ở Bảo mật.
@@ -1985,10 +2048,11 @@ export function AdminSettings({
                   )}
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Nhóm Zalo của shop (bot quản lý)</span>
+          </section>
+
+          <section id="nhom-zalo" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Nhóm Zalo của shop (bot quản lý)</span>
               <p className={HINT}>
                 Thêm tài khoản bot vào nhóm và cho làm quản trị viên, rồi bấm
                 “Dùng nhóm này” ở những nhóm muốn bot quản (chọn được nhiều
@@ -2101,7 +2165,7 @@ export function AdminSettings({
                     placeholder="VD: @{name} chào mừng vào nhóm {shop}! Đọc ghim trước khi hỏi nhé."
                     className={FIELD}
                   />
-                  <p className="mt-1.5 text-[11px] text-zinc-500">
+                  <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
                     {"{name}"} là tên người vào, {"{shop}"} là tên shop. Bắt đầu
                     bằng @{"{name}"} để bot gắn thẻ. Để trống là không chào.
                   </p>
@@ -2178,10 +2242,11 @@ export function AdminSettings({
                   </ul>
                 </div>
               ) : null}
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Link rút gọn có tiền (key miễn phí)</span>
+          </section>
+
+          <section id="link-rut-gon" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Link rút gọn có tiền (key miễn phí)</span>
               <p className={HINT}>
                 Tool miễn phí (gói 1đ) phát key qua link rút gọn: khách bấm Lấy
                 key, vượt link, nhận key vào Lịch sử mua. Dán địa chỉ API tạo
@@ -2225,10 +2290,11 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Trợ lý AI (ô chat hỗ trợ trên web)</span>
+          </section>
+
+          <section id="tro-ly-ai" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Trợ lý AI (ô chat hỗ trợ trên web)</span>
               <p className={HINT}>
                 Ô chat ở góc trang chỉ hiện khi có model trả lời. Claude dùng
                 key đặt trên máy chủ (trả phí). Muốn dùng model miễn phí thì
@@ -2339,10 +2405,11 @@ export function AdminSettings({
                   ) : null}
                 </div>
               </div>
-            </div>
 
-            <div className="border-t border-zinc-100 pt-5">
-              <span className={LABEL}>Gửi email, quên mật khẩu (SMTP)</span>
+          </section>
+
+          <section id="smtp" className={CARD + " scroll-mt-28"}>
+              <span className={HEADING}>Gửi email, quên mật khẩu (SMTP)</span>
               <p className={HINT}>
                 Dùng Gmail: host{" "}
                 <span className="font-mono text-zinc-700">
@@ -2427,16 +2494,10 @@ export function AdminSettings({
                   />
                 </div>
               </div>
-            </div>
 
-            <p className="text-[11px] text-zinc-500">
-              Nút Xác nhận / Từ chối ở mục Vận hành vẫn còn để xử lý các ca
-              lệch: khách quên ghi nội dung, ghi sai, hoặc chuyển thiếu tiền.
-              Bật auto rồi thì bình thường bạn không phải đụng tới nó.
-            </p>
           </section>
 
-          <section className={CARD}>
+          <section id="ban-hang" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Bán hàng</span>
 
             <Toggle
@@ -2467,7 +2528,7 @@ export function AdminSettings({
 
       {tab === "Nhận diện" ? (
         <>
-          <section className={CARD}>
+          <section id="ten-hinh-anh" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Tên và hình ảnh</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2836,9 +2897,9 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
+          <section id="trang-dang-nhap" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Bố cục trang đăng nhập / đăng ký</span>
-            <p className="text-[11px] text-zinc-500 -mt-2">
+            <p className="text-[11px] text-zinc-500 -mt-2 admin-hint">
               Ảnh lớn bên trái hai trang đó, và dòng chữ đè lên nó.
             </p>
 
@@ -3142,7 +3203,7 @@ export function AdminSettings({
           <div className="flex flex-col gap-4">
             <div>
               <span className={HEADING}>Đối tác uy tín</span>
-              <p className="mt-1 text-[11px] text-zinc-500">
+              <p className="mt-1 text-[11px] text-zinc-500 admin-hint">
                 Dải logo chạy dưới phần đánh giá khách hàng trên trang chủ.
                 Trống thì mục tự ẩn.
               </p>
@@ -3150,7 +3211,7 @@ export function AdminSettings({
             <AdminPartners partners={partners} />
           </div>
 
-          <section className={CARD}>
+          <section id="lien-he" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Liên hệ &amp; kết nối</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3264,9 +3325,9 @@ export function AdminSettings({
 
       {tab === "Bố cục trang chủ" ? (
         <>
-          <section className={CARD}>
+          <section id="khoi-trang-chu" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Các khối trên trang chủ</span>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               Bỏ tick để ẩn một khối, mũi tên để đổi thứ tự. Trang chủ hiển thị
               đúng theo thứ tự trong danh sách này.
             </p>
@@ -3323,7 +3384,7 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
+          <section id="hero" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Hero</span>
             {sectionSwitch(
               "hero",
@@ -3643,7 +3704,7 @@ export function AdminSettings({
             />
           </section>
 
-          <section className={CARD}>
+          <section id="danh-muc" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Danh mục sản phẩm</span>
             {sectionSwitch("featured", "Cụm 4 thẻ lớn ngay dưới hero.")}
             <SlugPicker
@@ -3658,7 +3719,7 @@ export function AdminSettings({
             </p>
           </section>
 
-          <section className={CARD}>
+          <section id="huong-dan" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Xem hướng dẫn</span>
             {sectionSwitch("docs", "Các bài trong mục Wiki & hướng dẫn.")}
             <SlugPicker
@@ -3669,7 +3730,7 @@ export function AdminSettings({
             />
           </section>
 
-          <section className={CARD}>
+          <section id="hang-san-pham" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>Hàng sản phẩm</span>
 
             <div className="max-w-[200px]">
@@ -3708,7 +3769,7 @@ export function AdminSettings({
             </div>
           </section>
 
-          <section className={CARD}>
+          <section id="seo" className={CARD + " scroll-mt-28"}>
             <span className={HEADING}>SEO Content</span>
             {sectionSwitch(
               "seo",

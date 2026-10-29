@@ -214,7 +214,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500">
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-zinc-500 admin-hint">
               <span className="font-mono text-zinc-400">/{doc.slug}</span>
               <span className="inline-flex items-center gap-1 tabular-nums">
                 <Eye size={11} />
@@ -434,7 +434,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               {pending ? "Đang tạo…" : "Tạo"}
             </button>
           </div>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-zinc-500 admin-hint">
             Đường dẫn sinh tự động từ tiêu đề và giữ nguyên về sau. Bài mới ở trạng thái
             &ldquo;đang biên soạn&rdquo;, bấm Sửa để viết nội dung rồi mới hiện đầy đủ cho
             khách.

@@ -44,11 +44,11 @@ const TIER_COLOR: Record<string, string> = {
 };
 
 const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
-const CARD_HEAD = "flex items-center gap-2 text-[12px] font-semibold text-zinc-600";
+const CARD_HEAD = "flex items-center gap-2 text-[14px] font-bold text-zinc-900";
 const LABEL = "mb-1.5 block text-[12px] font-semibold text-zinc-600";
 const ACTION =
   "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 text-[12px] font-semibold text-white transition-colors";
-const HINT = "text-[11px] leading-relaxed text-zinc-500";
+const HINT = "text-[11px] leading-relaxed text-zinc-500 admin-hint";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -333,7 +333,7 @@ export function AdminUserDetail({
       </div>
 
       {isSelf ? (
-        <p className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-[11px] leading-relaxed text-zinc-500">
+        <p className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-[11px] leading-relaxed text-zinc-500 admin-hint">
           Đây là tài khoản bạn đang đăng nhập. Máy chủ từ chối mọi thao tác quản trị lên
           chính nó, để một admin không thể tự khóa hoặc tự hạ quyền rồi khóa cả shop ở
           ngoài khu quản trị.

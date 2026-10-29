@@ -330,7 +330,7 @@ export function AdminSoftware({
                 className="shrink-0 text-zinc-400 transition-colors group-hover:text-rose-600"
               />
             </Link>
-            <p className="text-[11px] text-zinc-500 mt-0.5">
+            <p className="text-[11px] text-zinc-500 mt-0.5 admin-hint">
               {s.categoryName}
               {s.packages.length > 0
                 ? ` · ${s.packages.length} gói từ ${formatVnd(

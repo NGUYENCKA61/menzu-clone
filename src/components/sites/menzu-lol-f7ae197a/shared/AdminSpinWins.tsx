@@ -114,7 +114,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
 
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5">
-      <span className="flex items-center gap-2 text-[12px] font-semibold text-zinc-600">
+      <span className="flex items-center gap-2 text-[14px] font-bold text-zinc-900">
         <Gift size={13} className="text-zinc-400" />
         Quà vòng quay cần gửi ({pending.length})
       </span>
@@ -129,7 +129,7 @@ export function AdminSpinWins({ wins }: { wins: SpinWinRow[] }) {
       ) : null}
 
       {pending.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-4 text-center text-[11px] text-zinc-500">
+        <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-4 text-center text-[11px] text-zinc-500 admin-hint">
           Chưa có phần quà nào chờ gửi.
         </p>
       ) : (

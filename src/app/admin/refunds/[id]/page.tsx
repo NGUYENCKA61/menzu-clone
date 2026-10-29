@@ -158,7 +158,7 @@ export default async function AdminRefundDetailPage({
               {productName}
               <ExternalLink size={12} className="text-zinc-500" />
             </Link>
-            <p className="mt-1 text-[11px] font-semibold text-zinc-500">
+            <p className="mt-1 text-[11px] font-semibold text-zinc-500 admin-hint">
               {order.product.category.name}
               {order.package ? ` · ${order.package.label}` : ""}
               {order.quantity > 1 ? ` · ×${order.quantity}` : ""} · mua{" "}
@@ -177,7 +177,7 @@ export default async function AdminRefundDetailPage({
             <p className="mt-1 text-[13px] font-bold text-zinc-900">
               {row.user.username}
             </p>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               UID {row.user.uid} · ví {formatVnd(Number(row.user.balance))}đ
             </p>
           </div>

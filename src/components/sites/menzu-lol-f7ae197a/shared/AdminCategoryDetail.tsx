@@ -185,7 +185,7 @@ export function AdminCategoryDetail({
                 className={`${FIELD} font-mono`}
               />
             </div>
-            <p className="mt-1.5 text-[11px] text-zinc-500">
+            <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
               Đổi đường dẫn sẽ làm mọi link cũ tới{" "}
               <span className="font-mono text-zinc-500">/{category.slug}</span> trả về
               404.
@@ -225,7 +225,7 @@ export function AdminCategoryDetail({
                 </option>
               ))}
             </select>
-            <p className="mt-1.5 text-[11px] text-zinc-500">
+            <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
               Chưa phân loại thì danh mục chỉ hiện dưới chip &ldquo;Tất cả&rdquo;.
             </p>
           </div>
@@ -234,7 +234,7 @@ export function AdminCategoryDetail({
         <div className="flex flex-col gap-4 min-w-0">
           <section className={CARD}>
             <span className={CARD_HEAD}>Ảnh bìa</span>
-            <p className="-mt-2 text-[11px] text-zinc-500">
+            <p className="-mt-2 text-[11px] text-zinc-500 admin-hint">
               Hiện trên ô danh mục ngoài trang chủ.
             </p>
             <input
@@ -258,7 +258,7 @@ export function AdminCategoryDetail({
               empty, that header uses the tile picture above, stretched. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>Ảnh đầu trang danh mục</span>
-            <p className="-mt-2 text-[11px] text-zinc-500">
+            <p className="-mt-2 text-[11px] text-zinc-500 admin-hint">
               Ảnh ngang chạy ngang đầu trang danh mục, nên từ 1920×600px trở lên.
               Để trống thì dùng ảnh bìa ở trên.
             </p>
@@ -288,7 +288,7 @@ export function AdminCategoryDetail({
               stands in, cropped square. */}
           <section className={CARD}>
             <span className={CARD_HEAD}>Logo game</span>
-            <p className="-mt-2 text-[11px] text-zinc-500">
+            <p className="-mt-2 text-[11px] text-zinc-500 admin-hint">
               Logo vuông của game, hiện nhỏ cạnh tên danh mục. Nên dùng PNG nền
               trong, từ 128×128px. Để trống thì dùng ảnh bìa ở trên.
             </p>
@@ -341,7 +341,7 @@ export function AdminCategoryDetail({
                 />
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[11px] text-zinc-500 admin-hint">
               Hai số này do shop tự đặt để in ra thẻ ngoài trang chủ, không phải số
               sản phẩm thật trong kho ({category.productCount}).
             </p>

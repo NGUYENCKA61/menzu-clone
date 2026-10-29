@@ -124,7 +124,7 @@ export function AdminRefundDecide({
           placeholder={String(suggested ?? orderTotal)}
           className={`${FIELD} max-w-xs`}
         />
-        <p className="mt-1.5 text-[11px] text-zinc-500">
+        <p className="mt-1.5 text-[11px] text-zinc-500 admin-hint">
           {typeof refundRate === "number" && suggested !== null ? (
             <>
               Sản phẩm hứa hoàn <b className="text-zinc-700">{refundRate}%</b> ={" "}
