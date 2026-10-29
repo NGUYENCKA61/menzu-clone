@@ -38,6 +38,21 @@ interface ThreadRow {
   preview: { role: string; body: string } | null;
 }
 
+interface OrderRow {
+  code: string;
+  total: number;
+  status: string;
+  at: string;
+  product: string;
+}
+
+interface TopUpRow {
+  code: string;
+  amount: number;
+  status: string;
+  at: string;
+}
+
 const THREAD_BADGE: Record<ThreadRow["status"], { label: string; cls: string }> = {
   NEED_ADMIN: { label: "Cần xử lý", cls: "border-amber-200 bg-amber-50 text-amber-700" },
   BOT: { label: "Bot", cls: "border-zinc-200 bg-zinc-50 text-zinc-600" },
@@ -51,6 +66,8 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
   const [moreLeft, setMoreLeft] = useState(initial.length === 30);
   const [picked, setPicked] = useState<CustomerRow | null>(null);
   const [threads, setThreads] = useState<ThreadRow[] | null>(null);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [topUps, setTopUps] = useState<TopUpRow[]>([]);
   const [note, setNote] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagDraft, setTagDraft] = useState("");
@@ -94,10 +111,18 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
     setTagDraft("");
     setNoteSaved(false);
     setThreads(null);
+    setOrders([]);
+    setTopUps([]);
     const response = await fetch(`/api/admin/crm?userId=${encodeURIComponent(row.id)}`);
     if (response.ok) {
-      const data = (await response.json()) as { threads: ThreadRow[] };
+      const data = (await response.json()) as {
+        threads: ThreadRow[];
+        orders: OrderRow[];
+        topUps: TopUpRow[];
+      };
       setThreads(data.threads);
+      setOrders(data.orders);
+      setTopUps(data.topUps);
     } else {
       setThreads([]);
     }
@@ -413,6 +438,84 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                     </Link>
                   );
                 })
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                Đơn gần nhất
+              </p>
+              {orders.length === 0 ? (
+                <p className="rounded-lg bg-zinc-50 px-3 py-2 text-[12px] text-zinc-500">
+                  Chưa có đơn nào.
+                </p>
+              ) : (
+                orders.map((order) => (
+                  <div
+                    key={order.code}
+                    className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-[12px]"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-semibold">{order.product || order.code}</span>
+                      <span className="text-[11px] text-zinc-400">
+                        {order.code} · {dateShort(order.at)}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-semibold tabular-nums">
+                      {formatVnd(order.total)}đ
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-md border px-1.5 py-[1px] text-[10px] font-bold ${
+                        order.status === "PAID"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : order.status === "REFUNDED"
+                            ? "border-amber-200 bg-amber-50 text-amber-700"
+                            : "border-zinc-200 bg-zinc-50 text-zinc-500"
+                      }`}
+                    >
+                      {order.status === "PAID"
+                        ? "Đã trả"
+                        : order.status === "REFUNDED"
+                          ? "Đã hoàn"
+                          : order.status}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
+                Nạp gần nhất
+              </p>
+              {topUps.length === 0 ? (
+                <p className="rounded-lg bg-zinc-50 px-3 py-2 text-[12px] text-zinc-500">
+                  Chưa nạp lần nào.
+                </p>
+              ) : (
+                topUps.map((topUp) => (
+                  <div
+                    key={topUp.code}
+                    className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-[12px]"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{topUp.code}</span>
+                      <span className="text-[11px] text-zinc-400">{dateShort(topUp.at)}</span>
+                    </span>
+                    <span className="shrink-0 font-semibold tabular-nums">
+                      {formatVnd(topUp.amount)}đ
+                    </span>
+                    <span
+                      className={`shrink-0 rounded-md border px-1.5 py-[1px] text-[10px] font-bold ${
+                        topUp.status === "COMPLETED"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : "border-zinc-200 bg-zinc-50 text-zinc-500"
+                      }`}
+                    >
+                      {topUp.status === "COMPLETED" ? "Đã vào ví" : topUp.status}
+                    </span>
+                  </div>
+                ))
               )}
             </div>
 

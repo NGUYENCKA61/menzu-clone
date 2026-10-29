@@ -86,13 +86,51 @@ export async function threadForNewMessage(viewer: ChatViewer) {
   });
 }
 
-/** Append one line and keep the thread's sort key honest. */
+/** Append one line and keep the thread's sort keys honest. */
 export async function appendChatMessage(threadId: string, role: ChatRole, body: string) {
+  const now = new Date();
   const [message] = await db.$transaction([
     db.chatMessage.create({ data: { threadId, role, body } }),
-    db.chatThread.update({ where: { id: threadId }, data: { lastMessageAt: new Date() } }),
+    db.chatThread.update({
+      where: { id: threadId },
+      data: { lastMessageAt: now, ...(role === "CUSTOMER" ? { lastCustomerAt: now } : {}) },
+    }),
   ]);
   return message;
+}
+
+/**
+ * The thread of an outside channel's subscriber (ManyChat hands us a
+ * subscriber id, not a cookie): the newest open one, else a fresh one. The
+ * display name is refreshed while the thread is open, since the first
+ * webhook may not have carried it.
+ */
+export async function threadForChannelGuest(input: {
+  channel: "FACEBOOK" | "ZALO" | "TELEGRAM";
+  guestKey: string;
+  guestName: string | null;
+}) {
+  const open = await db.chatThread.findFirst({
+    where: { channel: input.channel, guestKey: input.guestKey, status: { not: "DONE" } },
+    orderBy: { lastMessageAt: "desc" },
+  });
+  if (open) {
+    if (input.guestName && open.guestName !== input.guestName) {
+      return db.chatThread.update({
+        where: { id: open.id },
+        data: { guestName: input.guestName },
+      });
+    }
+    return open;
+  }
+  return db.chatThread.create({
+    data: { channel: input.channel, guestKey: input.guestKey, guestName: input.guestName },
+  });
+}
+
+/** The desk opened it: the unread dot goes out. */
+export async function markThreadSeen(threadId: string): Promise<void> {
+  await db.chatThread.updateMany({ where: { id: threadId }, data: { adminSeenAt: new Date() } });
 }
 
 /**
@@ -171,12 +209,23 @@ export async function listThreadsForDesk(input: {
   status?: ChatThreadStatus;
   q?: string;
   userId?: string;
+  channel?: "WEB" | "FACEBOOK" | "ZALO" | "TELEGRAM";
 }) {
+  const q = input.q?.trim();
   const where: Prisma.ChatThreadWhereInput = {
     ...(input.status ? { status: input.status } : {}),
     ...(input.userId ? { userId: input.userId } : {}),
-    ...(input.q
-      ? { user: { is: { username: { contains: input.q, mode: "insensitive" } } } }
+    ...(input.channel ? { channel: input.channel } : {}),
+    // The search looks at who is talking and at what was said: a name, an
+    // outside channel's display name, or a phrase inside the conversation.
+    ...(q
+      ? {
+          OR: [
+            { user: { is: { username: { contains: q, mode: "insensitive" } } } },
+            { guestName: { contains: q, mode: "insensitive" } },
+            { messages: { some: { body: { contains: q, mode: "insensitive" } } } },
+          ],
+        }
       : {}),
   };
   const threads = await db.chatThread.findMany({
@@ -190,17 +239,74 @@ export async function listThreadsForDesk(input: {
   });
   return threads.map((thread) => ({
     id: thread.id,
+    kind: "CHAT" as const,
     status: thread.status,
     channel: thread.channel,
     needReason: thread.needReason,
     lastMessageAt: thread.lastMessageAt.toISOString(),
+    unread: Boolean(
+      thread.lastCustomerAt &&
+        (!thread.adminSeenAt || thread.lastCustomerAt > thread.adminSeenAt),
+    ),
     customer: thread.user
       ? { uid: thread.user.uid, username: thread.user.username, tags: thread.user.crmTags }
       : null,
+    guestName: thread.guestName,
     preview: thread.messages[0]
       ? { role: thread.messages[0].role, body: thread.messages[0].body.slice(0, 90) }
       : null,
   }));
+}
+
+/** The warranty statuses that still sit on the desk. */
+const WARRANTY_OPEN = ["OPEN", "IN_PROGRESS", "REFUNDING"] as const;
+
+/**
+ * Open warranty tickets shaped like inbox rows, so the one inbox really is
+ * one inbox. Their ids wear a `w_` prefix on the wire; actions beyond a
+ * reply stay on the admin warranty desk, which owns the money moves.
+ */
+export async function listWarrantyForDesk(q?: string) {
+  const query = q?.trim();
+  const tickets = await db.warrantyRequest.findMany({
+    where: {
+      status: { in: [...WARRANTY_OPEN] },
+      ...(query
+        ? { user: { is: { username: { contains: query, mode: "insensitive" } } } }
+        : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    take: 60,
+    include: {
+      user: { select: { uid: true, username: true, crmTags: true } },
+      order: { select: { code: true } },
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { fromShop: true, body: true, createdAt: true },
+      },
+    },
+  });
+  return tickets.map((ticket) => {
+    const last = ticket.messages[0];
+    return {
+      id: `w_${ticket.id}`,
+      kind: "WARRANTY" as const,
+      status: "NEED_ADMIN" as const,
+      warrantyStatus: ticket.status,
+      channel: "WARRANTY",
+      needReason: `Bảo hành đơn ${ticket.order?.code ?? ""}`.trim(),
+      lastMessageAt: (last?.createdAt ?? ticket.createdAt).toISOString(),
+      unread: Boolean(last && !last.fromShop),
+      customer: ticket.user
+        ? { uid: ticket.user.uid, username: ticket.user.username, tags: ticket.user.crmTags }
+        : null,
+      guestName: null,
+      preview: last
+        ? { role: last.fromShop ? ("ADMIN" as const) : ("CUSTOMER" as const), body: last.body.slice(0, 90) }
+        : null,
+    };
+  });
 }
 
 /**
@@ -268,26 +374,91 @@ export async function crmCustomers(input: { q?: string; skip?: number }) {
 }
 
 /**
- * One conversation with the customer's standing beside it — balance, money
- * in and out, open warranty — so the desk answers from the record instead of
- * asking the customer to prove what the shop already knows.
+ * The customer's standing, as the panel beside a conversation shows it —
+ * balance, money in and out, open warranty, the desk's note and labels —
+ * so the desk answers from the record instead of asking the customer to
+ * prove what the shop already knows.
  */
+export async function customerSummary(userId: string) {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      uid: true,
+      username: true,
+      balance: true,
+      crmNote: true,
+      crmTags: true,
+      createdAt: true,
+      _count: { select: { orders: true } },
+    },
+  });
+  if (!user) return null;
+  const [spent, topped, openWarranty] = await Promise.all([
+    db.order.aggregate({ where: { userId, status: "PAID" }, _sum: { total: true } }),
+    db.topUp.aggregate({ where: { userId, status: "COMPLETED" }, _sum: { credited: true } }),
+    db.warrantyRequest.count({
+      where: { userId, status: { in: [...WARRANTY_OPEN] } },
+    }),
+  ]);
+  return {
+    id: user.id,
+    uid: user.uid,
+    username: user.username,
+    balance: Number(user.balance),
+    totalSpent: Number(spent._sum.total ?? 0n),
+    totalToppedUp: Number(topped._sum.credited ?? 0n),
+    orderCount: user._count.orders,
+    openWarranty,
+    note: user.crmNote,
+    tags: user.crmTags,
+    memberSince: user.createdAt.toISOString(),
+  };
+}
+
+/** The drawer's "what has this customer done lately": orders and top-ups. */
+export async function customerActivity(userId: string) {
+  const [orders, topUps] = await Promise.all([
+    db.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: {
+        code: true,
+        total: true,
+        status: true,
+        createdAt: true,
+        product: { select: { name: true } },
+      },
+    }),
+    db.topUp.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { code: true, amount: true, credited: true, status: true, createdAt: true },
+    }),
+  ]);
+  return {
+    orders: orders.map((order) => ({
+      code: order.code,
+      total: Number(order.total),
+      status: order.status,
+      at: order.createdAt.toISOString(),
+      product: order.product?.name ?? "",
+    })),
+    topUps: topUps.map((topUp) => ({
+      code: topUp.code,
+      amount: Number(topUp.credited ?? topUp.amount),
+      status: topUp.status,
+      at: topUp.createdAt.toISOString(),
+    })),
+  };
+}
+
 export async function threadDetailForDesk(threadId: string) {
   const thread = await db.chatThread.findUnique({
     where: { id: threadId },
     include: {
-      user: {
-        select: {
-          id: true,
-          uid: true,
-          username: true,
-          balance: true,
-          crmNote: true,
-          crmTags: true,
-          createdAt: true,
-          _count: { select: { orders: true } },
-        },
-      },
       messages: {
         orderBy: { createdAt: "asc" },
         take: 300,
@@ -297,46 +468,58 @@ export async function threadDetailForDesk(threadId: string) {
   });
   if (!thread) return null;
 
-  let customer = null;
-  if (thread.user) {
-    const [spent, topped, openWarranty] = await Promise.all([
-      db.order.aggregate({
-        where: { userId: thread.user.id, status: "PAID" },
-        _sum: { total: true },
-      }),
-      db.topUp.aggregate({
-        where: { userId: thread.user.id, status: "COMPLETED" },
-        _sum: { credited: true },
-      }),
-      db.warrantyRequest.count({
-        where: { userId: thread.user.id, status: { in: ["OPEN", "IN_PROGRESS", "REFUNDING"] } },
-      }),
-    ]);
-    customer = {
-      id: thread.user.id,
-      uid: thread.user.uid,
-      username: thread.user.username,
-      balance: Number(thread.user.balance),
-      totalSpent: Number(spent._sum.total ?? 0n),
-      totalToppedUp: Number(topped._sum.credited ?? 0n),
-      orderCount: thread.user._count.orders,
-      openWarranty,
-      note: thread.user.crmNote,
-      tags: thread.user.crmTags,
-      memberSince: thread.user.createdAt.toISOString(),
-    };
-  }
-
   return {
     id: thread.id,
+    kind: "CHAT" as const,
     status: thread.status,
     channel: thread.channel,
     needReason: thread.needReason,
-    customer,
+    guestName: thread.guestName,
+    customer: thread.userId ? await customerSummary(thread.userId) : null,
     messages: thread.messages.map((m) => ({
       id: m.id,
       role: m.role,
       body: m.body,
+      imageUrl: null as string | null,
+      at: m.createdAt.toISOString(),
+    })),
+  };
+}
+
+/**
+ * One warranty ticket in the inbox's own shape. Read and reply only: the
+ * refund buttons, the bank form and the status moves live on the admin
+ * warranty desk, which was built around the money rules.
+ */
+export async function warrantyDetailForDesk(ticketId: string) {
+  const ticket = await db.warrantyRequest.findUnique({
+    where: { id: ticketId },
+    include: {
+      order: { select: { code: true } },
+      messages: {
+        orderBy: { createdAt: "asc" },
+        take: 300,
+        select: { id: true, fromShop: true, body: true, imageUrl: true, createdAt: true },
+      },
+    },
+  });
+  if (!ticket) return null;
+
+  return {
+    id: `w_${ticket.id}`,
+    kind: "WARRANTY" as const,
+    status: "NEED_ADMIN" as const,
+    warrantyStatus: ticket.status,
+    warrantyOpen: (WARRANTY_OPEN as readonly string[]).includes(ticket.status),
+    channel: "WARRANTY",
+    needReason: `Bảo hành đơn ${ticket.order?.code ?? ""}`.trim(),
+    guestName: null,
+    customer: ticket.userId ? await customerSummary(ticket.userId) : null,
+    messages: ticket.messages.map((m) => ({
+      id: m.id,
+      role: m.fromShop ? ("ADMIN" as const) : ("CUSTOMER" as const),
+      body: m.body,
+      imageUrl: m.imageUrl,
       at: m.createdAt.toISOString(),
     })),
   };

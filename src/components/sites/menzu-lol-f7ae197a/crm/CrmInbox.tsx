@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Bot,
   CheckCircle2,
+  ChevronDown,
   Inbox,
   Info,
   Loader2,
@@ -20,21 +21,30 @@ import { ago, avatarTone, clock, dateShort, dayLabel, formatVnd, initials } from
 
 /**
  * The inbox, three panes like every working CRM: conversations, the open
- * conversation, the customer beside it. Hand-offs ("Cần xử lý") are the
- * desk's default view; the bot's own chats and the closed ones are a tab
- * away. On a phone the panes become screens: list, then chat with a back
- * arrow, with the customer card behind the ⓘ button.
+ * conversation, the customer beside it. One list carries every channel —
+ * the web chat's threads and the open warranty tickets, with Messenger
+ * joining through ManyChat — newest word first, hand-offs a tab away. On a
+ * phone the panes become screens: list, then chat with a back arrow, the
+ * customer card behind the ⓘ button.
+ *
+ * A warranty row is read-and-reply here; its money moves (refunds, the bank
+ * form, statuses) stay on the admin warranty desk, one link away.
  */
 
 type ThreadStatus = "BOT" | "NEED_ADMIN" | "DONE";
+type ChannelFilter = "ALL" | "WEB" | "WARRANTY" | "FACEBOOK";
 
 interface ListRow {
   id: string;
+  kind: "CHAT" | "WARRANTY";
   status: ThreadStatus;
+  warrantyStatus?: string;
   channel: string;
   needReason: string | null;
   lastMessageAt: string;
+  unread: boolean;
   customer: { uid: number; username: string; tags: string[] } | null;
+  guestName: string | null;
   preview: { role: "CUSTOMER" | "BOT" | "ADMIN"; body: string } | null;
 }
 
@@ -44,18 +54,28 @@ interface Counts {
   done: number;
 }
 
+interface QuickReply {
+  label: string;
+  body: string;
+}
+
 interface DetailMessage {
   id: string;
   role: "CUSTOMER" | "BOT" | "ADMIN";
   body: string;
+  imageUrl: string | null;
   at: string;
 }
 
 interface Detail {
   id: string;
+  kind: "CHAT" | "WARRANTY";
   status: ThreadStatus;
+  warrantyStatus?: string;
+  warrantyOpen?: boolean;
   channel: string;
   needReason: string | null;
+  guestName: string | null;
   customer: {
     id: string;
     uid: number;
@@ -76,8 +96,16 @@ export interface CrmInboxInitial {
   threads: ListRow[];
   counts: Counts;
   filter: "ALL" | ThreadStatus;
+  quickReplies: QuickReply[];
   openThreadId: string | null;
 }
+
+const CHANNEL_TABS: { key: ChannelFilter; label: string }[] = [
+  { key: "ALL", label: "Tất cả kênh" },
+  { key: "WEB", label: "Chat web" },
+  { key: "WARRANTY", label: "Bảo hành" },
+  { key: "FACEBOOK", label: "Messenger" },
+];
 
 const FILTERS: { key: "ALL" | ThreadStatus; label: string }[] = [
   { key: "NEED_ADMIN", label: "Cần xử lý" },
@@ -92,18 +120,35 @@ const BADGE: Record<ThreadStatus, { label: string; cls: string }> = {
   DONE: { label: "Xong", cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
 };
 
-const CHANNEL: Record<string, string> = {
+const WARRANTY_LABEL: Record<string, string> = {
+  OPEN: "Bảo hành: đang mở",
+  IN_PROGRESS: "Bảo hành: đang xử lý",
+  REFUNDING: "Bảo hành: chờ hoàn tiền",
+  RESOLVED: "Bảo hành: đã xong",
+  REFUNDED: "Bảo hành: đã hoàn",
+};
+
+const CHANNEL_NAME: Record<string, string> = {
   WEB: "Chat web",
+  WARRANTY: "Bảo hành",
+  FACEBOOK: "Messenger",
   ZALO: "Zalo",
-  FACEBOOK: "Facebook",
   TELEGRAM: "Telegram",
 };
+
+function rowName(row: { customer: { username: string } | null; guestName: string | null }) {
+  return row.customer?.username ?? row.guestName ?? "Khách vãng lai";
+}
 
 export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
   const [threads, setThreads] = useState<ListRow[]>(initial.threads);
   const [counts, setCounts] = useState<Counts>(initial.counts);
+  const [channel, setChannel] = useState<ChannelFilter>("ALL");
   const [filter, setFilter] = useState<"ALL" | ThreadStatus>(initial.filter);
   const [q, setQ] = useState("");
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>(initial.quickReplies);
+  const [qrMenuOpen, setQrMenuOpen] = useState(false);
+  const [qrEditOpen, setQrEditOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -111,24 +156,35 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const [sendWarn, setSendWarn] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagDraft, setTagDraft] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
+  const [knowledgeNote, setKnowledgeNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const refreshList = useCallback(async (status: "ALL" | ThreadStatus, query: string) => {
-    const params = new URLSearchParams();
-    if (status !== "ALL") params.set("status", status);
-    if (query.trim()) params.set("q", query.trim());
-    const response = await fetch(`/api/admin/crm?${params}`);
-    if (!response.ok) return;
-    const data = (await response.json()) as { threads: ListRow[]; counts: Counts };
-    setThreads(data.threads);
-    setCounts(data.counts);
-  }, []);
+  const refreshList = useCallback(
+    async (ch: ChannelFilter, status: "ALL" | ThreadStatus, query: string) => {
+      const params = new URLSearchParams();
+      if (ch !== "ALL") params.set("channel", ch);
+      if (status !== "ALL" && ch !== "WARRANTY") params.set("status", status);
+      if (query.trim()) params.set("q", query.trim());
+      const response = await fetch(`/api/admin/crm?${params}`);
+      if (!response.ok) return;
+      const data = (await response.json()) as {
+        threads: ListRow[];
+        counts: Counts;
+        quickReplies: QuickReply[];
+      };
+      setThreads(data.threads);
+      setCounts(data.counts);
+      setQuickReplies(data.quickReplies);
+    },
+    [],
+  );
 
   const refreshDetail = useCallback(async (id: string) => {
     const response = await fetch(`/api/admin/crm?id=${encodeURIComponent(id)}`);
@@ -143,12 +199,24 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
       setView("chat");
       setLoadingDetail(true);
       setError(null);
+      setSendWarn(null);
       const fresh = await refreshDetail(id);
       if (fresh) {
         setDetail(fresh);
         setNote(fresh.customer?.note ?? "");
         setTags(fresh.customer?.tags ?? []);
         setNoteSaved(false);
+        if (fresh.kind === "CHAT") {
+          // The unread dot goes out quietly; the next list tick agrees.
+          void fetch("/api/admin/crm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "seen", id }),
+          });
+          setThreads((rows) =>
+            rows.map((row) => (row.id === id ? { ...row, unread: false } : row)),
+          );
+        }
       } else {
         setError("Không tải được hội thoại.");
       }
@@ -158,8 +226,8 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
   );
 
   // A ?thread= link (from the customer book) opens its conversation once the
-  // screen is up. Scheduled, not called in the effect body, so the open's
-  // setState runs from a timer callback.
+  // screen is up. Scheduled, so the open's setState runs from a timer
+  // callback rather than the effect body.
   const openedFromLink = useRef(false);
   useEffect(() => {
     if (openedFromLink.current || !initial.openThreadId) return;
@@ -171,7 +239,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
   // The desk breathes every 10 seconds: the list and the open conversation.
   useEffect(() => {
     const timer = setInterval(() => {
-      void refreshList(filter, q);
+      void refreshList(channel, filter, q);
       if (selectedId) {
         void refreshDetail(selectedId).then((fresh) => {
           if (fresh) setDetail((current) => (current?.id === fresh.id ? fresh : current));
@@ -179,7 +247,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
       }
     }, 10_000);
     return () => clearInterval(timer);
-  }, [filter, q, selectedId, refreshList, refreshDetail]);
+  }, [channel, filter, q, selectedId, refreshList, refreshDetail]);
 
   // New lines land in view.
   useEffect(() => {
@@ -187,33 +255,42 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
     if (box) box.scrollTop = box.scrollHeight;
   }, [detail?.messages.length, selectedId, loadingDetail]);
 
-  function pickFilter(key: "ALL" | ThreadStatus) {
-    setFilter(key);
-    void refreshList(key, q);
+  function pickChannel(key: ChannelFilter) {
+    setChannel(key);
+    void refreshList(key, filter, q);
   }
 
-  async function act(body: Record<string, unknown>): Promise<boolean> {
+  function pickFilter(key: "ALL" | ThreadStatus) {
+    setFilter(key);
+    void refreshList(channel, key, q);
+  }
+
+  async function act(body: Record<string, unknown>): Promise<{ ok: boolean; warn?: string }> {
     setError(null);
     const response = await fetch("/api/admin/crm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    const data = (await response.json().catch(() => null)) as
+      | { error?: string; warn?: string }
+      | null;
     if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null;
       setError(data?.error ?? "Có lỗi, bạn thử lại.");
-      return false;
+      return { ok: false };
     }
-    return true;
+    return { ok: true, warn: data?.warn };
   }
 
   async function sendReply() {
     const text = reply.trim();
     if (!text || !detail || sending) return;
     setSending(true);
-    const ok = await act({ action: "reply", id: detail.id, body: text });
-    if (ok) {
+    setSendWarn(null);
+    const result = await act({ action: "reply", id: detail.id, body: text });
+    if (result.ok) {
       setReply("");
+      if (result.warn) setSendWarn(result.warn);
       const fresh = await refreshDetail(detail.id);
       if (fresh) setDetail(fresh);
     }
@@ -221,23 +298,23 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
   }
 
   async function moveStatus(status: ThreadStatus) {
-    if (!detail) return;
-    const ok = await act({ action: "status", id: detail.id, status });
-    if (ok) {
+    if (!detail || detail.kind !== "CHAT") return;
+    const result = await act({ action: "status", id: detail.id, status });
+    if (result.ok) {
       setDetail({
         ...detail,
         status,
         needReason: status === "NEED_ADMIN" ? detail.needReason : null,
       });
-      void refreshList(filter, q);
+      void refreshList(channel, filter, q);
     }
   }
 
   async function saveNote() {
     if (!detail?.customer || savingNote) return;
     setSavingNote(true);
-    const ok = await act({ action: "note", userId: detail.customer.id, note, tags });
-    if (ok) setNoteSaved(true);
+    const result = await act({ action: "note", userId: detail.customer.id, note, tags });
+    if (result.ok) setNoteSaved(true);
     setSavingNote(false);
   }
 
@@ -249,6 +326,27 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
     setNoteSaved(false);
   }
 
+  /**
+   * The teach-the-bot shortcut: the customer's last question becomes the
+   * entry's title, the answer in the box its body. One tap while answering,
+   * and the bot gives this answer itself next time.
+   */
+  async function saveReplyToKnowledge() {
+    if (!detail || !reply.trim()) return;
+    const lastCustomer = [...detail.messages].reverse().find((m) => m.role === "CUSTOMER");
+    const title = (lastCustomer?.body ?? "Câu trả lời của shop").slice(0, 150);
+    const result = await act({
+      action: "knowledge-save",
+      title,
+      body: reply.trim(),
+      internal: false,
+    });
+    if (result.ok) {
+      setKnowledgeNote("Đã lưu vào sổ tay.");
+      setTimeout(() => setKnowledgeNote(null), 2500);
+    }
+  }
+
   // Messages grouped by the shop's day, each group under one date chip.
   const groups: { day: string; messages: DetailMessage[] }[] = [];
   for (const message of detail?.messages ?? []) {
@@ -258,7 +356,8 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
     else groups.push({ day, messages: [message] });
   }
 
-  const customerName = detail?.customer?.username ?? "Khách vãng lai";
+  const customerName = detail ? (detail.customer?.username ?? detail.guestName ?? "Khách vãng lai") : "";
+  const warrantyClosed = detail?.kind === "WARRANTY" && detail.warrantyOpen === false;
 
   return (
     <div className="flex min-h-0 flex-1">
@@ -266,40 +365,63 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
       <section
         className={`${view === "chat" ? "hidden lg:flex" : "flex"} w-full flex-col border-r border-zinc-200 bg-white lg:w-[340px] lg:shrink-0`}
       >
-        <div className="px-4 pb-3 pt-4">
+        <div className="px-4 pb-2.5 pt-4">
           <h1 className="text-[17px] font-bold">Hộp thư</h1>
           <p className="text-[12px] text-zinc-500">
-            Khung chat trên web: bot trả lời trước, ca khó vào đây.
+            Chat web, bảo hành và Messenger về một chỗ.
           </p>
         </div>
 
-        <div className="flex gap-0.5 border-b border-zinc-200 px-2">
-          {FILTERS.map(({ key, label }) => (
+        <div className="flex flex-wrap gap-1 px-3 pb-2">
+          {CHANNEL_TABS.map(({ key, label }) => (
             <button
               key={key}
               type="button"
-              onClick={() => pickFilter(key)}
-              className={`relative px-2.5 pb-2.5 pt-1 text-[12.5px] font-semibold transition-colors ${
-                filter === key ? "text-red-700" : "text-zinc-500 hover:text-zinc-800"
+              onClick={() => pickChannel(key)}
+              className={`rounded-full border px-2.5 py-1 text-[11.5px] font-semibold transition-colors ${
+                channel === key
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:text-zinc-800"
               }`}
             >
               {label}
-              {key === "NEED_ADMIN" && counts.needAdmin > 0 ? (
-                <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-700">
-                  {counts.needAdmin}
-                </span>
-              ) : null}
-              {filter === key ? (
-                <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-red-600" />
-              ) : null}
             </button>
           ))}
         </div>
 
+        {channel !== "WARRANTY" ? (
+          <div className="flex gap-0.5 border-b border-zinc-200 px-2">
+            {FILTERS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => pickFilter(key)}
+                className={`relative px-2.5 pb-2.5 pt-1 text-[12.5px] font-semibold transition-colors ${
+                  filter === key ? "text-red-700" : "text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                {label}
+                {key === "NEED_ADMIN" && counts.needAdmin > 0 ? (
+                  <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10.5px] font-bold text-amber-700">
+                    {counts.needAdmin}
+                  </span>
+                ) : null}
+                {filter === key ? (
+                  <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-red-600" />
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="border-b border-zinc-200 px-4 pb-2.5 text-[12px] text-zinc-500">
+            Phiếu bảo hành đang mở. Hoàn tiền và đổi trạng thái làm ở trang quản trị.
+          </p>
+        )}
+
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            void refreshList(filter, q);
+            void refreshList(channel, filter, q);
           }}
           className="px-3 py-2.5"
         >
@@ -308,7 +430,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
             <input
               value={q}
               onChange={(event) => setQ(event.target.value)}
-              placeholder="Tìm theo tên khách, Enter để tìm"
+              placeholder="Tên khách hoặc nội dung chat, Enter để tìm"
               className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-zinc-400"
             />
           </label>
@@ -316,14 +438,17 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
 
         <div className="flex-1 overflow-y-auto">
           {threads.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 px-4 py-14 text-zinc-400">
+            <div className="flex flex-col items-center gap-2 px-4 py-14 text-center text-zinc-400">
               <Inbox size={26} />
-              <p className="text-[13px]">Chưa có hội thoại nào ở mục này.</p>
+              <p className="text-[13px]">
+                {channel === "FACEBOOK"
+                  ? "Chưa có tin Messenger. Kết nối ManyChat ở mục Kết nối."
+                  : "Chưa có hội thoại nào ở mục này."}
+              </p>
             </div>
           ) : (
             threads.map((row) => {
-              const name = row.customer ? row.customer.username : "Khách vãng lai";
-              const badge = BADGE[row.status];
+              const name = rowName(row);
               const active = row.id === selectedId;
               return (
                 <button
@@ -334,26 +459,48 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                     active ? "bg-red-50/70" : "hover:bg-zinc-50"
                   }`}
                 >
-                  <span
-                    className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[12px] font-bold ${avatarTone(name)}`}
-                  >
-                    {initials(name)}
+                  <span className="relative mt-0.5 shrink-0">
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-bold ${avatarTone(name)}`}
+                    >
+                      {initials(name)}
+                    </span>
+                    {row.unread ? (
+                      <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-600" />
+                    ) : null}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline gap-2">
-                      <span className="truncate text-[13.5px] font-semibold">{name}</span>
+                      <span
+                        className={`truncate text-[13.5px] ${row.unread ? "font-bold" : "font-semibold"}`}
+                      >
+                        {name}
+                      </span>
                       <span className="ml-auto shrink-0 text-[11px] text-zinc-400">
                         {ago(row.lastMessageAt)}
                       </span>
                     </span>
                     <span className="mt-0.5 flex items-center gap-1.5">
-                      <span
-                        className={`shrink-0 rounded-md border px-1.5 py-[1px] text-[10px] font-bold ${badge.cls}`}
-                      >
-                        {badge.label}
-                      </span>
+                      {row.kind === "WARRANTY" ? (
+                        <span className="shrink-0 rounded-md border border-sky-200 bg-sky-50 px-1.5 py-[1px] text-[10px] font-bold text-sky-700">
+                          Bảo hành
+                        </span>
+                      ) : (
+                        <span
+                          className={`shrink-0 rounded-md border px-1.5 py-[1px] text-[10px] font-bold ${BADGE[row.status].cls}`}
+                        >
+                          {BADGE[row.status].label}
+                        </span>
+                      )}
+                      {row.channel === "FACEBOOK" ? (
+                        <span className="shrink-0 rounded-md border border-indigo-200 bg-indigo-50 px-1.5 py-[1px] text-[10px] font-bold text-indigo-700">
+                          Messenger
+                        </span>
+                      ) : null}
                       {row.preview ? (
-                        <span className="truncate text-[12.5px] text-zinc-500">
+                        <span
+                          className={`truncate text-[12.5px] ${row.unread ? "font-semibold text-zinc-700" : "text-zinc-500"}`}
+                        >
                           {row.preview.role === "ADMIN"
                             ? "Bạn: "
                             : row.preview.role === "BOT"
@@ -408,18 +555,32 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
               <div className="min-w-0">
                 <p className="truncate text-[14px] font-semibold leading-tight">{customerName}</p>
                 <p className="text-[11px] text-zinc-500">
-                  {CHANNEL[detail.channel] ?? detail.channel}
+                  {CHANNEL_NAME[detail.channel] ?? detail.channel}
                   {detail.customer ? ` · UID ${detail.customer.uid}` : ""}
                 </p>
               </div>
               <span
-                className={`hidden rounded-md border px-2 py-0.5 text-[10.5px] font-bold sm:inline ${BADGE[detail.status].cls}`}
+                className={`hidden rounded-md border px-2 py-0.5 text-[10.5px] font-bold sm:inline ${
+                  detail.kind === "WARRANTY"
+                    ? "border-sky-200 bg-sky-50 text-sky-700"
+                    : BADGE[detail.status].cls
+                }`}
               >
-                {BADGE[detail.status].label}
+                {detail.kind === "WARRANTY"
+                  ? (WARRANTY_LABEL[detail.warrantyStatus ?? ""] ?? "Bảo hành")
+                  : BADGE[detail.status].label}
               </span>
 
               <div className="ml-auto flex items-center gap-1.5">
-                {detail.status !== "DONE" ? (
+                {detail.kind === "WARRANTY" ? (
+                  <Link
+                    href="/admin/warranty"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-zinc-300 px-3 text-[12.5px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100"
+                  >
+                    Mở phiếu trong quản trị
+                    <ArrowUpRight size={13} />
+                  </Link>
+                ) : detail.status !== "DONE" ? (
                   <button
                     type="button"
                     onClick={() => void moveStatus("DONE")}
@@ -438,7 +599,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                     Mở lại
                   </button>
                 )}
-                {detail.status === "NEED_ADMIN" ? (
+                {detail.kind === "CHAT" && detail.status === "NEED_ADMIN" ? (
                   <button
                     type="button"
                     onClick={() => void moveStatus("BOT")}
@@ -459,9 +620,15 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
               </div>
             </header>
 
-            {detail.status === "NEED_ADMIN" && detail.needReason ? (
+            {detail.kind === "CHAT" && detail.status === "NEED_ADMIN" && detail.needReason ? (
               <p className="border-b border-amber-100 bg-amber-50 px-5 py-2 text-[12.5px] text-amber-800">
                 Bot đã chuyển ca: {detail.needReason}. Khách đang chờ bạn trả lời.
+              </p>
+            ) : null}
+            {detail.kind === "WARRANTY" ? (
+              <p className="border-b border-sky-100 bg-sky-50 px-5 py-2 text-[12.5px] text-sky-800">
+                {detail.needReason}. Trả lời ở đây là nhắn thẳng vào phiếu; hoàn tiền
+                và trạng thái làm trong quản trị.
               </p>
             ) : null}
 
@@ -479,40 +646,118 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
             </div>
 
             <div className="border-t border-zinc-200 bg-white p-3 lg:px-5">
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void sendReply();
-                }}
-                className="flex items-end gap-2"
-              >
-                <textarea
-                  value={reply}
-                  onChange={(event) => setReply(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey) {
+              {warrantyClosed ? (
+                <p className="text-[13px] text-zinc-500">
+                  Phiếu này đã xử lý xong, khung trao đổi đã đóng.
+                </p>
+              ) : (
+                <>
+                  <div className="relative mb-2 flex items-center gap-2">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setQrMenuOpen((openNow) => !openNow)}
+                        className="inline-flex h-7 items-center gap-1 rounded-lg border border-zinc-300 px-2.5 text-[12px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100"
+                      >
+                        Câu mẫu
+                        <ChevronDown size={12} />
+                      </button>
+                      {qrMenuOpen ? (
+                        <div className="absolute bottom-9 left-0 z-20 w-[280px] rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg">
+                          {quickReplies.length === 0 ? (
+                            <p className="px-2.5 py-2 text-[12px] text-zinc-500">
+                              Chưa có câu mẫu nào.
+                            </p>
+                          ) : (
+                            quickReplies.map((item) => (
+                              <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => {
+                                  setReply((current) =>
+                                    current.trim() ? `${current.trimEnd()}\n${item.body}` : item.body,
+                                  );
+                                  setQrMenuOpen(false);
+                                }}
+                                className="block w-full rounded-lg px-2.5 py-2 text-left hover:bg-zinc-100"
+                              >
+                                <span className="block text-[12.5px] font-semibold">{item.label}</span>
+                                <span className="block truncate text-[11.5px] text-zinc-500">
+                                  {item.body}
+                                </span>
+                              </button>
+                            ))
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setQrMenuOpen(false);
+                              setQrEditOpen(true);
+                            }}
+                            className="mt-1 block w-full rounded-lg border-t border-zinc-100 px-2.5 py-2 text-left text-[12px] font-semibold text-red-700 hover:bg-red-50"
+                          >
+                            Sửa bộ câu mẫu…
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                    {reply.trim() && detail.kind === "CHAT" ? (
+                      <button
+                        type="button"
+                        onClick={() => void saveReplyToKnowledge()}
+                        className="inline-flex h-7 items-center rounded-lg border border-zinc-300 px-2.5 text-[12px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100"
+                        title="Lưu câu hỏi của khách và câu trả lời này vào sổ tay để bot tự trả lời lần sau"
+                      >
+                        Lưu vào sổ tay bot
+                      </button>
+                    ) : null}
+                    {knowledgeNote ? (
+                      <span className="text-[12px] font-semibold text-emerald-600">
+                        {knowledgeNote}
+                      </span>
+                    ) : null}
+                  </div>
+                  <form
+                    onSubmit={(event) => {
                       event.preventDefault();
                       void sendReply();
-                    }
-                  }}
-                  rows={2}
-                  maxLength={2000}
-                  placeholder={`Trả lời ${customerName}…`}
-                  className="min-h-[44px] flex-1 resize-y rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
-                />
-                <button
-                  type="submit"
-                  disabled={sending || !reply.trim()}
-                  className="flex h-10 items-center gap-2 rounded-xl bg-red-600 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
-                >
-                  {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                  Gửi
-                </button>
-              </form>
-              <p className="mt-1.5 text-[11px] text-zinc-400">
-                Enter gửi, Shift+Enter xuống dòng. Khách thấy câu trả lời trong khung
-                chat trên web trong vòng 10 giây.
-              </p>
+                    }}
+                    className="flex items-end gap-2"
+                  >
+                    <textarea
+                      value={reply}
+                      onChange={(event) => setReply(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          void sendReply();
+                        }
+                      }}
+                      rows={2}
+                      maxLength={detail.kind === "WARRANTY" ? 500 : 2000}
+                      placeholder={`Trả lời ${customerName}…`}
+                      className="min-h-[44px] flex-1 resize-y rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                    />
+                    <button
+                      type="submit"
+                      disabled={sending || !reply.trim()}
+                      className="flex h-10 items-center gap-2 rounded-xl bg-red-600 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+                    >
+                      {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                      Gửi
+                    </button>
+                  </form>
+                  <p className="mt-1.5 text-[11px] text-zinc-400">
+                    Enter gửi, Shift+Enter xuống dòng.
+                    {detail.kind === "CHAT"
+                      ? detail.channel === "FACEBOOK"
+                        ? " Câu trả lời gửi qua ManyChat vào Messenger của khách."
+                        : " Khách thấy câu trả lời trong khung chat trên web trong vòng 10 giây."
+                      : " Khách thấy trong mục Bảo hành của họ trên web."}
+                  </p>
+                </>
+              )}
+              {sendWarn ? <p className="mt-1 text-[12px] text-amber-700">{sendWarn}</p> : null}
               {error ? <p className="mt-1 text-[12px] text-red-600">{error}</p> : null}
             </div>
           </>
@@ -548,7 +793,9 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                     UID {detail.customer.uid} · Thành viên từ {dateShort(detail.customer.memberSince)}
                   </p>
                 ) : (
-                  <p className="text-[11.5px] text-zinc-500">Chưa đăng nhập</p>
+                  <p className="text-[11.5px] text-zinc-500">
+                    {detail.channel === "FACEBOOK" ? "Khách Messenger" : "Chưa đăng nhập"}
+                  </p>
                 )}
               </div>
               <button
@@ -654,8 +901,9 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
               </>
             ) : (
               <p className="rounded-lg bg-zinc-50 px-3 py-2.5 text-[12.5px] leading-relaxed text-zinc-500">
-                Khách chưa đăng nhập nên chưa có hồ sơ. Hỏi tên tài khoản hoặc mã
-                đơn, rồi tra ở trang Khách hàng.
+                {detail.channel === "FACEBOOK"
+                  ? "Khách nhắn từ Messenger, chưa gắn với tài khoản web nào. Hỏi tên tài khoản rồi tra ở trang Khách hàng."
+                  : "Khách chưa đăng nhập nên chưa có hồ sơ. Hỏi tên tài khoản hoặc mã đơn, rồi tra ở trang Khách hàng."}
               </p>
             )}
           </div>
@@ -665,6 +913,18 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
           </div>
         )}
       </aside>
+
+      {/* ================= the canned-answer editor ================= */}
+      {qrEditOpen ? (
+        <QuickReplyEditor
+          list={quickReplies}
+          onClose={() => setQrEditOpen(false)}
+          onSaved={(fresh) => {
+            setQuickReplies(fresh);
+            setQrEditOpen(false);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -693,7 +953,7 @@ function ChatLine({
       <span className="px-1 text-[10.5px] font-semibold text-zinc-400">
         {who} · {clock(message.at)}
       </span>
-      <p
+      <div
         className={`whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[13.5px] leading-relaxed ${
           message.role === "ADMIN"
             ? "rounded-br-md bg-red-600 text-white"
@@ -702,8 +962,133 @@ function ChatLine({
               : "rounded-bl-md border border-zinc-200 bg-white text-zinc-800 shadow-sm"
         }`}
       >
+        {message.imageUrl ? (
+          <a href={message.imageUrl} target="_blank" rel="noreferrer">
+            {/* A warranty photo at its stored size; next/image fights a
+                chat scroller for no gain on an already-small upload. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={message.imageUrl}
+              alt="Ảnh khách gửi"
+              className="mb-1.5 max-h-[220px] rounded-lg"
+            />
+          </a>
+        ) : null}
         {message.body}
-      </p>
+      </div>
     </div>
+  );
+}
+
+/** The shared canned answers, edited in place and saved as one set. */
+function QuickReplyEditor({
+  list,
+  onClose,
+  onSaved,
+}: {
+  list: QuickReply[];
+  onClose: () => void;
+  onSaved: (fresh: QuickReply[]) => void;
+}) {
+  const [rows, setRows] = useState<QuickReply[]>(list.length ? list : [{ label: "", body: "" }]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function save() {
+    setSaving(true);
+    setError(null);
+    const response = await fetch("/api/admin/crm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "quickreplies", list: rows }),
+    });
+    const data = (await response.json().catch(() => null)) as
+      | { quickReplies?: QuickReply[]; error?: string }
+      | null;
+    setSaving(false);
+    if (!response.ok || !data?.quickReplies) {
+      setError(data?.error ?? "Chưa lưu được.");
+      return;
+    }
+    onSaved(data.quickReplies);
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Đóng"
+        onClick={onClose}
+        className="fixed inset-0 z-40 bg-black/30"
+      />
+      <div className="fixed inset-x-3 top-[8dvh] z-50 mx-auto flex max-h-[80dvh] w-auto max-w-[560px] flex-col gap-3 overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[15px] font-bold">Bộ câu trả lời mẫu</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100"
+            aria-label="Đóng"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <p className="text-[12px] text-zinc-500">
+          Dùng chung cho cả desk. Tối đa 20 câu; dòng trống sẽ bị bỏ khi lưu.
+        </p>
+        {rows.map((row, index) => (
+          <div key={index} className="flex flex-col gap-1.5 rounded-xl border border-zinc-200 p-2.5">
+            <div className="flex items-center gap-2">
+              <input
+                value={row.label}
+                onChange={(event) =>
+                  setRows(rows.map((r, i) => (i === index ? { ...r, label: event.target.value } : r)))
+                }
+                maxLength={40}
+                placeholder="Tên ngắn (ví dụ: Chào hỏi)"
+                className="h-8 flex-1 rounded-lg border border-zinc-300 px-2.5 text-[12.5px] outline-none focus:border-red-400"
+              />
+              <button
+                type="button"
+                onClick={() => setRows(rows.filter((_, i) => i !== index))}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-red-600"
+                aria-label="Xoá câu này"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <textarea
+              value={row.body}
+              onChange={(event) =>
+                setRows(rows.map((r, i) => (i === index ? { ...r, body: event.target.value } : r)))
+              }
+              rows={2}
+              maxLength={1000}
+              placeholder="Nội dung gửi cho khách…"
+              className="resize-y rounded-lg border border-zinc-300 px-2.5 py-2 text-[12.5px] outline-none focus:border-red-400"
+            />
+          </div>
+        ))}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setRows([...rows, { label: "", body: "" }])}
+            disabled={rows.length >= 20}
+            className="h-8 rounded-lg border border-zinc-300 px-3 text-[12px] font-semibold text-zinc-600 hover:bg-zinc-100 disabled:opacity-40"
+          >
+            Thêm câu
+          </button>
+          <button
+            type="button"
+            onClick={() => void save()}
+            disabled={saving}
+            className="h-8 rounded-lg bg-red-600 px-4 text-[12px] font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+          >
+            {saving ? "Đang lưu…" : "Lưu bộ câu mẫu"}
+          </button>
+          {error ? <span className="text-[12px] text-red-600">{error}</span> : null}
+        </div>
+      </div>
+    </>
   );
 }

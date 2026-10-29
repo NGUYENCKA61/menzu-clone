@@ -1,6 +1,15 @@
 "use client";
 
-import { ArrowUpRight, Headset, Inbox, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  Headset,
+  Inbox,
+  Megaphone,
+  Plug,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -20,6 +29,10 @@ import { avatarTone, initials } from "./format";
 const NAV = [
   { label: "Hộp thư", href: "/crm", icon: Inbox },
   { label: "Khách hàng", href: "/crm/khach", icon: Users },
+  { label: "Sổ tay bot", href: "/crm/so-tay", icon: BookOpen },
+  { label: "Báo cáo", href: "/crm/bao-cao", icon: BarChart3 },
+  { label: "Đăng bài", href: "/crm/dang-bai", icon: Megaphone },
+  { label: "Kết nối", href: "/crm/ket-noi", icon: Plug },
 ];
 
 export function CrmShell({
@@ -105,13 +118,13 @@ export function CrmShell({
             {initials(adminUsername)}
           </span>
         </div>
-        <nav className="flex gap-1 px-2">
+        <nav className="hide-scrollbar flex gap-1 overflow-x-auto px-2">
           {NAV.map(({ label, href }) => (
             <Link
               key={href}
               href={href}
               aria-current={active(href) ? "page" : undefined}
-              className={`border-b-2 px-3 pb-2 pt-1 text-[13px] font-semibold ${
+              className={`shrink-0 whitespace-nowrap border-b-2 px-3 pb-2 pt-1 text-[13px] font-semibold ${
                 active(href)
                   ? "border-red-600 text-red-700"
                   : "border-transparent text-zinc-500"

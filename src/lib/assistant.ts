@@ -18,6 +18,7 @@ import {
 } from "@/lib/assistantProviders";
 import { db } from "@/lib/db";
 import { docHtmlToPlainText } from "@/lib/docHtml";
+import { retrieveForQuestion } from "@/lib/knowledge";
 import { featuresOrDefault, parseFeatures } from "@/lib/productFeatures";
 import { DEFAULT_GUIDE } from "@/lib/productGuide";
 import { productHref } from "@/lib/routes";
@@ -40,8 +41,13 @@ import { getShopSettings } from "@/lib/settingsStore";
  * Mistral). Cấu hình says which; the catalogue and the rules are the same.
  */
 
-/** The Claude model. Overridable, because the bill for this lands on the shop. */
-export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-opus-5";
+/**
+ * The Claude model. Haiku by default (the owner, 29/10/2026): a support
+ * answer is a dozen lines over a cached catalogue, which is exactly the
+ * small model's job at about a twentieth of the big ones' price.
+ * Overridable, because the bill for this lands on the shop.
+ */
+export const ASSISTANT_MODEL = process.env.ASSISTANT_MODEL ?? "claude-haiku-5-5";
 
 /** Whether the shop has given the site a way to answer. */
 export function assistantConfigured(settings: ShopSettings): boolean {
@@ -142,12 +148,31 @@ export async function buildCatalogue(): Promise<string> {
 
 /** One answer, through whichever door Cấu hình names. */
 export async function askAssistant(history: ChatTurn[]): Promise<string> {
+  const question = history[history.length - 1]?.content ?? "";
   const settings = await getShopSettings();
-  const catalogue = await buildCatalogue();
+  const [catalogue, retrieved] = await Promise.all([
+    buildCatalogue(),
+    // The handbook and matching wiki titles, pulled per question — the part
+    // of the prompt that varies, so it rides OUTSIDE the cached block.
+    retrieveForQuestion(question).catch(() => ""),
+  ]);
   const system = `${SYSTEM_RULES}\n\n# DỮ LIỆU SHOP\n${catalogue}`;
   return settings.assistantProvider === "compatible"
+    ? askCompatible(settings, retrieved ? `${system}\n\n${retrieved}` : system, history)
+    : askClaude(system, retrieved, history);
+}
+
+/**
+ * One standalone drafting call for the desk's own writing (a post for a
+ * product, CRM > Đăng bài). Same doors, same keys, no catalogue: the
+ * caller hands over exactly the facts the draft may use.
+ */
+export async function draftOnce(system: string, ask: string): Promise<string> {
+  const settings = await getShopSettings();
+  const history: ChatTurn[] = [{ role: "user", content: ask }];
+  return settings.assistantProvider === "compatible"
     ? askCompatible(settings, system, history)
-    : askClaude(system, history);
+    : askClaude(system, "", history);
 }
 
 /**
@@ -162,7 +187,7 @@ export async function askAssistant(history: ChatTurn[]): Promise<string> {
  * default, disabling it invites tool-call text and stray tags into the visible
  * answer, and a support reply does not need deep reasoning anyway.
  */
-async function askClaude(system: string, history: ChatTurn[]): Promise<string> {
+async function askClaude(system: string, retrieved: string, history: ChatTurn[]): Promise<string> {
   const client = new Anthropic();
 
   const response = await client.messages.create({
@@ -175,6 +200,9 @@ async function askClaude(system: string, history: ChatTurn[]): Promise<string> {
         text: system,
         cache_control: { type: "ephemeral" },
       },
+      // The per-question handbook block sits after the breakpoint so the
+      // cached half stays identical for every visitor.
+      ...(retrieved ? [{ type: "text" as const, text: retrieved }] : []),
     ],
     messages: history.map((turn) => ({ role: turn.role, content: turn.content })),
   });

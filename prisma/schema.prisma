@@ -2161,6 +2161,9 @@ model ChatThread {
   user     User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   /// The anonymous visitor's cookie value — random bytes, never shown.
   guestKey String?
+  /// What an outside channel calls this guest ("FB: Minh Trần" from
+  /// ManyChat); null for web guests, who have no name to show.
+  guestName String?
 
   status ChatThreadStatus @default(BOT)
   /// Why the bot handed over, in the desk's words ("Khách bấm nút Gặp admin").
@@ -2168,6 +2171,10 @@ model ChatThread {
 
   /// Kept by hand on every append so the desk list sorts without joining.
   lastMessageAt DateTime @default(now())
+  /// The customer's latest word and the desk's latest look, for the unread
+  /// dot: a thread is unread while the first is newer than the second.
+  lastCustomerAt DateTime?
+  adminSeenAt    DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -2177,6 +2184,25 @@ model ChatThread {
   @@index([userId, lastMessageAt])
   @@index([guestKey, lastMessageAt])
   @@map("chat_threads")
+}
+
+/// The bot's handbook (sổ tay), written by the desk in CRM > Sổ tay. Before
+/// every answer the assistant pulls the few entries that match the
+/// customer's words and reads them as the shop's own instructions — the
+/// "dạy bot" loop: a good hand-written answer gets saved here once and the
+/// bot gives it from then on.
+model KnowledgeEntry {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  /// True = the desk's own reference, never handed to the model. What the
+  /// bot reads can be teased out of it by a patient customer, so the truly
+  /// private notes live behind this flag and go nowhere.
+  internal  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("knowledge_entries")
 }
 
 model ChatMessage {
