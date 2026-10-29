@@ -1772,6 +1772,18 @@ export function normalizeSettings(
  * what is allowed.
  */
 export function validateSettings(settings: ShopSettings): string | null {
+  // The webhook secrets are the ONLY wall between the bots and a forged
+  // update speaking with a customer's Telegram id — a short hand-typed word
+  // here is a guessable wall (audit 28/10, #2). Long is enforced; random is
+  // one press of the generate button beside each field.
+  for (const [secret, which] of [
+    [settings.telegramSecret, "bot thông báo"],
+    [settings.telegramShopSecret, "bot shop"],
+  ] as const) {
+    if (secret.trim() && secret.trim().length < 32) {
+      return `Mã bí mật webhook của ${which} phải từ 32 ký tự: bấm nút tự sinh cạnh ô nhập`;
+    }
+  }
   if (!Number.isInteger(settings.topUpMin) || settings.topUpMin < 1_000) {
     return "Mức nạp tối thiểu phải từ 1.000đ trở lên";
   }

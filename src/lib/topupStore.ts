@@ -453,7 +453,18 @@ export async function applyTransfers(
  * rows every minute pays nobody twice; a row that matches nothing is only
  * named in the report, for the desk to settle by hand.
  */
-export async function applyCardCredits(credits: IncomingTransfer[]): Promise<MatchReport> {
+export async function applyCardCredits(
+  credits: IncomingTransfer[],
+  options: {
+    /**
+     * Off while TheSieuRe is on: its callback already credits each request
+     * by id, so an unmatched feed row guessing by face value could pay a
+     * SECOND card with the first card's money (audit 28/10, #11). Without
+     * TheSieuRe the feed is the only source and keeps the fallback.
+     */
+    amountFallback?: boolean;
+  } = {},
+): Promise<MatchReport> {
   const report: MatchReport = { matched: 0, skipped: 0, details: [] };
   if (credits.length === 0) return report;
 
@@ -495,7 +506,7 @@ export async function applyCardCredits(credits: IncomingTransfer[]): Promise<Mat
     const ref = refOf(credit);
     if (ref && paid.has(ref)) continue;
     const figure = credit.amount.toLocaleString("vi-VN");
-    const card = matchCardCredit(credit, waiting);
+    const card = matchCardCredit(credit, waiting, options.amountFallback ?? true);
     if (!card) {
       report.skipped += 1;
       report.details.push(

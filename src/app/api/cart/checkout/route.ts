@@ -96,6 +96,13 @@ export async function POST(request: Request) {
       if (dead) {
         throw new Error(`GONE:${dead.product.name ?? dead.product.code}`);
       }
+      // The 1đ tier is the free key's shelf, never sold: a basket line
+      // holding one (staged before the wall went up, or forged) must not
+      // ride the paid checkout out with 99 free keys (audit 28/10, #10).
+      const free = items.find((i) => i.package.price <= 1n);
+      if (free) {
+        throw new Error(`GONE:${free.product.name ?? free.product.code}`);
+      }
 
       // A tier on flash sale costs its sale price, read inside the
       // transaction like everything else the charge depends on.

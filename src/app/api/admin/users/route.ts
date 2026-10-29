@@ -131,7 +131,14 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: "Email đã được tài khoản khác dùng" }, { status: 409 });
       }
     }
-    const updated = await db.user.update({ where: { id: target.id }, data: { email } });
+    // A hand-edited address is only ever a claim, exactly like one typed at
+    // registration: the verified flag and any change window die with the old
+    // address, or Google sign-in on the new address would walk straight into
+    // the account (audit 28/10, #6; the schema note on emailVerifiedAt).
+    const updated = await db.user.update({
+      where: { id: target.id },
+      data: { email, emailVerifiedAt: null, emailChangeUnlockedUntil: null },
+    });
     return NextResponse.json({ username: updated.username, email: updated.email });
   }
 

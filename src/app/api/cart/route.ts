@@ -67,9 +67,12 @@ export async function POST(request: Request) {
   // staged against this one and charged at that one's price.
   const pkg = await db.productPackage.findFirst({
     where: { id: packageId, productId: product.id },
-    select: { id: true },
+    select: { id: true, price: true },
   });
-  if (!pkg) {
+  // The 1đ tier is the free key's shelf, never staged for sale: the basket
+  // taking it would let 99 free keys through the paid checkout (audit
+  // 28/10, #10). The same wall stands in placeOrder.
+  if (!pkg || pkg.price <= 1n) {
     return NextResponse.json({ error: "Gói này không còn bán" }, { status: 409 });
   }
 

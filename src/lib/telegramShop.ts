@@ -382,16 +382,20 @@ export async function productScreen(productId: string): Promise<MenuScreen | nul
       lines.push("\n⛔ Tool đang tạm khóa mua key cho đến khi có bản an toàn.");
       return { text: lines.join("\n"), keyboard: [back] };
     }
-    if (p.packages.length === 0) {
+    // The 1đ tier is the free key's shelf, not a thing the bot sells: listed
+    // here it was a one-tap way around the paid shortlink (audit 28/10, #10).
+    // placeOrder refuses it besides, so a stale button cannot buy it either.
+    const sellable = p.packages.filter((pkg) => pkg.price > 1n);
+    if (sellable.length === 0) {
       lines.push("\nChưa có gói nào để bán.");
       return { text: lines.join("\n"), keyboard: [back] };
     }
     lines.push("\n<b>Chọn gói:</b>");
-    const tierSale = await runningPackageSales(p.packages.map((pkg) => pkg.id));
+    const tierSale = await runningPackageSales(sellable.map((pkg) => pkg.id));
     return {
       text: lines.join("\n"),
       keyboard: [
-        ...p.packages.map((pkg) => {
+        ...sellable.map((pkg) => {
           const now = tierPriceNow(pkg, tierSale);
           // A button cannot cross a price out, so a tier on sale says so
           // with the bolt and its percent.

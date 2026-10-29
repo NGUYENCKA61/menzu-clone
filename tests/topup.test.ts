@@ -376,6 +376,13 @@ describe("card rates", () => {
     expect(parseCardRates("50000:20,5")).toEqual([{ amount: 50_000, percent: 20.5 }]);
   });
 
+  it("reads a fee table typed with spaces after the colon", () => {
+    expect(parseCardRates("10000 : 27.5,  50000 :20.5")).toEqual([
+      { amount: 10_000, percent: 27.5 },
+      { amount: 50_000, percent: 20.5 },
+    ]);
+  });
+
   it("drops anything that is not a rate", () => {
     expect(parseCardRates("")).toEqual([]);
     expect(parseCardRates("abc")).toEqual([]);
@@ -493,6 +500,9 @@ describe("matchCardCredit", () => {
     expect(matchCardCredit({ ...credit, amount: 120_000 }, waiting)).toBeNull();
     expect(matchCardCredit({ ...credit, amount: 45_000 }, waiting)).toBe(fifty);
     expect(matchCardCredit({ ...credit, amount: 20_000 }, waiting)).toBeNull();
+    // With TheSieuRe answering cards itself the guess is off: a nameless row
+    // must match nothing, however well the face value fits (audit #11).
+    expect(matchCardCredit(credit, waiting, false)).toBeNull();
   });
 
   it("leaves a coin toss between two cards of one denomination to the desk", () => {

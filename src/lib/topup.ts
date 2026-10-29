@@ -359,7 +359,7 @@ export function parseCardRates(raw: string): CardRate[] {
   // Read as pairs wherever they appear rather than split on a separator: the
   // comma is both what separates two pairs and how a Vietnamese keyboard
   // writes 20,5 percent, and splitting on it turns one rate into two.
-  const pairs = raw.matchAll(/([0-9][0-9.s]*)s*:s*([0-9]+(?:[.,][0-9]+)?)/g);
+  const pairs = raw.matchAll(/([0-9][0-9.\s]*)\s*:\s*([0-9]+(?:[.,][0-9]+)?)/g);
   for (const [, left, right] of pairs) {
     const amount = Math.floor(Number(left.replace(/[^0-9]/g, "")));
     const percent = Number(right.replace(",", "."));
@@ -548,6 +548,11 @@ export const CARD_CREDIT_EARLY_MS = 5 * 60 * 1000;
 export function matchCardCredit(
   credit: IncomingTransfer,
   waiting: PendingCard[],
+  // With TheSieuRe's own callback crediting requests by id, the feed must
+  // only ever match by code or serial: one real card could otherwise pay a
+  // second, fake card of the same face through this guess (audit 28/10,
+  // #11). Callers without TheSieuRe keep the fallback.
+  allowAmountFallback = true,
 ): PendingCard | null {
   const code = extractTopUpCode(credit.description);
   if (code) return waiting.find((card) => card.code === code) ?? null;
@@ -559,6 +564,7 @@ export function matchCardCredit(
   );
   if (bySerial.length > 0) return bySerial.length === 1 ? bySerial[0]! : null;
 
+  if (!allowAmountFallback) return null;
   if (!credit.reference || !credit.at) return null;
   const at = credit.at.getTime();
   const byAmount = waiting.filter(

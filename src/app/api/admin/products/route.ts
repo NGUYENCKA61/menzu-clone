@@ -274,6 +274,11 @@ export async function PATCH(request: Request) {
     body?.price !== undefined && Number.isFinite(Number(body.price))
       ? BigInt(Math.floor(Number(body.price)))
       : undefined;
+  // The same floor the create handler holds: zero makes an account free and
+  // a negative price 500s the checkout (audit 28/10, #14).
+  if (price !== undefined && price <= 0n) {
+    return NextResponse.json({ error: "Giá phải lớn hơn 0" }, { status: 400 });
+  }
 
   // Empty string means "back to the default picture": the storefront falls
   // back to the by-code path when this is null, so clearing is a real state

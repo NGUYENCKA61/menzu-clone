@@ -189,6 +189,18 @@ function randomKey(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * The Telegram webhook secrets, generated rather than typed: the secret is
+ * the only wall between the bots and a forged update speaking with a
+ * customer's id, and validateSettings refuses anything under 32 characters.
+ * 48 hex characters here, same alphabet Telegram accepts.
+ */
+function randomWebhookSecret(): string {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
@@ -1701,17 +1713,26 @@ export function AdminSettings({
                 </div>
                 <div>
                   <label htmlFor="tg-secret" className={LABEL}>
-                    Secret webhook
+                    Secret webhook (từ 32 ký tự)
                   </label>
-                  <input
-                    id="tg-secret"
-                    type="password"
-                    autoComplete="off"
-                    value={tgSecret}
-                    onChange={(event) => setTgSecret(event.target.value)}
-                    placeholder="•••"
-                    className={`${FIELD} font-mono`}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      id="tg-secret"
+                      type="password"
+                      autoComplete="off"
+                      value={tgSecret}
+                      onChange={(event) => setTgSecret(event.target.value)}
+                      placeholder="•••"
+                      className={`${FIELD} min-w-0 flex-1 font-mono`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setTgSecret(randomWebhookSecret())}
+                      className="shrink-0 rounded-lg border border-white/15 px-3 text-[12px] font-bold text-neutral-300 transition-colors hover:border-white/30 hover:text-white"
+                    >
+                      Tự sinh
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="tg-chat" className={LABEL}>
@@ -1830,17 +1851,26 @@ export function AdminSettings({
                 </div>
                 <div>
                   <label htmlFor="shop-secret" className={LABEL}>
-                    Secret webhook
+                    Secret webhook (từ 32 ký tự)
                   </label>
-                  <input
-                    id="shop-secret"
-                    type="password"
-                    autoComplete="off"
-                    value={shopSecret}
-                    onChange={(event) => setShopSecret(event.target.value)}
-                    placeholder="•••"
-                    className={`${FIELD} font-mono`}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      id="shop-secret"
+                      type="password"
+                      autoComplete="off"
+                      value={shopSecret}
+                      onChange={(event) => setShopSecret(event.target.value)}
+                      placeholder="•••"
+                      className={`${FIELD} min-w-0 flex-1 font-mono`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShopSecret(randomWebhookSecret())}
+                      className="shrink-0 rounded-lg border border-white/15 px-3 text-[12px] font-bold text-neutral-300 transition-colors hover:border-white/30 hover:text-white"
+                    >
+                      Tự sinh
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="shop-username" className={LABEL}>

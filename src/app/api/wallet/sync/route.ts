@@ -131,7 +131,13 @@ async function runSync(request: Request) {
     : { matched: 0, skipped: 0, details: [] as string[] };
 
   const credits = pollFeeds && cardFeed ? await readFeed(cardFeed) : [];
-  const cards = pollFeeds && cardFeed ? await applyCardCredits(credits) : null;
+  // With TheSieuRe answering cards itself, the feed may only settle rows it
+  // can name by code or serial — a face-value guess here could pay a second
+  // card with the first one's money (audit 28/10, #11).
+  const cards =
+    pollFeeds && cardFeed
+      ? await applyCardCredits(credits, { amountFallback: !askTheSieuRe })
+      : null;
   const asked = askTheSieuRe ? await checkPendingCards(settings) : null;
   // Then the clock: whatever is still unanswered past 30 minutes is told so.
   const timedOut = askTheSieuRe ? await failUnansweredCards() : null;

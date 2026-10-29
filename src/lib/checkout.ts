@@ -153,6 +153,10 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         select: { id: true, price: true, label: true },
       });
       if (!found) throw new Error("BAD_PACKAGE");
+      // The 1đ tier is the free key's shelf, handed out only through the
+      // shortlink flow — never sold. Sold, it skips the link the shop is
+      // paid for and, at 99 a line, empties the shelf (audit 28/10, #10).
+      if (found.price <= 1n) throw new Error("BAD_PACKAGE");
       chosenPackage = found;
     }
 
