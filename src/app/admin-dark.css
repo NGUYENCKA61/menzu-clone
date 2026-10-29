@@ -1,0 +1,136 @@
+/**
+ * The admin's dark dress (the owner, 30/10/2026: "thêm phần chỉnh sang giao
+ * diện đen nữa nha / công tắc"). The white admin is written in a small zinc
+ * vocabulary, so dark mode is this one override sheet instead of a second
+ * build: everything keys on html[data-admin-theme="dark"] under .admin-app
+ * (AdminChrome's root), applied before paint by THEME_BOOT_SCRIPT
+ * (?quan-tri=toi|sang or the stored switch). The storefront and the CRM
+ * never carry .admin-app, so nothing here can reach them.
+ */
+
+html[data-admin-theme="dark"] .admin-app {
+  background: #0b0b0d;
+  color: #e9e9ee;
+  color-scheme: dark;
+}
+
+/* ---- surfaces ---------------------------------------------------------- */
+html[data-admin-theme="dark"] .admin-app :is(.bg-white, .focus-visible\:bg-zinc-100:focus-visible) {
+  background-color: #141418;
+}
+html[data-admin-theme="dark"] .admin-app .bg-zinc-50 { background-color: #1b1b20; }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-50\/70 { background-color: rgba(27, 27, 32, 0.7); }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-100 { background-color: #232329; }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-200 { background-color: #30303a; }
+html[data-admin-theme="dark"] .admin-app .bg-\[\#f6f6f7\]\/95 { background-color: rgba(11, 11, 13, 0.95); }
+html[data-admin-theme="dark"] .admin-app :is(.hover\:bg-zinc-50:hover, .hover\:bg-zinc-50\/70:hover) {
+  background-color: #1b1b20;
+}
+html[data-admin-theme="dark"] .admin-app .hover\:bg-zinc-100:hover { background-color: #26262d; }
+html[data-admin-theme="dark"] .admin-app .hover\:bg-zinc-200:hover { background-color: #34343e; }
+
+/* ---- borders ----------------------------------------------------------- */
+html[data-admin-theme="dark"] .admin-app .border-zinc-100 { border-color: #232329; }
+html[data-admin-theme="dark"] .admin-app .border-zinc-200 { border-color: #2b2b33; }
+html[data-admin-theme="dark"] .admin-app .border-zinc-300 { border-color: #3a3a45; }
+html[data-admin-theme="dark"] .admin-app .hover\:border-zinc-300:hover { border-color: #44444f; }
+html[data-admin-theme="dark"] .admin-app .hover\:border-zinc-400:hover { border-color: #52525e; }
+html[data-admin-theme="dark"] .admin-app .divide-zinc-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #232329;
+}
+
+/* ---- ink --------------------------------------------------------------- */
+html[data-admin-theme="dark"] .admin-app .text-zinc-900 { color: #f2f2f5; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-800 { color: #e4e4ea; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-700 { color: #c9c9d3; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-600 { color: #a8a8b4; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-500 { color: #8e8e9b; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-400 { color: #6f6f7c; }
+html[data-admin-theme="dark"] .admin-app .text-zinc-300 { color: #4c4c58; }
+html[data-admin-theme="dark"] .admin-app :is(.hover\:text-zinc-900:hover, .group:hover .group-hover\:text-zinc-900) {
+  color: #ffffff;
+}
+html[data-admin-theme="dark"] .admin-app .group:hover .group-hover\:text-zinc-600 { color: #c9c9d3; }
+html[data-admin-theme="dark"] .admin-app .placeholder\:text-zinc-400::placeholder { color: #5d5d69; }
+
+/* ---- the black primary flips to paper ---------------------------------- */
+html[data-admin-theme="dark"] .admin-app .bg-zinc-900 {
+  background-color: #e9e9ee;
+  color: #131316;
+}
+html[data-admin-theme="dark"] .admin-app .bg-zinc-900 :is(svg) { color: inherit; }
+html[data-admin-theme="dark"] .admin-app .hover\:bg-zinc-700:hover {
+  background-color: #d6d6dd;
+  color: #131316;
+}
+html[data-admin-theme="dark"] .admin-app .border-zinc-900 { border-color: #e9e9ee; }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-900\/5 { background-color: rgba(233, 233, 238, 0.09); }
+html[data-admin-theme="dark"] .admin-app .bg-zinc-900\/80 { background-color: rgba(9, 9, 11, 0.8); }
+html[data-admin-theme="dark"] .admin-app .accent-zinc-900 { accent-color: #e9e9ee; }
+
+/* ---- signal tints ------------------------------------------------------ */
+html[data-admin-theme="dark"] .admin-app :is(.bg-rose-50, .hover\:bg-rose-50:hover) { background-color: rgba(244, 63, 94, 0.12); }
+html[data-admin-theme="dark"] .admin-app :is(.bg-rose-50\/60, .bg-rose-50\/40) { background-color: rgba(244, 63, 94, 0.08); }
+html[data-admin-theme="dark"] .admin-app .hover\:bg-rose-100:hover { background-color: rgba(244, 63, 94, 0.2); }
+html[data-admin-theme="dark"] .admin-app .border-rose-200 { border-color: rgba(244, 63, 94, 0.4); }
+html[data-admin-theme="dark"] .admin-app :is(.border-rose-300, .hover\:border-rose-300:hover) { border-color: rgba(244, 63, 94, 0.55); }
+html[data-admin-theme="dark"] .admin-app .text-rose-700 { color: #fda4af; }
+html[data-admin-theme="dark"] .admin-app :is(.text-rose-600, .hover\:text-rose-600:hover) { color: #fb7185; }
+html[data-admin-theme="dark"] .admin-app .text-rose-700\/80 { color: rgba(253, 164, 175, 0.85); }
+
+html[data-admin-theme="dark"] .admin-app :is(.bg-amber-50, .hover\:bg-amber-50:hover) { background-color: rgba(245, 158, 11, 0.12); }
+html[data-admin-theme="dark"] .admin-app :is(.bg-amber-50\/50, .bg-amber-50\/60) { background-color: rgba(245, 158, 11, 0.08); }
+html[data-admin-theme="dark"] .admin-app .hover\:bg-amber-100:hover { background-color: rgba(245, 158, 11, 0.2); }
+html[data-admin-theme="dark"] .admin-app .border-amber-200 { border-color: rgba(245, 158, 11, 0.4); }
+html[data-admin-theme="dark"] .admin-app :is(.border-amber-300, .hover\:border-amber-400:hover) { border-color: rgba(245, 158, 11, 0.55); }
+html[data-admin-theme="dark"] .admin-app .border-amber-200\/70 { border-color: rgba(245, 158, 11, 0.3); }
+html[data-admin-theme="dark"] .admin-app .text-amber-700 { color: #fcd34d; }
+html[data-admin-theme="dark"] .admin-app :is(.text-amber-600, .hover\:text-amber-600:hover) { color: #fbbf24; }
+
+html[data-admin-theme="dark"] .admin-app :is(.bg-emerald-50, .hover\:bg-emerald-50:hover) { background-color: rgba(16, 185, 129, 0.12); }
+html[data-admin-theme="dark"] .admin-app .bg-emerald-50\/60 { background-color: rgba(16, 185, 129, 0.08); }
+html[data-admin-theme="dark"] .admin-app .hover\:bg-emerald-100:hover { background-color: rgba(16, 185, 129, 0.2); }
+html[data-admin-theme="dark"] .admin-app .border-emerald-200 { border-color: rgba(16, 185, 129, 0.4); }
+html[data-admin-theme="dark"] .admin-app :is(.border-emerald-300, .hover\:border-emerald-300:hover) { border-color: rgba(16, 185, 129, 0.55); }
+html[data-admin-theme="dark"] .admin-app .text-emerald-700 { color: #6ee7b7; }
+html[data-admin-theme="dark"] .admin-app .text-emerald-600 { color: #34d399; }
+html[data-admin-theme="dark"] .admin-app .ring-emerald-300 { --tw-ring-color: rgba(16, 185, 129, 0.5); }
+html[data-admin-theme="dark"] .admin-app .ring-rose-300 { --tw-ring-color: rgba(244, 63, 94, 0.5); }
+
+html[data-admin-theme="dark"] .admin-app .bg-sky-50 { background-color: rgba(14, 165, 233, 0.12); }
+html[data-admin-theme="dark"] .admin-app .border-sky-200 { border-color: rgba(14, 165, 233, 0.4); }
+html[data-admin-theme="dark"] .admin-app .text-sky-700 { color: #7dd3fc; }
+html[data-admin-theme="dark"] .admin-app .text-sky-600 { color: #38bdf8; }
+
+html[data-admin-theme="dark"] .admin-app .bg-violet-50 { background-color: rgba(139, 92, 246, 0.12); }
+html[data-admin-theme="dark"] .admin-app .border-violet-200 { border-color: rgba(139, 92, 246, 0.4); }
+html[data-admin-theme="dark"] .admin-app .text-violet-700 { color: #c4b5fd; }
+html[data-admin-theme="dark"] .admin-app .text-violet-600 { color: #a78bfa; }
+
+html[data-admin-theme="dark"] .admin-app .bg-indigo-50 { background-color: rgba(99, 102, 241, 0.12); }
+html[data-admin-theme="dark"] .admin-app .border-indigo-200 { border-color: rgba(99, 102, 241, 0.4); }
+html[data-admin-theme="dark"] .admin-app .text-indigo-600 { color: #a5b4fc; }
+html[data-admin-theme="dark"] .admin-app .text-cyan-600 { color: #67e8f9; }
+
+/* Pastel avatar chips read fine on dark as they are; only the slate pair
+   loses contrast. */
+html[data-admin-theme="dark"] .admin-app .bg-slate-200 { background-color: #37374a; }
+html[data-admin-theme="dark"] .admin-app .text-slate-700 { color: #cbd5e1; }
+html[data-admin-theme="dark"] .admin-app .bg-rose-100 { background-color: rgba(244, 63, 94, 0.22); }
+html[data-admin-theme="dark"] .admin-app .bg-sky-100 { background-color: rgba(14, 165, 233, 0.22); }
+html[data-admin-theme="dark"] .admin-app .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.22); }
+html[data-admin-theme="dark"] .admin-app .bg-violet-100 { background-color: rgba(139, 92, 246, 0.22); }
+html[data-admin-theme="dark"] .admin-app .bg-amber-100 { background-color: rgba(245, 158, 11, 0.22); }
+
+/* ---- the revenue bars (inline SVG fills) ------------------------------- */
+html[data-admin-theme="dark"] .admin-app rect[fill="#18181b"] { fill: #ececf2; }
+html[data-admin-theme="dark"] .admin-app rect[fill="#a1a1aa"] { fill: #6f6f7c; }
+html[data-admin-theme="dark"] .admin-app rect[fill="#e4e4e7"] { fill: #26262d; }
+
+/* ---- odds and ends ----------------------------------------------------- */
+html[data-admin-theme="dark"] .admin-app .shadow-\[-10px_0_14px_-10px_rgba\(24\,24\,27\,0\.08\)\] {
+  box-shadow: -10px 0 14px -10px rgba(0, 0, 0, 0.6);
+}
+html[data-admin-theme="dark"] .admin-app .shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+html[data-admin-theme="dark"] .admin-app .shadow-lg { box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5); }
+html[data-admin-theme="dark"] .admin-app img { filter: brightness(0.92); }

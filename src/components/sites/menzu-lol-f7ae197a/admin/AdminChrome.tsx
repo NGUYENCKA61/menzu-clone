@@ -22,6 +22,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { AdminThemeSwitch, AdminThemeSwitchIcon } from "./AdminThemeSwitch";
 import { avatarTone, initials } from "./format";
 
 /**
@@ -110,7 +111,7 @@ export function AdminChrome({
 
   return (
     <div
-      className="flex min-h-dvh flex-col bg-[#f6f6f7] text-zinc-900 lg:flex-row"
+      className="admin-app flex min-h-dvh flex-col bg-[#f6f6f7] text-zinc-900 lg:flex-row"
       style={{ colorScheme: "light" }}
     >
       {/* ----- desktop sidebar ----- */}
@@ -144,6 +145,7 @@ export function AdminChrome({
         </nav>
 
         <div className="flex flex-col gap-3 border-t border-zinc-200 px-4 py-4">
+          <AdminThemeSwitch />
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900"
@@ -174,10 +176,13 @@ export function AdminChrome({
           <span className="text-[13px] font-black tracking-wide">
             THICHTHIHACK <span className="font-semibold text-zinc-500">· Quản trị</span>
           </span>
-          <span
-            className={`ml-auto flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold ${avatarTone(username)}`}
-          >
-            {initials(username)}
+          <span className="ml-auto flex items-center gap-2">
+            <AdminThemeSwitchIcon />
+            <span
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold ${avatarTone(username)}`}
+            >
+              {initials(username)}
+            </span>
           </span>
         </div>
         <nav ref={strip} className="hide-scrollbar flex overflow-x-auto px-2">
