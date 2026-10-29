@@ -619,7 +619,7 @@ export function AdminAnnouncements({
         <button
           type="submit"
           disabled={busy}
-          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-zinc-900"
+          className="self-start h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang xử lý…" : editing ? "Lưu thay đổi" : "Tạo thông báo"}
         </button>

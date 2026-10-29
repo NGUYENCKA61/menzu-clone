@@ -204,7 +204,7 @@ export function AdminWeaponImages({
           <button
             type="submit"
             disabled={busy}
-            className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-zinc-900"
+            className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-70 transition-colors text-[13px] font-semibold text-white"
           >
             {busy ? "Đang xử lý…" : "Tải từ link"}
           </button>
@@ -299,7 +299,7 @@ export function AdminWeaponImages({
             type="button"
             disabled={busy || pick === hotPickSkin}
             onClick={saveHotPick}
-            className="h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-40 text-[12px] font-semibold text-zinc-900 transition-colors"
+            className="h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-40 text-[12px] font-semibold text-white transition-colors"
           >
             Lưu
           </button>
@@ -346,7 +346,7 @@ export function AdminWeaponImages({
                       type="button"
                       disabled={busy}
                       onClick={() => handleDelete(row)}
-                      className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-rose-500 disabled:opacity-60 transition-colors text-[12px] font-semibold text-zinc-900"
+                      className="h-7 px-2.5 rounded-lg bg-red-500/90 hover:bg-rose-500 disabled:opacity-60 transition-colors text-[12px] font-semibold text-white"
                     >
                       Bỏ
                     </button>

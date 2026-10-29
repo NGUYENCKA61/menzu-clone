@@ -260,7 +260,7 @@ export function AdminDocEditor({
             type="button"
             onClick={save}
             disabled={pending || !dirty}
-            className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-2"
+            className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-2"
           >
             <FileText size={14} />
             {pending ? "Đang lưu…" : "Lưu bài viết"}

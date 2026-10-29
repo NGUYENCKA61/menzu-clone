@@ -314,7 +314,7 @@ export function AdminVerifications({
                     <button
                       type="button"
                       onClick={() => open(r, "approve")}
-                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[13px] font-semibold text-zinc-900 transition-colors hover:bg-emerald-400"
+                      className="h-10 rounded-xl bg-emerald-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-emerald-400"
                     >
                       Duyệt
                     </button>

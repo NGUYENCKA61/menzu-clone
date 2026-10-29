@@ -3812,11 +3812,11 @@ export function AdminSettings({
 
       {/* Sticky so Lưu never scrolls out of reach on this long form —
           cosmetic wrapper only, the submit itself is unchanged. */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center gap-3 border-t border-zinc-100 bg-[#0a0a0c]/95 px-1 py-3 backdrop-blur-sm">
+      <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center gap-3 border-t border-zinc-200 bg-[#f6f6f7]/95 px-1 py-3 backdrop-blur-sm">
         <button
           type="submit"
           disabled={busy}
-          className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 transition-colors text-[13px] font-semibold text-zinc-900"
+          className="h-10 px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 transition-colors text-[13px] font-semibold text-white"
         >
           {busy ? "Đang lưu…" : "Lưu cấu hình"}
         </button>

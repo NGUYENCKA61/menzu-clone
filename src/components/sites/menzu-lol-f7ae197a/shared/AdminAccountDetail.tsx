@@ -84,7 +84,7 @@ const FIELD =
 const LABEL =
   "block text-[12px] font-semibold text-zinc-500 mb-1.5";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5";
+  "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[12px] font-semibold text-white transition-colors inline-flex items-center gap-1.5";
 
 const STATUS_META: Record<string, { label: string; tint: string }> = {
   AVAILABLE: {

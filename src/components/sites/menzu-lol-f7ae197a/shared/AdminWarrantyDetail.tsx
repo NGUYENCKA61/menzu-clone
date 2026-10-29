@@ -461,7 +461,7 @@ export function AdminWarrantyDetail({
                           busy !== null || note.trim().length === 0 || !amountOk
                         }
                         onClick={() => move("REFUND", { method, amount })}
-                        className={`${BTN} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
+                        className={`${BTN} bg-zinc-900 text-white hover:bg-zinc-700`}
                       >
                         <RotateCcw className="h-3.5 w-3.5" aria-hidden />
                         {busy === "REFUND"
@@ -494,7 +494,7 @@ export function AdminWarrantyDetail({
                                 amount: String(refundDue),
                               })
                         }
-                        className={`${BTN} bg-emerald-600 text-zinc-900 hover:bg-emerald-500`}
+                        className={`${BTN} bg-emerald-600 text-white hover:bg-emerald-500`}
                       >
                         <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                         {busy !== null
@@ -586,7 +586,7 @@ export function AdminWarrantyDetail({
                     type="button"
                     disabled={busy !== null || note.trim().length === 0}
                     onClick={() => void sendMessage()}
-                    className={`${BTN} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
+                    className={`${BTN} bg-zinc-900 text-white hover:bg-zinc-700`}
                   >
                     <Send className="h-3.5 w-3.5" aria-hidden />
                     {busy === "MESSAGE" ? "Đang gửi…" : "Gửi tin"}

@@ -299,7 +299,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
           onClick={() => setCatFilter("")}
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-semibold transition-colors ${
             catFilter === ""
-              ? "bg-zinc-900 text-zinc-900"
+              ? "bg-zinc-900 text-white"
               : "border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900"
           }`}
         >
@@ -369,7 +369,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
             className={`h-10 px-4 rounded-xl text-[13px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
               creating
                 ? "border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100"
-                : "bg-zinc-900 hover:bg-zinc-700 text-zinc-900"
+                : "bg-zinc-900 hover:bg-zinc-700 text-white"
             }`}
           >
             {creating ? <X size={14} /> : <Plus size={14} />}
@@ -428,7 +428,7 @@ export function AdminDocs({ docs }: { docs: DocView[] }) {
               type="button"
               disabled={pending || !newTitle.trim()}
               onClick={create}
-              className="h-[42px] px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-zinc-900 transition-colors inline-flex items-center gap-1.5"
+              className="h-[42px] px-5 rounded-xl bg-zinc-900 hover:bg-zinc-700 disabled:opacity-60 text-[13px] font-semibold text-white transition-colors inline-flex items-center gap-1.5"
             >
               <Plus size={14} />
               {pending ? "Đang tạo…" : "Tạo"}

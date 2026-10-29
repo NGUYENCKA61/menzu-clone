@@ -551,7 +551,7 @@ export function AdminSpinPrizeEditor({
           type="button"
           disabled={busy}
           onClick={save}
-          className={`${ACTION} bg-zinc-900 text-zinc-900 hover:bg-zinc-700`}
+          className={`${ACTION} bg-zinc-900 text-white hover:bg-zinc-700`}
         >
           <Save size={13} />
           {isNew ? "Thêm vào vòng quay" : "Lưu ô này"}
