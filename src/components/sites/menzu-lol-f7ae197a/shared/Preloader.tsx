@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 /**
@@ -39,11 +40,18 @@ const MAX_COVER_MS = 2500;
  * display face, a below-the-fold file.
  */
 export function Preloader({ brand }: { brand: { name: string } }) {
+  const pathname = usePathname();
   const [phase, setPhase] = useState<"covering" | "fading" | "gone">(
     hasCompleted ? "gone" : "covering",
   );
 
+  // The CRM app is a white page with its own frame: the shop's dark cover
+  // flashing over it on every load would brand the wrong product. A flag,
+  // not an early return, so the hooks below run on every render.
+  const onCrm = pathname.startsWith("/crm");
+
   useEffect(() => {
+    if (onCrm) return;
     if (phase === "covering") {
       const begin = () => setPhase("fading");
       if (document.readyState !== "loading") begin();
@@ -60,9 +68,9 @@ export function Preloader({ brand }: { brand: { name: string } }) {
       const exit = window.setTimeout(() => setPhase("gone"), 500);
       return () => window.clearTimeout(exit);
     }
-  }, [phase]);
+  }, [phase, onCrm]);
 
-  if (phase === "gone") return null;
+  if (onCrm || phase === "gone") return null;
 
   // Two-tone wordmark: first word white, everything after it red, set solid
   // with no spaces — "Thich Thi Hack" comes out THICH|THIHACK, one mark.

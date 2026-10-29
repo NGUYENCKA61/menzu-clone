@@ -4,6 +4,7 @@ import { FORBIDDEN, getAdmin } from "@/lib/admin";
 import {
   appendChatMessage,
   crmCounts,
+  crmCustomers,
   listThreadsForDesk,
   threadDetailForDesk,
 } from "@/lib/chatStore";
@@ -41,8 +42,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ thread });
   }
 
-  const statusRaw = url.searchParams.get("status");
   const q = url.searchParams.get("q")?.trim().slice(0, 60) || undefined;
+
+  // The customer book, paged.
+  if (url.searchParams.get("view") === "customers") {
+    const skip = Math.max(0, Math.min(5000, Number(url.searchParams.get("skip")) || 0));
+    return NextResponse.json({ customers: await crmCustomers({ q, skip }) });
+  }
+
+  // One customer's conversations, for the drawer on the customer book.
+  const userId = url.searchParams.get("userId");
+  if (userId) {
+    return NextResponse.json({ threads: await listThreadsForDesk({ userId }) });
+  }
+
+  const statusRaw = url.searchParams.get("status");
   const [threads, counts] = await Promise.all([
     listThreadsForDesk({ status: isStatus(statusRaw) ? statusRaw : undefined, q }),
     crmCounts(),

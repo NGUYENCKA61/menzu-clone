@@ -26,6 +26,8 @@ const PRIVATE_PREFIXES = [
   // belongs with the public pages above, whose noindex only works if a
   // crawler may fetch it (the SEO review, round 2, T11).
   "/agency/dashboard",
+  // The CRM app: staff-side, already noindex; disallowed like /admin.
+  "/crm",
   // The one exception to the rule above: /free-key/<id> also says noindex,
   // but opening it spends a free-key claim, and its addresses are only ever
   // reached through the shop's shortlinks. Keeping compliant bots from

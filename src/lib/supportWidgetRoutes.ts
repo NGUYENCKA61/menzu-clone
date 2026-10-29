@@ -13,6 +13,11 @@ export function floatingWidgetHidden(pathname: string): boolean {
   // over the bottom-right corner every admin table puts its paging controls in.
   if (pathname.startsWith("/admin")) return true;
 
+  // The CRM app is the same staff desk in its own frame: a customer-care
+  // bubble floating over the screen that answers customer care would be the
+  // snake eating its tail.
+  if (pathname.startsWith("/crm")) return true;
+
   // The basket's summary column ends in the "Thanh toán" button, in the very
   // corner the tab sits in: the one press the whole page exists for was
   // landing on the widget instead. Support is a click away in the footer and

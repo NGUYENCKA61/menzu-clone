@@ -167,9 +167,14 @@ export async function crmCounts(): Promise<CrmCounts> {
  * rather than a second sort so "Tất cả" still reads as a timeline. 60 rows is
  * weeks of traffic today; a cursor can come with the volume.
  */
-export async function listThreadsForDesk(input: { status?: ChatThreadStatus; q?: string }) {
+export async function listThreadsForDesk(input: {
+  status?: ChatThreadStatus;
+  q?: string;
+  userId?: string;
+}) {
   const where: Prisma.ChatThreadWhereInput = {
     ...(input.status ? { status: input.status } : {}),
+    ...(input.userId ? { userId: input.userId } : {}),
     ...(input.q
       ? { user: { is: { username: { contains: input.q, mode: "insensitive" } } } }
       : {}),
@@ -195,6 +200,70 @@ export async function listThreadsForDesk(input: { status?: ChatThreadStatus; q?:
     preview: thread.messages[0]
       ? { role: thread.messages[0].role, body: thread.messages[0].body.slice(0, 90) }
       : null,
+  }));
+}
+
+/**
+ * The desk's customer book: a page of accounts with the figures a support
+ * desk triages by — balance, money in and out, orders, labels, last seen.
+ * Aggregates are scoped to the page's own ids, the same lesson the admin
+ * users list learned at 8,000 accounts.
+ */
+export async function crmCustomers(input: { q?: string; skip?: number }) {
+  const q = input.q?.trim();
+  const where: Prisma.UserWhereInput = q
+    ? {
+        OR: [
+          { username: { contains: q, mode: "insensitive" } },
+          { crmTags: { has: q } },
+        ],
+      }
+    : {};
+  const users = await db.user.findMany({
+    where,
+    orderBy: [{ lastLoginAt: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+    skip: input.skip ?? 0,
+    take: 30,
+    select: {
+      id: true,
+      uid: true,
+      username: true,
+      balance: true,
+      crmNote: true,
+      crmTags: true,
+      lastLoginAt: true,
+      createdAt: true,
+      _count: { select: { orders: true, chatThreads: true } },
+    },
+  });
+  const ids = users.map((user) => user.id);
+  const [spent, topped] = await Promise.all([
+    db.order.groupBy({
+      by: ["userId"],
+      where: { userId: { in: ids }, status: "PAID" },
+      _sum: { total: true },
+    }),
+    db.topUp.groupBy({
+      by: ["userId"],
+      where: { userId: { in: ids }, status: "COMPLETED" },
+      _sum: { credited: true },
+    }),
+  ]);
+  const spentBy = new Map(spent.map((row) => [row.userId, Number(row._sum.total ?? 0n)]));
+  const toppedBy = new Map(topped.map((row) => [row.userId, Number(row._sum.credited ?? 0n)]));
+  return users.map((user) => ({
+    id: user.id,
+    uid: user.uid,
+    username: user.username,
+    balance: Number(user.balance),
+    totalSpent: spentBy.get(user.id) ?? 0,
+    totalToppedUp: toppedBy.get(user.id) ?? 0,
+    orderCount: user._count.orders,
+    threadCount: user._count.chatThreads,
+    note: user.crmNote,
+    tags: user.crmTags,
+    lastLoginAt: user.lastLoginAt?.toISOString() ?? null,
+    memberSince: user.createdAt.toISOString(),
   }));
 }
 

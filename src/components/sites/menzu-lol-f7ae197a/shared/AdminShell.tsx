@@ -29,7 +29,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Sản phẩm", href: "/admin/products", icon: Boxes },
   { label: "Nhóm danh mục", href: "/admin/groups", icon: LayoutGrid },
   { label: "Đơn hàng", href: "/admin/orders", icon: ShoppingBag },
-  { label: "CRM", href: "/admin/crm", icon: Headset },
+  { label: "CRM", href: "/crm", icon: Headset },
   { label: "Bảo hành", href: "/admin/warranty", icon: ShieldCheck },
   { label: "Marketing", href: "/admin/marketing", icon: Ticket },
   { label: "Người dùng", href: "/admin/users", icon: Users },
@@ -47,7 +47,7 @@ const NAV: { label: string; href: string; icon: LucideIcon }[] = [
 const PHONE_ORDER: Record<string, string> = {
   "/admin": "order-1",
   "/admin/orders": "order-2",
-  "/admin/crm": "order-3",
+  "/crm": "order-3",
   "/admin/operations": "order-4",
   "/admin/products": "order-5",
   "/admin/users": "order-6",

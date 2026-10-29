@@ -72,6 +72,7 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "categories",
   "category",
   "checkwc",
+  "crm",
   "docs",
   "favicon.ico",
   "feedback",
