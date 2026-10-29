@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Prisma } from "@prisma/client";
 
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { AdminDashboard } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminDashboard";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
 import { getAdmin } from "@/lib/admin";
 import {
@@ -260,7 +260,7 @@ export default async function AdminHome() {
     .slice(0, 8);
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Tổng quan"
       username={admin.username}
     >
@@ -319,6 +319,6 @@ export default async function AdminHome() {
           time: clockVn(at),
         }))}
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }

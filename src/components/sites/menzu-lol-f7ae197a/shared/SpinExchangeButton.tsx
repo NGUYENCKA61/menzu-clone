@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Coins } from "lucide-react";
 import { useState } from "react";
 
-import { ConfirmDialog } from "./AdminStates";
+import { ConfirmDialog } from "./ConfirmDialogDark";
 
 /**
  * "Đổi lấy N điểm", from a list.

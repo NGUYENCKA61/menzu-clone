@@ -4,15 +4,13 @@ import { Download, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
+import { INPUT } from "../admin/kit";
 import { searchNeedsSync } from "@/lib/paging";
 import {
   USER_QUERY_MAX,
   USER_TIER_LABELS,
   type UserFilters,
 } from "@/lib/users";
-
-const FIELD =
-  "h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors";
 
 /**
  * The four views, as one control.
@@ -80,11 +78,11 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
     ) ?? VIEWS[0];
 
   return (
-    <div className="flex flex-col xl:flex-row gap-2.5">
-      <div className="relative flex-1 min-w-0">
+    <div className="flex flex-col gap-2.5 xl:flex-row">
+      <div className="relative min-w-0 flex-1">
         <Search
           size={15}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
         />
         <input
           value={q}
@@ -92,11 +90,11 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
           onChange={(event) => setQ(event.target.value)}
           placeholder="Tìm tên đăng nhập, email hoặc UID…"
           aria-label="Tìm người dùng"
-          className={`${FIELD} w-full pl-9`}
+          className={`${INPUT} pl-9`}
         />
       </div>
 
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="hide-scrollbar flex gap-2 overflow-x-auto">
         {VIEWS.map((view) => {
           const on = view.label === active.label;
           return (
@@ -107,8 +105,8 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
               onClick={() => go({ role: view.role, state: view.state })}
               className={`h-10 shrink-0 rounded-lg border px-4 text-[13px] font-semibold transition-colors ${
                 on
-                  ? "border-rose-500/60 bg-rose-500/15 text-rose-400"
-                  : "border-white/[0.08] bg-[#0e0e11] text-neutral-400 hover:text-white hover:bg-white/[0.05]"
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
               }`}
             >
               {view.label}
@@ -124,13 +122,11 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
         value={filters.tier ?? ""}
         onChange={(event) => go({ tier: event.target.value })}
         aria-label="Lọc theo hạng"
-        className={`${FIELD} shrink-0`}
+        className={`${INPUT} shrink-0 xl:w-auto`}
       >
-        <option value="" className="bg-neutral-900">
-          Mọi hạng
-        </option>
+        <option value="">Mọi hạng</option>
         {Object.entries(USER_TIER_LABELS).map(([value, label]) => (
-          <option key={value} value={value} className="bg-neutral-900">
+          <option key={value} value={value}>
             {label}
           </option>
         ))}
@@ -142,7 +138,7 @@ export function AdminUserFilters({ filters }: { filters: UserFilters }) {
       <a
         href={`/api/admin/users/export?${params.toString()}`}
         title="Tải danh sách đang xem về dạng CSV"
-        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-rose-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700"
       >
         <Download size={15} />
         Xuất dữ liệu

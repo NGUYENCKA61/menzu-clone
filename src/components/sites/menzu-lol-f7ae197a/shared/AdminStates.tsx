@@ -5,14 +5,20 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { lockScroll, trapTab, unlockScroll } from "./modalChrome";
 import { useOverlayPresence } from "./useOverlayPresence";
 
+/**
+ * The admin's shared states and small controls, white since the 30/10/2026
+ * rebuild ("đập đi xây lại… màu trắng"). Same exports and props as the dark
+ * originals, so every screen that leans on them crossed over for free.
+ */
+
 /** Spinner for a panel that is fetching. */
 export function AdminLoading({ label = "Đang tải…" }: { label?: string }) {
   return (
     <div
       role="status"
-      className="flex flex-col items-center justify-center gap-3 py-16 text-neutral-400"
+      className="flex flex-col items-center justify-center gap-3 py-16 text-zinc-500"
     >
-      <Loader2 size={22} className="animate-spin text-indigo-400" />
+      <Loader2 size={22} className="animate-spin text-zinc-400" />
       <span className="text-sm">{label}</span>
     </div>
   );
@@ -29,10 +35,10 @@ export function AdminEmpty({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] py-16 text-center">
-      <Inbox size={24} className="text-neutral-600" />
-      <p className="text-sm font-bold text-white">{title}</p>
-      {body ? <p className="text-xs text-neutral-400 max-w-[420px]">{body}</p> : null}
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-zinc-300 bg-white py-16 text-center">
+      <Inbox size={24} className="text-zinc-300" />
+      <p className="text-sm font-bold text-zinc-900">{title}</p>
+      {body ? <p className="max-w-[420px] text-xs leading-relaxed text-zinc-500">{body}</p> : null}
       {action}
     </div>
   );
@@ -43,16 +49,16 @@ export function AdminError({ message, onRetry }: { message: string; onRetry?: ()
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/[0.06] py-12 text-center"
+      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-rose-200 bg-rose-50/60 py-12 text-center"
     >
-      <AlertTriangle size={22} className="text-red-400" />
-      <p className="text-sm font-bold text-red-400">Không tải được dữ liệu</p>
-      <p className="text-xs text-neutral-400 max-w-[420px]">{message}</p>
+      <AlertTriangle size={22} className="text-rose-500" />
+      <p className="text-sm font-bold text-rose-600">Không tải được dữ liệu</p>
+      <p className="max-w-[420px] text-xs text-zinc-500">{message}</p>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-1 h-9 px-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[13px] font-semibold text-white transition-colors"
+          className="mt-1 h-9 rounded-lg border border-zinc-300 bg-white px-4 text-[13px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
         >
           Thử lại
         </button>
@@ -121,7 +127,10 @@ export function ConfirmDialog({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" inert={leaving}>
       {/* Clicking the backdrop cancels — the safe outcome, never the action. */}
-      <div className={`order-modal-backdrop absolute inset-0 bg-black/70 backdrop-blur-sm${leaving ? " order-modal-backdrop-out" : ""}`} onClick={onCancel} />
+      <div
+        className={`order-modal-backdrop absolute inset-0 bg-zinc-950/40 backdrop-blur-sm${leaving ? " order-modal-backdrop-out" : ""}`}
+        onClick={onCancel}
+      />
 
       <div
         ref={panel}
@@ -129,28 +138,29 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-title"
         tabIndex={-1}
-        className={`order-modal-card relative w-full max-w-[420px] rounded-2xl border border-white/10 bg-panel p-6 shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
+        className={`order-modal-card relative w-full max-w-[420px] rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl outline-none${leaving ? " order-modal-card-out" : ""}`}
+        style={{ colorScheme: "light" }}
       >
         <button
           type="button"
           onClick={onCancel}
           aria-label="Đóng"
-          className="absolute right-4 top-4 text-neutral-500 hover:text-white transition-colors"
+          className="absolute right-4 top-4 text-zinc-400 transition-colors hover:text-zinc-900"
         >
           <X size={16} />
         </button>
 
-        <h2 id="confirm-title" className="text-base font-black text-white pr-6">
+        <h2 id="confirm-title" className="pr-6 text-base font-black text-zinc-900">
           {title}
         </h2>
-        <p className="mt-2 text-xs text-neutral-400 leading-relaxed">{body}</p>
+        <p className="mt-2 text-xs leading-relaxed text-zinc-500">{body}</p>
         {children ? <div className="mt-4">{children}</div> : null}
 
         <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 h-10 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-[13px] font-semibold text-neutral-300 transition-colors"
+            className="h-10 flex-1 rounded-lg border border-zinc-300 bg-white text-[13px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
           >
             Hủy
           </button>
@@ -158,8 +168,8 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={pending}
-            className={`flex-1 h-10 rounded-xl text-[13px] font-semibold text-white transition-colors disabled:opacity-60 disabled:cursor-wait ${
-              danger ? "bg-red-600 hover:bg-red-500" : "bg-[var(--brand-dark)] hover:bg-[var(--brand)]"
+            className={`h-10 flex-1 rounded-lg text-[13px] font-semibold text-white transition-colors disabled:cursor-wait disabled:opacity-60 ${
+              danger ? "bg-rose-600 hover:bg-rose-500" : "bg-zinc-900 hover:bg-zinc-700"
             }`}
           >
             {pending ? "Đang xử lý…" : confirmLabel}
@@ -171,14 +181,7 @@ export function ConfirmDialog({
 }
 
 /**
- * The admin's search box.
- *
- * Four screens — người dùng, đơn hàng, tài liệu, thông báo — had already
- * settled on the same markup for this, copied between them: a 40px field on
- * #0e0e11 with the magnifier inset on the left and a rose focus ring. This is
- * that markup, written once, so the fifth screen is the same shape as the four
- * rather than a sixth variant of it.
- *
+ * The admin's search box: one shape for every screen that filters a list.
  * The wrapper is a label, so a click anywhere on the field — the icon
  * included — puts the cursor in the input.
  */
@@ -202,7 +205,7 @@ export function AdminSearch({
     <label className={`relative block ${className}`}>
       <Search
         size={15}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
       />
       <input
         value={value}
@@ -210,7 +213,7 @@ export function AdminSearch({
         placeholder={placeholder}
         aria-label={label}
         maxLength={maxLength}
-        className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+        className="h-10 w-full rounded-lg border border-zinc-300 bg-white pl-9 pr-3 text-[13px] text-zinc-900 outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-900"
       />
     </label>
   );

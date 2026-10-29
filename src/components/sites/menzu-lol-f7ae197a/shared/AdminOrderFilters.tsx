@@ -4,6 +4,8 @@ import { Download, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
+import { INPUT } from "../admin/kit";
+
 import {
   ORDER_METHOD_LABELS,
   ORDER_STATUS_LABELS,
@@ -12,11 +14,8 @@ import {
 } from "@/lib/orders";
 import { searchNeedsSync } from "@/lib/paging";
 
-const FIELD =
-  "h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] px-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors";
-
 /**
- * The order screen's toolbar.
+ * The order screen's toolbar, white since the 30/10/2026 rebuild.
  *
  * Filtering happens in the database, not here: the table shows the most recent
  * hundred orders, so narrowing the rows already on screen would search a
@@ -70,11 +69,11 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-2.5">
-      <div className="relative flex-1 min-w-0">
+    <div className="flex flex-col gap-2.5 lg:flex-row">
+      <div className="relative min-w-0 flex-1">
         <Search
           size={15}
-          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
         />
         <input
           value={q}
@@ -82,7 +81,7 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
           onChange={(event) => setQ(event.target.value)}
           placeholder="Tìm mã đơn, khách hàng hoặc sản phẩm…"
           aria-label="Tìm đơn hàng"
-          className={`${FIELD} w-full pl-9`}
+          className={`${INPUT} pl-9`}
         />
       </div>
 
@@ -90,13 +89,11 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
         value={filters.status ?? ""}
         onChange={(event) => set("status", event.target.value)}
         aria-label="Lọc theo trạng thái"
-        className={FIELD}
+        className={`${INPUT} lg:w-auto`}
       >
-        <option value="" className="bg-neutral-900">
-          Tất cả trạng thái
-        </option>
+        <option value="">Tất cả trạng thái</option>
         {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
-          <option key={value} value={value} className="bg-neutral-900">
+          <option key={value} value={value}>
             {label}
           </option>
         ))}
@@ -106,13 +103,11 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
         value={filters.method ?? ""}
         onChange={(event) => set("method", event.target.value)}
         aria-label="Lọc theo phương thức"
-        className={FIELD}
+        className={`${INPUT} lg:w-auto`}
       >
-        <option value="" className="bg-neutral-900">
-          Tất cả phương thức
-        </option>
+        <option value="">Tất cả phương thức</option>
         {Object.entries(ORDER_METHOD_LABELS).map(([value, label]) => (
-          <option key={value} value={value} className="bg-neutral-900">
+          <option key={value} value={value}>
             {label}
           </option>
         ))}
@@ -123,14 +118,14 @@ export function AdminOrderFilters({ filters }: { filters: OrderFilters }) {
         value={filters.day}
         onChange={(event) => set("day", event.target.value)}
         aria-label="Lọc theo ngày"
-        className={FIELD}
+        className={`${INPUT} lg:w-auto`}
       />
 
       {/* A plain link, not a fetch: the browser's own download handling gives
           the file its name and puts it where the admin expects. */}
       <a
         href={`/api/admin/orders/export?${params.toString()}`}
-        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-rose-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-rose-600"
+        className="flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700"
       >
         <Download size={15} />
         Xuất dữ liệu

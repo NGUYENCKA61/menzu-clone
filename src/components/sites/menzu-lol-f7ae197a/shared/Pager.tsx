@@ -7,26 +7,23 @@ import { GAP, pageRange, pageStrip } from "@/lib/paging";
  * "Hiển thị 1–10 / 134" line on the left, same sliding number strip with the
  * first and last page always reachable — but driven by a useState page
  * instead of ?page= links, because these ledgers filter in the browser.
- *
- * Chip chrome is copied verbatim from the admin's PageLink so the member
- * pages and the admin never disagree about what a pager looks like.
+ * White since the 30/10/2026 rebuild, matching the kit's PageLink.
  */
 
 const SHAPE =
   "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold";
 // Only the chips that go somewhere answer a press. The current page and the
 // greyed end arrows are drawn from the same shape and must not sink.
-const CHIP_CURRENT = `${SHAPE} border-[var(--menzu-accent)]/60 bg-[var(--menzu-accent)]/15 text-[var(--menzu-accent)]`;
-const CHIP_IDLE = `${SHAPE} press border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`;
-const CHIP_OFF = `${SHAPE} border-white/[0.06] text-neutral-700 cursor-default`;
+const CHIP_CURRENT = `${SHAPE} border-zinc-900 bg-zinc-900 text-white`;
+const CHIP_IDLE = `${SHAPE} press border-zinc-300 bg-white text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900`;
+const CHIP_OFF = `${SHAPE} cursor-default border-zinc-200 text-zinc-300`;
 
 /**
  * Bring a list's head back into view after a page change. The pager sits
  * under the list, so the press that changes the page is made from the foot
  * of the screen while the ten new rows land above it — the viewport stays
  * where it was and the reader is looking at the tail of a page they have
- * not read. The feedback board has always done this; the two money pages
- * did not. Smooth, unless the reader asked for less motion; the target
+ * not read. Smooth, unless the reader asked for less motion; the target
  * carries scroll-mt so the fixed header does not cover its first line.
  */
 export function scrollListTop(node: HTMLElement | null) {
@@ -64,7 +61,7 @@ export function Pager({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <p className="text-[12px] text-neutral-500 tabular-nums">
+      <p className="text-[12px] tabular-nums text-zinc-500">
         Hiển thị {range.from}–{range.to} / {total.toLocaleString("vi-VN")} {unit}
       </p>
 
@@ -90,7 +87,7 @@ export function Pager({
               <span
                 key={`gap-${index}`}
                 aria-hidden
-                className="px-1 text-[12px] text-neutral-700"
+                className="px-1 text-[12px] text-zinc-400"
               >
                 {GAP}
               </span>

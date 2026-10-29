@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ConfirmDialog } from "./AdminStates";
+import { ConfirmDialog } from "./ConfirmDialogDark";
 import { StatusToast } from "./StatusToast";
 import { formatVnd } from "./productData";
 

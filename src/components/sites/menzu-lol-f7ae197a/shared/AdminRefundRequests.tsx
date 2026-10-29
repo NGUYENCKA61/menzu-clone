@@ -26,6 +26,12 @@ export interface RefundRequestRow {
 const ROW =
   "flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border p-4 transition-colors";
 
+/** The white desk's own status tones; the shared lib keeps the labels. */
+const STATE_CHIP: Record<string, string> = {
+  PENDING: "border-amber-200 bg-amber-50 text-amber-700",
+  REJECTED: "border-rose-200 bg-rose-50 text-rose-700",
+};
+
 /**
  * The refund queue, as a list.
  *
@@ -43,7 +49,7 @@ export function AdminRefundRequests({ rows }: { rows: RefundRequestRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-[13px] text-neutral-500">
+      <p className="rounded-xl border border-dashed border-zinc-300 bg-white py-10 text-center text-[13px] text-zinc-500">
         Chưa có yêu cầu hoàn trả nào.
       </p>
     );
@@ -60,44 +66,46 @@ export function AdminRefundRequests({ rows }: { rows: RefundRequestRow[] }) {
             href={`/admin/refunds/${r.id}`}
             className={`${ROW} ${
               open
-                ? "border-amber-500/25 bg-amber-500/[0.04] hover:border-amber-500/50"
-                : "border-white/[0.08] bg-white/[0.02] hover:border-white/20"
+                ? "border-amber-300 bg-amber-50/50 hover:border-amber-400"
+                : "border-zinc-200 bg-white hover:border-zinc-300"
             }`}
           >
             <span
-              className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[12px] font-semibold ${state.tile}`}
+              className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                STATE_CHIP[r.status] ?? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              }`}
             >
               {state.label}
             </span>
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-                <span className="font-mono text-[12px] font-black text-white">
+                <span className="font-mono text-[12px] font-bold text-zinc-900">
                   {r.orderCode}
                 </span>
-                <span className="truncate text-[12px] font-bold text-neutral-300">
+                <span className="truncate text-[12px] font-semibold text-zinc-700">
                   {r.productName}
                 </span>
-                <span className="text-[12px] font-black text-[var(--brand)]">
+                <span className="text-[12px] font-bold tabular-nums text-zinc-900">
                   {r.total}
                 </span>
                 {r.hasImage ? (
-                  <Paperclip size={11} className="text-neutral-500" />
+                  <Paperclip size={11} className="text-zinc-400" />
                 ) : null}
               </div>
               {/* One line of it. The rest is a click away, and a decision made
                   off a truncated complaint is one made without reading it. */}
-              <p className="mt-1 truncate text-[12px] text-neutral-400">
+              <p className="mt-1 truncate text-[12px] text-zinc-500">
                 {r.reason}
               </p>
-              <p className="mt-0.5 text-[11px] text-neutral-600">
+              <p className="mt-0.5 text-[11px] text-zinc-400">
                 {r.username} · UID {r.uid} · {r.createdAt}
                 {r.method ? ` · ${REFUND_METHOD[r.method].label}` : ""}
                 {r.amount ? ` ${r.amount}` : ""}
               </p>
             </div>
 
-            <ArrowRight size={14} className="shrink-0 text-neutral-600" />
+            <ArrowRight size={14} className="shrink-0 text-zinc-300" />
           </Link>
         );
       })}

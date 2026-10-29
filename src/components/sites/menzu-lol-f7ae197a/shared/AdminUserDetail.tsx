@@ -20,6 +20,7 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { INPUT } from "../admin/kit";
 import { AdminError, ConfirmDialog } from "./AdminStates";
 import type { AdminUserView } from "./AdminUsers";
 
@@ -35,22 +36,19 @@ type Pending =
 const TIERS = ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND", "ELITE"] as const;
 
 const TIER_COLOR: Record<string, string> = {
-  CLASSIC: "text-neutral-300",
-  GOLD: "text-yellow-400",
-  PLATINUM: "text-cyan-300",
-  DIAMOND: "text-violet-300",
-  ELITE: "text-rose-300",
+  CLASSIC: "text-zinc-500",
+  GOLD: "text-amber-600",
+  PLATINUM: "text-cyan-600",
+  DIAMOND: "text-violet-600",
+  ELITE: "text-rose-600",
 };
 
-const CARD = "rounded-xl border border-white/[0.08] bg-[#0e0e11] p-5 flex flex-col gap-4";
-const CARD_HEAD =
-  "flex items-center gap-2 text-[12px] font-semibold text-neutral-500";
-const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
+const CARD = "rounded-xl border border-zinc-200 bg-white p-5 flex flex-col gap-4";
+const CARD_HEAD = "flex items-center gap-2 text-[12px] font-semibold text-zinc-600";
+const LABEL = "mb-1.5 block text-[12px] font-semibold text-zinc-600";
 const ACTION =
-  "h-[34px] px-4 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand)] disabled:opacity-60 text-[12px] font-semibold text-white transition-colors";
-const HINT = "text-[11px] text-neutral-500 leading-relaxed";
+  "h-[34px] px-4 rounded-lg bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 text-[12px] font-semibold text-white transition-colors";
+const HINT = "text-[11px] leading-relaxed text-zinc-500";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -60,7 +58,7 @@ function StatCard({
   label,
   value,
   sub,
-  tone = "text-white",
+  tone = "text-zinc-900",
 }: {
   label: string;
   value: string;
@@ -68,12 +66,10 @@ function StatCard({
   tone?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-2">
-      <span className="text-[12px] font-semibold text-neutral-500">
-        {label}
-      </span>
-      <span className={`text-[22px] font-black leading-none tabular-nums ${tone}`}>{value}</span>
-      {sub ? <span className="text-[11px] text-neutral-500">{sub}</span> : null}
+    <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5">
+      <span className="text-[12.5px] text-zinc-500">{label}</span>
+      <span className={`text-[21px] font-bold leading-none tabular-nums ${tone}`}>{value}</span>
+      {sub ? <span className="text-[11.5px] text-zinc-400">{sub}</span> : null}
     </div>
   );
 }
@@ -222,21 +218,21 @@ export function AdminUserDetail({
   })();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {error ? <AdminError message={error} onRetry={() => setError(null)} /> : null}
 
       {/* Who this is: the face, the papers, the footprint dates. */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+      <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-5">
           <span
-            className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
+            className={`flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-zinc-100 ${
               user.blockedAt
-                ? "border-red-500/40"
+                ? "border-rose-300"
                 : user.role === "ADMIN"
-                  ? "border-violet-500/50"
+                  ? "border-violet-300"
                   : user.role === "AGENCY"
-                    ? "border-amber-500/50"
-                    : "border-white/10"
+                    ? "border-amber-300"
+                    : "border-zinc-200"
             }`}
           >
             {user.avatarUrl ? (
@@ -248,24 +244,24 @@ export function AdminUserDetail({
                 className={`h-full w-full object-cover ${user.blockedAt ? "opacity-50 grayscale" : ""}`}
               />
             ) : (
-              <span aria-hidden className="text-2xl font-black text-neutral-500">
-                {user.username.slice(0, 1)}
+              <span aria-hidden className="text-2xl font-black text-zinc-400">
+                {user.username.slice(0, 1).toUpperCase()}
               </span>
             )}
           </span>
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-xl font-black text-white">{user.username}</h2>
+              <h2 className="text-xl font-black text-zinc-900">{user.username}</h2>
               <span
-                className={`inline-block rounded-md border px-2 py-1 text-[12px] font-semibold ${
+                className={`inline-block rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
                   user.blockedAt
-                    ? "border-red-500/30 bg-red-500/10 text-red-400"
+                    ? "border-rose-200 bg-rose-50 text-rose-700"
                     : user.role === "ADMIN"
-                      ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                      ? "border-violet-200 bg-violet-50 text-violet-700"
                       : user.role === "AGENCY"
-                        ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                        ? "border-amber-200 bg-amber-50 text-amber-700"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
                 }`}
               >
                 {user.blockedAt
@@ -278,7 +274,7 @@ export function AdminUserDetail({
               </span>
               <span
                 className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${
-                  TIER_COLOR[user.tier] ?? "text-neutral-300"
+                  TIER_COLOR[user.tier] ?? "text-zinc-600"
                 }`}
               >
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -288,20 +284,20 @@ export function AdminUserDetail({
                 // "Xác thực cấp 2" (12/10/2026): the desk that granted it is a click away.
                 <Link
                   href="/admin/verifications?filter=all"
-                  className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[12px] font-semibold text-emerald-300 transition-colors hover:text-white"
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 transition-colors hover:border-emerald-300"
                 >
                   <BadgeCheck size={11} aria-hidden />
                   Cấp 2 · {user.verifiedAt}
                 </Link>
               ) : null}
             </div>
-            <p className="mt-2 text-[12px] text-neutral-500 tabular-nums">
+            <p className="mt-2 text-[12px] tabular-nums text-zinc-500">
               UID {user.uid} · Tham gia {user.createdAt}
               {user.email ? ` · ${user.email}` : ""}
             </p>
-            <p className="mt-1 text-[12px] text-neutral-500">
+            <p className="mt-1 text-[12px] text-zinc-500">
               Đăng nhập gần nhất:{" "}
-              <span className="font-semibold text-neutral-300">
+              <span className="font-semibold text-zinc-700">
                 {user.lastLoginAt ?? "chưa đăng nhập lần nào"}
               </span>
             </p>
@@ -309,18 +305,18 @@ export function AdminUserDetail({
         </div>
 
         {user.blockedAt ? (
-          <div className="mt-5 rounded-lg border border-red-500/20 bg-red-500/[0.06] px-4 py-3">
+          <div className="mt-5 rounded-lg border border-rose-200 bg-rose-50/60 px-4 py-3">
             <span className={LABEL}>Lý do khóa · {user.blockedAt}</span>
-            <p className="text-xs text-neutral-200">{user.blockedReason ?? "Không ghi lý do"}</p>
+            <p className="text-xs text-zinc-700">{user.blockedReason ?? "Không ghi lý do"}</p>
           </div>
         ) : null}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           label="Số dư ví"
           value={`${formatVnd(user.balance)}đ`}
-          tone={user.balance > 0 ? "text-emerald-400" : "text-white"}
+          tone={user.balance > 0 ? "text-emerald-600" : "text-zinc-900"}
         />
         <StatCard label="Tổng đã nạp" value={`${formatVnd(user.totalToppedUp)}đ`} />
         <StatCard
@@ -332,12 +328,12 @@ export function AdminUserDetail({
           label="Địa chỉ IP"
           value={user.lastIp ?? "-"}
           sub="ghi nhận ở lần đăng nhập gần nhất"
-          tone="text-white break-all"
+          tone="text-zinc-900 break-all"
         />
       </div>
 
       {isSelf ? (
-        <p className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[11px] text-neutral-400">
+        <p className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-[11px] leading-relaxed text-zinc-500">
           Đây là tài khoản bạn đang đăng nhập. Máy chủ từ chối mọi thao tác quản trị lên
           chính nó, để một admin không thể tự khóa hoặc tự hạ quyền rồi khóa cả shop ở
           ngoài khu quản trị.
@@ -345,15 +341,15 @@ export function AdminUserDetail({
       ) : (
         // Two independent stacks, not grid rows: cards differ in height and a
         // row-aligned grid opened holes under the short ones.
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          <div className="flex flex-col gap-4 min-w-0">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-4">
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Mail size={13} className="text-neutral-400" />
+              <Mail size={13} className="text-zinc-400" />
               Email liên hệ
             </span>
             <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[200px]">
+              <div className="min-w-[200px] flex-1">
                 <label htmlFor="detail-email" className={LABEL}>
                   Email
                 </label>
@@ -363,7 +359,7 @@ export function AdminUserDetail({
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="chưa có email"
-                  className={FIELD}
+                  className={INPUT}
                 />
               </div>
               <button
@@ -379,7 +375,7 @@ export function AdminUserDetail({
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Wallet size={13} className="text-neutral-400" />
+              <Wallet size={13} className="text-zinc-400" />
               Số dư ví
             </span>
             {/* Adding and taking off as two plain choices, where one field
@@ -390,7 +386,7 @@ export function AdminUserDetail({
             <div
               role="radiogroup"
               aria-label="Cộng hay trừ tiền"
-              className="grid w-full max-w-[320px] grid-cols-2 gap-1 rounded-lg border border-white/10 bg-neutral-950/60 p-1"
+              className="grid w-full max-w-[320px] grid-cols-2 gap-1 rounded-lg border border-zinc-200 bg-zinc-50 p-1"
             >
               {(["add", "sub"] as const).map((kind) => {
                 const on = mode === kind;
@@ -405,9 +401,9 @@ export function AdminUserDetail({
                     className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-md text-[12px] font-semibold transition-colors ${
                       on
                         ? add
-                          ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/40"
-                          : "bg-red-500/15 text-red-400 ring-1 ring-red-500/40"
-                        : "text-neutral-400 hover:text-white"
+                          ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-300"
+                          : "bg-white text-rose-700 shadow-sm ring-1 ring-rose-300"
+                        : "text-zinc-500 hover:text-zinc-900"
                     }`}
                   >
                     {add ? <Plus size={13} /> : <Minus size={13} />}
@@ -425,7 +421,7 @@ export function AdminUserDetail({
                   <span
                     aria-hidden
                     className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold ${
-                      mode === "add" ? "text-emerald-400" : "text-red-400"
+                      mode === "add" ? "text-emerald-600" : "text-rose-600"
                     }`}
                   >
                     {mode === "add" ? "+" : "−"}
@@ -436,20 +432,20 @@ export function AdminUserDetail({
                     value={amount ? formatVnd(Number(amount)) : ""}
                     onChange={(event) => setAmount(event.target.value.replace(/[^\d]/g, "").slice(0, 10))}
                     placeholder="100.000"
-                    className={`${FIELD} w-40 pl-7 tabular-nums`}
+                    className={`${INPUT} w-40 pl-7 tabular-nums`}
                   />
                 </div>
               </div>
-              <div className="flex-1 min-w-[160px]">
+              <div className="min-w-[160px] flex-1">
                 <label htmlFor="detail-note" className={LABEL}>
-                  Lý do <span className="text-neutral-600">(khách sẽ thấy)</span>
+                  Lý do <span className="font-normal text-zinc-400">(khách sẽ thấy)</span>
                 </label>
                 <input
                   id="detail-note"
                   value={note}
                   onChange={(event) => setNote(event.target.value)}
                   placeholder="Hoàn tiền đơn VLR2079"
-                  className={FIELD}
+                  className={INPUT}
                 />
               </div>
               <button
@@ -468,7 +464,7 @@ export function AdminUserDetail({
                   }
                 }}
                 className={`inline-flex h-[34px] items-center gap-1.5 rounded-lg px-4 text-[12px] font-semibold text-white transition-colors disabled:opacity-50 ${
-                  mode === "add" ? "bg-emerald-600 hover:bg-emerald-500" : "bg-red-600 hover:bg-red-500"
+                  mode === "add" ? "bg-emerald-600 hover:bg-emerald-500" : "bg-rose-600 hover:bg-rose-500"
                 }`}
               >
                 {mode === "add" ? <Plus size={13} /> : <Minus size={13} />}
@@ -478,12 +474,12 @@ export function AdminUserDetail({
             {amountValue ? (
               <p className={HINT}>
                 Số dư sau khi {mode === "add" ? "cộng" : "trừ"}:{" "}
-                <span className={`font-bold tabular-nums ${balanceAfter < 0 ? "text-red-400" : "text-white"}`}>
+                <span className={`font-bold tabular-nums ${balanceAfter < 0 ? "text-rose-600" : "text-zinc-900"}`}>
                   {balanceAfter < 0 ? "-" : ""}
                   {formatVnd(Math.abs(balanceAfter))}đ
                 </span>{" "}
                 (hiện {formatVnd(user.balance)}đ)
-                {balanceAfter < 0 ? <span className="text-red-400">, số dư sẽ bị âm</span> : null}
+                {balanceAfter < 0 ? <span className="text-rose-600">, số dư sẽ bị âm</span> : null}
               </p>
             ) : null}
             <p className={HINT}>
@@ -494,13 +490,13 @@ export function AdminUserDetail({
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <BadgePercent size={13} className="text-amber-400" />
+              <BadgePercent size={13} className="text-zinc-400" />
               Đại lý
             </span>
             <div className="flex flex-wrap items-end gap-3">
               <div>
                 <label htmlFor="detail-agency" className={LABEL}>
-                  % chiết khấu <span className="text-neutral-600">(1–90, thỏa thuận riêng)</span>
+                  % chiết khấu <span className="font-normal text-zinc-400">(1–90, thỏa thuận riêng)</span>
                 </label>
                 <input
                   id="detail-agency"
@@ -510,7 +506,7 @@ export function AdminUserDetail({
                   }
                   inputMode="numeric"
                   placeholder={user.role === "AGENCY" ? `Đang: ${user.agencyPercent}%` : "VD: 15"}
-                  className={`${FIELD} w-40 tabular-nums`}
+                  className={`${INPUT} w-40 tabular-nums`}
                 />
               </div>
               <button
@@ -522,7 +518,7 @@ export function AdminUserDetail({
                 }
                 title={user.role === "ADMIN" ? "Thu hồi quyền quản trị trước" : undefined}
                 onClick={() => setConfirming({ kind: "agency" })}
-                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[12px] font-semibold text-amber-400 transition-colors"
+                className={ACTION}
               >
                 {user.role === "AGENCY" ? "Đổi %" : "Cấp đại lý"}
               </button>
@@ -531,7 +527,7 @@ export function AdminUserDetail({
                   type="button"
                   disabled={busy}
                   onClick={() => setConfirming({ kind: "agencyRevoke" })}
-                  className="h-[34px] px-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 disabled:opacity-40 text-[12px] font-semibold text-neutral-300 transition-colors"
+                  className="h-[34px] rounded-lg border border-zinc-300 bg-white px-4 text-[12px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 disabled:opacity-40"
                 >
                   Gỡ đại lý
                 </button>
@@ -544,16 +540,16 @@ export function AdminUserDetail({
           </section>
           </div>
 
-          <div className="flex flex-col gap-4 min-w-0">
+          <div className="flex min-w-0 flex-col gap-4">
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <KeyRound size={13} className="text-neutral-400" />
+              <KeyRound size={13} className="text-zinc-400" />
               Đặt lại mật khẩu
             </span>
             <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[200px]">
+              <div className="min-w-[200px] flex-1">
                 <label htmlFor="detail-password" className={LABEL}>
-                  Mật khẩu mới <span className="text-neutral-600">(ít nhất 8 ký tự)</span>
+                  Mật khẩu mới <span className="font-normal text-zinc-400">(ít nhất 8 ký tự)</span>
                 </label>
                 <input
                   id="detail-password"
@@ -562,14 +558,14 @@ export function AdminUserDetail({
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Đặt lại khi khách mất quyền truy cập"
                   autoComplete="off"
-                  className={FIELD}
+                  className={INPUT}
                 />
               </div>
               <button
                 type="button"
                 disabled={busy || password.length < 6}
                 onClick={() => setConfirming({ kind: "password" })}
-                className="h-[34px] px-4 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-40 disabled:hover:bg-amber-500/10 text-[12px] font-semibold text-amber-400 transition-colors inline-flex items-center gap-1.5"
+                className={`${ACTION} inline-flex items-center gap-1.5`}
               >
                 <KeyRound size={12} />
                 Đặt lại
@@ -583,7 +579,7 @@ export function AdminUserDetail({
 
           <section className={CARD}>
             <span className={CARD_HEAD}>
-              <Medal size={13} className="text-neutral-400" />
+              <Medal size={13} className="text-zinc-400" />
               Hạng thành viên
             </span>
             <div className="flex flex-wrap items-end gap-3">
@@ -598,25 +594,25 @@ export function AdminUserDetail({
                   onChange={(event) =>
                     call({ username: user.username, action: "tier", tier: event.target.value })
                   }
-                  className={`${FIELD} w-44`}
+                  className={`${INPUT} w-44`}
                 >
                   {TIERS.map((tier) => (
-                    <option key={tier} value={tier} className="bg-neutral-900">
+                    <option key={tier} value={tier}>
                       {tier}
                     </option>
                   ))}
                 </select>
               </div>
-              <p className={`flex-1 min-w-[200px] ${HINT}`}>
+              <p className={`min-w-[200px] flex-1 ${HINT}`}>
                 Đặt tay. Mốc lên hạng là quy định riêng của shop và chưa được khai báo, nên
                 hệ thống không tự nâng hạng cho ai.
               </p>
             </div>
           </section>
 
-          <section className="rounded-xl border border-red-500/20 bg-red-500/[0.03] p-5 flex flex-col gap-4">
-            <span className={CARD_HEAD}>
-              <ShieldAlert size={13} className="text-red-400" />
+          <section className="flex flex-col gap-4 rounded-xl border border-rose-200 bg-rose-50/40 p-5">
+            <span className="flex items-center gap-2 text-[12px] font-semibold text-rose-700">
+              <ShieldAlert size={13} className="text-rose-500" />
               Vùng nguy hiểm
             </span>
             <div className="flex flex-wrap items-center gap-2.5">
@@ -624,7 +620,7 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "role" })}
-                className="h-[34px] px-4 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 disabled:opacity-40 text-[12px] font-semibold text-rose-400 transition-colors inline-flex items-center gap-1.5"
+                className="inline-flex h-[34px] items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-4 text-[12px] font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-40"
               >
                 <Shield size={12} />
                 {user.role === "ADMIN" ? "Thu hồi quyền admin" : "Cấp quyền admin"}
@@ -633,10 +629,10 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "block" })}
-                className={`h-[34px] px-4 rounded-lg disabled:opacity-40 text-[12px] font-semibold transition-colors inline-flex items-center gap-1.5 ${
+                className={`inline-flex h-[34px] items-center gap-1.5 rounded-lg px-4 text-[12px] font-semibold transition-colors disabled:opacity-40 ${
                   user.blockedAt
-                    ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
-                    : "border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                    ? "border border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
+                    : "border border-amber-300 bg-white text-amber-700 hover:bg-amber-50"
                 }`}
               >
                 {user.blockedAt ? <Unlock size={12} /> : <Ban size={12} />}
@@ -646,13 +642,13 @@ export function AdminUserDetail({
                 type="button"
                 disabled={busy}
                 onClick={() => setConfirming({ kind: "delete" })}
-                className="h-[34px] px-4 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-40 text-[12px] font-semibold text-red-400 transition-colors inline-flex items-center gap-1.5"
+                className="inline-flex h-[34px] items-center gap-1.5 rounded-lg bg-rose-600 px-4 text-[12px] font-semibold text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
               >
                 <Trash2 size={12} />
                 Xóa vĩnh viễn
               </button>
             </div>
-            <p className={HINT}>
+            <p className={`${HINT} text-rose-700/80`}>
               Khóa giữ nguyên số liệu và mở lại được; xóa mất hẳn lịch sử đơn, nạp và giao
               dịch của khách. Mỗi nút đều hỏi xác nhận trước khi chạy.
             </p>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BadgeCheck, CreditCard, Landmark, Search, Star, Trash2 } from "lucide-react";
 
+import { INPUT, TEXTAREA } from "../admin/kit";
 import { AdminEmpty, AdminError, ConfirmDialog } from "./AdminStates";
 import {
   AdminRefundRequests,
@@ -31,12 +32,9 @@ export interface FeedbackView {
   createdAt: string;
 }
 
-/** The Cấu hình screen's field, label and hint, for the one form on this
- *  screen: the figure typed before a top-up is credited by hand. */
-const FIELD =
-  "w-full rounded-lg border border-white/10 bg-neutral-950/60 px-3 py-2 text-xs text-white outline-none focus:border-[var(--brand)]/60 transition-colors placeholder-neutral-600";
-const LABEL = "block text-[12px] font-semibold text-neutral-500 mb-1.5";
-const HINT = "mt-1.5 text-[11px] text-neutral-500";
+/** The one hand-typed figure on this screen: what a transfer actually carried. */
+const LABEL = "mb-1.5 block text-[12px] font-semibold text-zinc-600";
+const HINT = "mt-1.5 text-[11px] text-zinc-500";
 
 /**
  * The reasons a top-up is actually refused, one tap each.
@@ -75,16 +73,16 @@ export interface TopUpView {
   createdAt: string;
 }
 
-/** The 24px face beside a customer's name, initial when there is no picture —
+/** The 32px face beside a customer's name, initial when there is no picture —
  *  the same face language as the dashboard and the users table. */
 function MiniAvatar({ username, avatarUrl }: { username: string; avatarUrl: string | null }) {
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100">
       {avatarUrl ? (
         <Image src={avatarUrl} alt="" width={32} height={32} className="h-full w-full object-cover" />
       ) : (
-        <span aria-hidden className="text-[13px] font-semibold text-neutral-500">
-          {username.slice(0, 1)}
+        <span aria-hidden className="text-[13px] font-semibold text-zinc-500">
+          {username.slice(0, 1).toUpperCase()}
         </span>
       )}
     </span>
@@ -93,6 +91,8 @@ function MiniAvatar({ username, avatarUrl }: { username: string; avatarUrl: stri
 
 const PAGE_BTN =
   "flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-[12px] font-semibold transition-colors";
+const PAGE_BTN_OFF =
+  "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900";
 
 /** The admin page strip, client-side: same chrome as the users list, driven by
  *  state instead of the URL — these tabs share one route. */
@@ -109,17 +109,17 @@ function Pager({
   return (
     <nav aria-label="Phân trang" className="flex items-center gap-1.5">
       {current <= 1 ? (
-        <span aria-hidden className={`${PAGE_BTN} border-white/[0.06] text-neutral-700 cursor-default`}>
+        <span aria-hidden className={`${PAGE_BTN} cursor-default border-zinc-200 text-zinc-300`}>
           ‹
         </span>
       ) : (
-        <button type="button" aria-label="Trang trước" onClick={() => onGo(current - 1)} className={`${PAGE_BTN} border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`}>
+        <button type="button" aria-label="Trang trước" onClick={() => onGo(current - 1)} className={`${PAGE_BTN} ${PAGE_BTN_OFF}`}>
           ‹
         </button>
       )}
       {pageStrip(current, total).map((n, index) =>
         n === GAP ? (
-          <span key={`gap-${index}`} aria-hidden className="px-1 text-[12px] text-neutral-700">
+          <span key={`gap-${index}`} aria-hidden className="px-1 text-[12px] text-zinc-400">
             {GAP}
           </span>
         ) : (
@@ -131,8 +131,8 @@ function Pager({
             onClick={() => onGo(n)}
             className={`${PAGE_BTN} ${
               n === current
-                ? "border-rose-500/60 bg-rose-500/15 text-rose-400"
-                : "border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white"
+                ? "border-zinc-900 bg-zinc-900 text-white"
+                : PAGE_BTN_OFF
             }`}
           >
             {n}
@@ -140,11 +140,11 @@ function Pager({
         ),
       )}
       {current >= total ? (
-        <span aria-hidden className={`${PAGE_BTN} border-white/[0.06] text-neutral-700 cursor-default`}>
+        <span aria-hidden className={`${PAGE_BTN} cursor-default border-zinc-200 text-zinc-300`}>
           ›
         </span>
       ) : (
-        <button type="button" aria-label="Trang sau" onClick={() => onGo(current + 1)} className={`${PAGE_BTN} border-white/[0.08] bg-white/[0.03] text-neutral-300 hover:bg-white/[0.08] hover:text-white`}>
+        <button type="button" aria-label="Trang sau" onClick={() => onGo(current + 1)} className={`${PAGE_BTN} ${PAGE_BTN_OFF}`}>
           ›
         </button>
       )}
@@ -153,21 +153,23 @@ function Pager({
 }
 
 const TOPUP_STATUS: Record<string, { text: string; className: string }> = {
-  PENDING: { text: "Chờ xác nhận", className: "border-amber-500/30 bg-amber-500/10 text-amber-400" },
-  COMPLETED: { text: "Đã cộng tiền", className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
-  FAILED: { text: "Đã từ chối", className: "border-red-500/30 bg-red-500/10 text-red-400" },
+  PENDING: { text: "Chờ xác nhận", className: "border-amber-200 bg-amber-50 text-amber-700" },
+  COMPLETED: { text: "Đã cộng tiền", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
+  FAILED: { text: "Đã từ chối", className: "border-rose-200 bg-rose-50 text-rose-700" },
   // Grey rather than red: nobody did anything wrong, the request simply aged
   // out of the queue — and it still credits if the money turns up.
-  EXPIRED: { text: "Quá hạn", className: "border-white/10 bg-white/5 text-neutral-500" },
+  EXPIRED: { text: "Quá hạn", className: "border-zinc-200 bg-zinc-50 text-zinc-500" },
   // The customer withdrew it themselves from /wallet. Without this entry the
   // fallback dressed cancelled rows as "Chờ xác nhận" — the exact opposite.
-  CANCELLED: { text: "Đã hủy", className: "border-white/10 bg-white/5 text-neutral-500" },
+  CANCELLED: { text: "Đã hủy", className: "border-zinc-200 bg-zinc-50 text-zinc-500" },
 };
+const STATUS_CHIP =
+  "inline-flex whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold";
 
 const TAB_ON =
-  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/25 bg-white/[0.12] text-frost transition-colors";
+  "whitespace-nowrap border-b-2 border-zinc-900 px-3 pb-2.5 pt-1 text-[13.5px] font-semibold text-zinc-900 transition-colors";
 const TAB_OFF =
-  "whitespace-nowrap px-4 py-2 rounded-xl text-[14px] font-semibold border border-white/10 bg-white/[0.03] text-neutral-400 hover:text-white transition-colors";
+  "whitespace-nowrap border-b-2 border-transparent px-3 pb-2.5 pt-1 text-[13.5px] font-semibold text-zinc-500 transition-colors hover:text-zinc-900";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -278,14 +280,20 @@ export function AdminOperations({
     }
   }
 
+  /** The waiting count on a tab: work someone is waiting on reads amber. */
+  const badge = (n: number) =>
+    n > 0 ? (
+      <span className="ml-1.5 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+        {n}
+      </span>
+    ) : null;
+
   return (
     <div className="flex flex-col gap-5">
-      {/* Five pills are 413px; on a 390px phone the row scrolled and the
-          last tab — the parcels waiting to be posted, badge and all — showed
-          one letter. They wrap to two rows there and stay one row from sm. */}
-      <div className="flex flex-wrap gap-2 sm:flex-nowrap sm:overflow-x-auto">
+      <div className="hide-scrollbar flex overflow-x-auto border-b border-zinc-200">
         <button type="button" onClick={() => setTab("feedback")} className={tab === "feedback" ? TAB_ON : TAB_OFF}>
           Đánh giá
+          {badge(pendingCount)}
         </button>
         <button type="button" onClick={() => setTab("topups")} className={tab === "topups" ? TAB_ON : TAB_OFF}>
           Nạp tiền
@@ -299,11 +307,7 @@ export function AdminOperations({
           className={tab === "refunds" ? TAB_ON : TAB_OFF}
         >
           Hoàn trả
-          {waitingRefunds > 0 ? (
-            <span className="ml-1.5 rounded-md bg-black/25 px-1.5 py-0.5 text-[10px]">
-              {waitingRefunds}
-            </span>
-          ) : null}
+          {badge(waitingRefunds)}
         </button>
         <button
           type="button"
@@ -323,11 +327,7 @@ export function AdminOperations({
           className={tab === "parcels" ? TAB_ON : TAB_OFF}
         >
           Gửi quà
-          {unsentPrizes > 0 ? (
-            <span className="ml-1.5 rounded-md bg-black/25 px-1.5 py-0.5 text-[10px]">
-              {unsentPrizes}
-            </span>
-          ) : null}
+          {badge(unsentPrizes)}
         </button>
       </div>
 
@@ -345,10 +345,10 @@ export function AdminOperations({
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label className="relative flex-1 min-w-[240px] max-w-[360px]">
+              <label className="relative min-w-[240px] max-w-[360px] flex-1">
                 <Search
                   size={14}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none"
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
                 />
                 <input
                   value={fbQuery}
@@ -357,14 +357,14 @@ export function AdminOperations({
                     setFbPage(1);
                   }}
                   placeholder="Tìm tên, @tài khoản hoặc nội dung..."
-                  className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+                  className={`${INPUT} pl-9`}
                 />
               </label>
               {/* The queue at a glance, before any scrolling. */}
-              <p className="text-[12px] text-neutral-500 tabular-nums">
+              <p className="text-[12px] tabular-nums text-zinc-500">
                 {pendingCount > 0 ? (
                   <>
-                    <span className="font-black text-amber-400">{pendingCount}</span> chờ
+                    <span className="font-black text-amber-600">{pendingCount}</span> chờ
                     duyệt ·{" "}
                   </>
                 ) : null}
@@ -379,15 +379,15 @@ export function AdminOperations({
             {fbSlice.map((row) => (
               <div
                 key={row.id}
-                className={`rounded-2xl border p-4 sm:p-5 ${
+                className={`rounded-xl border p-4 sm:p-5 ${
                   row.approved
-                    ? "border-white/10 bg-neutral-900/50"
-                    : "border-amber-500/30 bg-amber-500/[0.04]"
+                    ? "border-zinc-200 bg-white"
+                    : "border-amber-300 bg-amber-50/50"
                 }`}
               >
                 <div className="flex gap-3.5">
                   {/* The face the public card will wear — who you are verifying. */}
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-zinc-200 bg-zinc-100">
                     {row.avatarUrl ? (
                       <Image
                         src={row.avatarUrl}
@@ -397,41 +397,38 @@ export function AdminOperations({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span
-                        aria-hidden
-                        className="text-[15px] font-semibold text-neutral-500"
-                      >
-                        {row.name.slice(0, 1)}
+                      <span aria-hidden className="text-[15px] font-semibold text-zinc-500">
+                        {row.name.slice(0, 1).toUpperCase()}
                       </span>
                     )}
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
-                      <span className="text-[13px] font-black text-white">{row.name}</span>
+                      <span className="text-[13px] font-bold text-zinc-900">{row.name}</span>
                       {/* Which account is behind the card — the public page
                           never shows this, the moderator always needs it. */}
                       {row.username ? (
-                        <span className="text-[11px] text-neutral-500">@{row.username}</span>
+                        <span className="text-[11px] text-zinc-500">@{row.username}</span>
                       ) : null}
                       {row.anonymous ? (
-                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
+                        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[11px] font-semibold text-zinc-500">
                           Ẩn danh
                         </span>
                       ) : null}
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border text-blue-400 bg-blue-500/10 border-blue-500/20">
+                      <span className="rounded-full border border-sky-200 bg-sky-50 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">
                         {row.service}
                       </span>
                       {!row.approved ? (
-                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-amber-500/30 bg-amber-500/10 text-amber-400">
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700">
                           Chờ duyệt
                         </span>
                       ) : row.verified ? (
-                        <span className="text-[12px] font-semibold px-1.5 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">
                           Đã xác minh
                         </span>
                       ) : null}
-                      <span className="ml-auto text-[11px] text-neutral-600 tabular-nums whitespace-nowrap">
+                      <span className="ml-auto whitespace-nowrap text-[11px] tabular-nums text-zinc-400">
                         {row.createdAt}
                       </span>
                     </div>
@@ -444,19 +441,19 @@ export function AdminOperations({
                           strokeWidth={1.5}
                           className={
                             n <= row.rating
-                              ? "text-amber-400 fill-amber-400"
-                              : "text-neutral-800 fill-neutral-900/50"
+                              ? "fill-amber-400 text-amber-400"
+                              : "fill-zinc-100 text-zinc-300"
                           }
                         />
                       ))}
                     </div>
 
                     {row.body ? (
-                      <p className="mt-2 text-[12.5px] text-neutral-300 leading-relaxed">
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-700">
                         “{row.body}”
                       </p>
                     ) : (
-                      <p className="mt-2 text-[12px] text-neutral-600 italic">
+                      <p className="mt-2 text-[12px] italic text-zinc-400">
                         Không để lại nhận xét
                       </p>
                     )}
@@ -467,7 +464,7 @@ export function AdminOperations({
                         target="_blank"
                         rel="noreferrer"
                         title="Mở ảnh gốc"
-                        className="mt-2.5 block w-fit rounded-lg overflow-hidden border border-white/10 hover:border-emerald-500/50 transition-colors"
+                        className="mt-2.5 block w-fit overflow-hidden rounded-lg border border-zinc-200 transition-colors hover:border-zinc-400"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -479,9 +476,9 @@ export function AdminOperations({
                     ) : null}
 
                     {row.amount > 0 ? (
-                      <p className="mt-2 text-[11px] text-neutral-500">
+                      <p className="mt-2 text-[11px] text-zinc-500">
                         Trị giá GD:{" "}
-                        <span className="font-black text-emerald-400 tabular-nums">
+                        <span className="font-black tabular-nums text-emerald-600">
                           {formatVnd(row.amount)}đ
                         </span>
                       </p>
@@ -494,7 +491,7 @@ export function AdminOperations({
                         type="button"
                         disabled={pending}
                         onClick={() => call("/api/admin/feedback", { id: row.id, approved: true })}
-                        className="h-8 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 text-[12px] font-semibold text-black transition-colors inline-flex items-center justify-center gap-1.5"
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-[12px] font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-60"
                       >
                         <BadgeCheck size={12} />
                         Duyệt
@@ -504,7 +501,7 @@ export function AdminOperations({
                       type="button"
                       disabled={pending}
                       onClick={() => call("/api/admin/feedback", { id: row.id, verified: !row.verified })}
-                      className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-60 text-[12px] font-semibold text-neutral-300 transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="inline-flex h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-zinc-300 bg-white px-3 text-[12px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-60"
                     >
                       <BadgeCheck size={12} />
                       {row.verified ? "Bỏ xác minh" : "Xác minh"}
@@ -514,7 +511,7 @@ export function AdminOperations({
                       disabled={pending}
                       onClick={() => setRemoving(row)}
                       aria-label={`Xoá đánh giá của ${row.name}`}
-                      className="h-8 rounded-lg border border-white/10 bg-white/5 hover:border-red-500/30 hover:bg-red-500/10 disabled:opacity-60 text-neutral-400 hover:text-red-400 transition-colors inline-flex items-center justify-center"
+                      className="inline-flex h-8 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-400 transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-60"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -527,7 +524,7 @@ export function AdminOperations({
 
             {shownFeedback.length > 0 ? (
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <p className="text-[12px] text-neutral-500 tabular-nums">
+                <p className="text-[12px] tabular-nums text-zinc-500">
                   Hiển thị {fbRange.from}–{fbRange.to} / {shownFeedback.length} đánh giá
                 </p>
                 <Pager current={fbCurrent} total={fbPages} onGo={setFbPage} />
@@ -540,10 +537,10 @@ export function AdminOperations({
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="relative flex-1 min-w-[240px]">
+            <label className="relative min-w-[240px] flex-1">
               <Search
                 size={15}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
               />
               <input
                 value={topUpQuery}
@@ -552,10 +549,10 @@ export function AdminOperations({
                   setTopUpPage(1);
                 }}
                 placeholder="Tìm mã lệnh hoặc tên đăng nhập..."
-                className="w-full h-10 rounded-lg border border-white/[0.08] bg-[#0e0e11] pl-9 pr-3 text-[13px] text-white outline-none focus:border-rose-500/50 transition-colors"
+                className={`${INPUT} pl-9`}
               />
             </label>
-            <span className="text-[12px] text-neutral-500 tabular-nums">
+            <span className="text-[12px] tabular-nums text-zinc-500">
               {q ? `${shownTopUps.length}/${topUps.length}` : topUps.length} lượt nạp
             </span>
           </div>
@@ -572,55 +569,55 @@ export function AdminOperations({
           {topUpSlice.map((row) => {
             const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
             return (
-              <article key={row.code} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+              <article key={row.code} className="rounded-xl border border-zinc-200 bg-white p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="block font-mono text-xs font-black text-white">#{row.code}</span>
-                    <span className="block text-[11px] text-neutral-500">{row.createdAt}</span>
+                    <span className="block font-mono text-xs font-bold text-zinc-900">#{row.code}</span>
+                    <span className="block text-[11px] text-zinc-400">{row.createdAt}</span>
                   </div>
-                  <span className={`shrink-0 text-[12px] font-semibold px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}>
+                  <span className={`${STATUS_CHIP} shrink-0 ${status.className}`}>
                     {status.text}
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <span className="flex min-w-0 items-center gap-2.5">
                     <MiniAvatar username={row.username} avatarUrl={row.avatarUrl} />
-                    <span className="truncate text-xs font-bold text-neutral-200">{row.username}</span>
+                    <span className="truncate text-xs font-bold text-zinc-800">{row.username}</span>
                   </span>
                   <span
                     className={`shrink-0 text-base font-black tabular-nums ${
                       row.status === "COMPLETED"
-                        ? "text-emerald-400"
+                        ? "text-emerald-600"
                         : row.status === "FAILED" || row.status === "CANCELLED"
-                          ? "text-neutral-400 line-through"
-                          : "text-white"
+                          ? "text-zinc-400 line-through"
+                          : "text-zinc-900"
                     }`}
                   >
                     {row.status === "COMPLETED" ? "+" : ""}
                     {formatVnd(row.amount)}đ
                   </span>
                 </div>
-                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-neutral-400">
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-zinc-500">
                   {row.method === "CARD" ? (
-                    <CreditCard size={13} className="shrink-0 text-violet-400" />
+                    <CreditCard size={13} className="shrink-0 text-zinc-400" />
                   ) : (
-                    <Landmark size={13} className="shrink-0 text-sky-400" />
+                    <Landmark size={13} className="shrink-0 text-zinc-400" />
                   )}
                   {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
                 </div>
                 {row.cardSerial && row.cardPin ? (
-                  <div className="mt-2 flex flex-col gap-0.5 rounded-lg border border-white/[0.06] bg-neutral-950/60 px-3 py-2 font-mono text-[12px] leading-snug text-neutral-200 break-all">
-                    <span><span className="text-neutral-500">Seri </span>{row.cardSerial}</span>
-                    <span><span className="text-neutral-500">Mã </span>{row.cardPin}</span>
+                  <div className="mt-2 flex flex-col gap-0.5 break-all rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-[12px] leading-snug text-zinc-800">
+                    <span><span className="text-zinc-400">Seri </span>{row.cardSerial}</span>
+                    <span><span className="text-zinc-400">Mã </span>{row.cardPin}</span>
                   </div>
                 ) : null}
                 {row.method === "CARD" && row.providerRef?.startsWith("tsr:") ? (
-                  <p className="mt-2 text-[11px] font-semibold text-violet-300">
+                  <p className="mt-2 text-[11px] font-semibold text-violet-600">
                     {row.status === "PENDING" ? "TheSieuRe đang gạch thẻ" : "Gạch qua TheSieuRe"}
                   </p>
                 ) : null}
                 {row.status === "PENDING" ? (
-                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/[0.06] pt-3">
+                  <div className="mt-3 grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3">
                     <button
                       type="button"
                       disabled={pending}
@@ -628,7 +625,7 @@ export function AdminOperations({
                         setConfirming(row);
                         setReceived(String(row.amount));
                       }}
-                      className="press h-10 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[13px] font-semibold text-emerald-400 transition-colors"
+                      className="press h-10 rounded-lg bg-emerald-600 text-[13px] font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
                     >
                       Xác nhận
                     </button>
@@ -639,7 +636,7 @@ export function AdminOperations({
                         setRejecting(row);
                         setRejectNote("");
                       }}
-                      className="press h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[13px] font-semibold text-neutral-400 transition-colors"
+                      className="press h-10 rounded-lg border border-zinc-300 bg-white text-[13px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 disabled:opacity-50"
                     >
                       Từ chối
                     </button>
@@ -650,12 +647,12 @@ export function AdminOperations({
           })}
         </div>
 
-        <div className="hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
-          <table className="w-full min-w-[760px] text-left">
+        <div className="hidden w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white sm:block">
+          <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-zinc-200">
                 {["Mã", "Tài khoản", "Hình thức", "Số tiền", "Trạng thái", "Thời gian", ""].map((c) => (
-                  <th key={c} scope="col" className="px-5 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap">
+                  <th key={c} scope="col" className="whitespace-nowrap px-5 py-3 text-[12.5px] font-semibold text-zinc-500">
                     {c}
                   </th>
                 ))}
@@ -665,23 +662,23 @@ export function AdminOperations({
               {topUpSlice.map((row) => (
                 <tr
                   key={row.code}
-                  className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.015]"
+                  className="border-b border-zinc-100 transition-colors last:border-0 hover:bg-zinc-50/70"
                 >
-                  <td className="px-5 py-3 font-mono text-xs font-black text-white whitespace-nowrap">
+                  <td className="whitespace-nowrap px-5 py-3 font-mono text-xs font-bold text-zinc-900">
                     #{row.code}
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-5 py-3">
                     <span className="flex items-center gap-2.5">
                       <MiniAvatar username={row.username} avatarUrl={row.avatarUrl} />
-                      <span className="text-xs font-bold text-neutral-200">{row.username}</span>
+                      <span className="text-xs font-bold text-zinc-800">{row.username}</span>
                     </span>
                   </td>
-                  <td className="px-5 py-3 whitespace-nowrap">
-                    <span className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                  <td className="whitespace-nowrap px-5 py-3">
+                    <span className="flex items-center gap-1.5 text-[11px] text-zinc-500">
                       {row.method === "CARD" ? (
-                        <CreditCard size={13} className="shrink-0 text-violet-400" />
+                        <CreditCard size={13} className="shrink-0 text-zinc-400" />
                       ) : (
-                        <Landmark size={13} className="shrink-0 text-sky-400" />
+                        <Landmark size={13} className="shrink-0 text-zinc-400" />
                       )}
                       {row.method === "CARD" ? (row.carrier ?? "Thẻ cào") : "Ngân hàng"}
                     </span>
@@ -690,30 +687,30 @@ export function AdminOperations({
                         and having to open a second screen for them is how a
                         digit gets mistyped. */}
                     {row.cardSerial && row.cardPin ? (
-                      <span className="mt-1 flex flex-col font-mono text-[11px] leading-tight text-neutral-300">
+                      <span className="mt-1 flex flex-col font-mono text-[11px] leading-tight text-zinc-700">
                         <span>
-                          <span className="text-neutral-600">Seri </span>
+                          <span className="text-zinc-400">Seri </span>
                           {row.cardSerial}
                         </span>
                         <span>
-                          <span className="text-neutral-600">Mã </span>
+                          <span className="text-zinc-400">Mã </span>
                           {row.cardPin}
                         </span>
                       </span>
                     ) : null}
                     {row.method === "CARD" && row.providerRef?.startsWith("tsr:") ? (
-                      <span className="mt-1 block text-[11px] font-semibold text-violet-300">
+                      <span className="mt-1 block text-[11px] font-semibold text-violet-600">
                         {row.status === "PENDING" ? "TheSieuRe đang gạch" : "Qua TheSieuRe"}
                       </span>
                     ) : null}
                   </td>
                   <td
-                    className={`px-5 py-3 text-xs font-black tabular-nums whitespace-nowrap ${
+                    className={`whitespace-nowrap px-5 py-3 text-xs font-black tabular-nums ${
                       row.status === "COMPLETED"
-                        ? "text-emerald-400"
+                        ? "text-emerald-600"
                         : row.status === "FAILED" || row.status === "CANCELLED"
-                          ? "text-neutral-500 line-through"
-                          : "text-neutral-400"
+                          ? "text-zinc-400 line-through"
+                          : "text-zinc-700"
                     }`}
                   >
                     {row.status === "COMPLETED" ? "+" : ""}
@@ -723,15 +720,13 @@ export function AdminOperations({
                     {(() => {
                       const status = TOPUP_STATUS[row.status] ?? TOPUP_STATUS.PENDING!;
                       return (
-                        <span
-                          className={`text-[12px] font-semibold px-2 py-1 rounded-lg border whitespace-nowrap ${status.className}`}
-                        >
+                        <span className={`${STATUS_CHIP} ${status.className}`}>
                           {status.text}
                         </span>
                       );
                     })()}
                   </td>
-                  <td className="px-5 py-3 text-[11px] text-neutral-500">{row.createdAt}</td>
+                  <td className="px-5 py-3 text-[11px] text-zinc-500">{row.createdAt}</td>
                   <td className="px-5 py-3">
                     {/* Confirming is what actually credits the wallet, so it
                         asks first — the customer's balance is real money. */}
@@ -744,7 +739,7 @@ export function AdminOperations({
                             setConfirming(row);
                             setReceived(String(row.amount));
                           }}
-                          className="h-8 px-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 disabled:opacity-50 text-[12px] font-semibold text-emerald-400 transition-colors whitespace-nowrap"
+                          className="h-8 whitespace-nowrap rounded-lg bg-emerald-600 px-3 text-[12px] font-semibold text-white transition-colors hover:bg-emerald-500 disabled:opacity-50"
                         >
                           Xác nhận
                         </button>
@@ -755,7 +750,7 @@ export function AdminOperations({
                             setRejecting(row);
                             setRejectNote("");
                           }}
-                          className="h-8 px-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 disabled:opacity-50 text-[12px] font-semibold text-neutral-400 transition-colors whitespace-nowrap"
+                          className="h-8 whitespace-nowrap rounded-lg border border-zinc-300 bg-white px-3 text-[12px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100 disabled:opacity-50"
                         >
                           Từ chối
                         </button>
@@ -772,7 +767,7 @@ export function AdminOperations({
 
           {shownTopUps.length > 0 ? (
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="text-[12px] text-neutral-500 tabular-nums">
+              <p className="text-[12px] tabular-nums text-zinc-500">
                 Hiển thị {topUpRange.from}–{topUpRange.to} / {shownTopUps.length} lượt nạp
               </p>
               <Pager current={topUpCurrent} total={topUpPages} onGo={setTopUpPage} />
@@ -818,7 +813,7 @@ export function AdminOperations({
               autoComplete="off"
               value={received}
               onChange={(event) => setReceived(event.target.value.replace(/\D/g, ""))}
-              className={`${FIELD} font-black tabular-nums`}
+              className={`${INPUT} font-black tabular-nums`}
             />
             <p className={HINT}>
               {receivedAmount === confirming.amount
@@ -864,8 +859,8 @@ export function AdminOperations({
                   onClick={() => setRejectNote(reason)}
                   className={
                     rejectNote === reason
-                      ? "rounded-lg border border-[var(--menzu-accent)]/50 bg-[var(--menzu-accent)]/15 px-2.5 py-1.5 text-left text-[11px] font-semibold text-[var(--menzu-accent)] transition-colors"
-                      : "rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-left text-[11px] font-medium text-neutral-400 transition-colors hover:border-white/20 hover:text-white"
+                      ? "rounded-lg border border-zinc-900 bg-zinc-900 px-2.5 py-1.5 text-left text-[11px] font-semibold text-white transition-colors"
+                      : "rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-left text-[11px] font-medium text-zinc-600 transition-colors hover:border-zinc-400 hover:text-zinc-900"
                   }
                 >
                   {reason}
@@ -879,7 +874,7 @@ export function AdminOperations({
               value={rejectNote}
               onChange={(event) => setRejectNote(event.target.value)}
               placeholder="Hoặc tự viết lý do…"
-              className={`${FIELD} resize-none`}
+              className={`${TEXTAREA} resize-none`}
             />
             <p className={HINT}>
               {rejectNote.trim()

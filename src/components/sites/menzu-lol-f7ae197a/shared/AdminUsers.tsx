@@ -43,25 +43,26 @@ type Pending =
 
 /** Each tier keeps its metal: the dot and the word share one color. */
 const TIER_COLOR: Record<string, string> = {
-  CLASSIC: "text-neutral-300",
-  GOLD: "text-yellow-400",
-  PLATINUM: "text-cyan-300",
-  DIAMOND: "text-violet-300",
-  ELITE: "text-rose-300",
+  CLASSIC: "text-zinc-500",
+  GOLD: "text-amber-600",
+  PLATINUM: "text-cyan-600",
+  DIAMOND: "text-violet-600",
+  ELITE: "text-rose-600",
 };
 
 // The last column stays in view while the rest scrolls: with the sidebar a
 // 1024 laptop has 732px for a 1093px table and the buttons were the first
 // thing to go. Same surface as the card so the rows slide under it.
 const STICKY_ACTIONS =
-  "sticky right-0 z-10 bg-[#0e0e11] border-l border-white/[0.06] shadow-[-10px_0_14px_-10px_rgba(0,0,0,0.7)]";
+  "sticky right-0 z-10 bg-white border-l border-zinc-100 shadow-[-10px_0_14px_-10px_rgba(24,24,27,0.08)]";
 
 /**
- * Quiet by default, colored on hover — four of these per row used to be four
- * loud pills, and eight rows of pills read as a wall of alarms.
+ * Quiet by default — four of these per row used to be four loud pills, and
+ * eight rows of pills read as a wall of alarms. Red appears only under the
+ * hand that is about to lock or delete.
  */
 const ICON_BTN =
-  "h-8 w-8 rounded-lg border border-white/[0.07] bg-white/[0.03] inline-flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed";
+  "h-8 w-8 rounded-lg border border-zinc-200 bg-white inline-flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed";
 
 function formatVnd(n: number): string {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -170,100 +171,111 @@ export function AdminUsers({
 
   /** The role/lock chip, shared by the card and the table row. */
   const statusPill = (user: AdminUserView) => (
-        <span
-          className={`inline-block rounded-md border px-2 py-1 text-[12px] font-semibold whitespace-nowrap ${
-            user.blockedAt
-              ? "border-red-500/30 bg-red-500/10 text-red-400"
-              : user.role === "ADMIN"
-                ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
-                : user.role === "AGENCY"
-                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
-                  : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-          }`}
-        >
-          {user.blockedAt
-            ? "Đã khóa"
-            : user.role === "ADMIN"
-              ? "Quản trị"
-              : user.role === "AGENCY"
-                ? `Đại lý · ${user.agencyPercent}%`
-                : "Hoạt động"}
-        </span>
+    <span
+      className={`inline-block whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+        user.blockedAt
+          ? "border-rose-200 bg-rose-50 text-rose-700"
+          : user.role === "ADMIN"
+            ? "border-violet-200 bg-violet-50 text-violet-700"
+            : user.role === "AGENCY"
+              ? "border-amber-200 bg-amber-50 text-amber-700"
+              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+      }`}
+    >
+      {user.blockedAt
+        ? "Đã khóa"
+        : user.role === "ADMIN"
+          ? "Quản trị"
+          : user.role === "AGENCY"
+            ? `Đại lý · ${user.agencyPercent}%`
+            : "Hoạt động"}
+    </span>
   );
+
+  /** The avatar's ring repeats the status chip's color, so a blocked or
+   *  privileged account is visible at a glance. */
+  const avatarRing = (user: AdminUserView) =>
+    user.blockedAt
+      ? "border-rose-300"
+      : user.role === "ADMIN"
+        ? "border-violet-300"
+        : user.role === "AGENCY"
+          ? "border-amber-300"
+          : "border-zinc-200";
 
   /** The four moderation buttons, shared by the card and the table row. */
   const actions = (user: AdminUserView, isSelf: boolean) => (
-        <div className="flex items-center gap-1.5">
-          <Link
-            href={`/admin/users/${user.uid}`}
-            aria-label={`Hồ sơ chi tiết của ${user.username}`}
-            title="Mở hồ sơ chi tiết"
-            className={`${ICON_BTN} text-neutral-400 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400`}
-          >
-            <Eye size={14} />
-          </Link>
-    
-          <button
-            type="button"
-            disabled={busy || isSelf}
-            aria-label={
-              user.role === "ADMIN"
-                ? `Thu hồi quyền quản trị của ${user.username}`
-                : `Cấp quyền quản trị cho ${user.username}`
-            }
-            title={
-              isSelf
-                ? "Không thể tự đổi quyền của mình"
-                : user.role === "ADMIN"
-                  ? "Thu hồi quyền quản trị"
-                  : "Cấp quyền quản trị"
-            }
-            onClick={() => setConfirming({ kind: "role", user })}
-            className={`${ICON_BTN} ${
-              user.role === "ADMIN"
-                ? "text-violet-400 hover:border-violet-500/30 hover:bg-violet-500/10"
-                : "text-neutral-500 hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
-            }`}
-          >
-            <Shield size={13} />
-          </button>
-    
-          <button
-            type="button"
-            disabled={busy || isSelf}
-            aria-label={
-              user.blockedAt
-                ? `Mở khóa ${user.username}`
-                : `Khóa ${user.username}`
-            }
-            title={
-              isSelf
-                ? "Không thể tự khóa tài khoản của mình"
-                : user.blockedAt
-                  ? "Mở khóa tài khoản"
-                  : "Khóa tài khoản"
-            }
-            onClick={() => setConfirming({ kind: "block", user })}
-            className={`${ICON_BTN} ${
-              user.blockedAt
-                ? "text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10"
-                : "text-neutral-500 hover:border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-400"
-            }`}
-          >
-            {user.blockedAt ? <Unlock size={13} /> : <Ban size={13} />}
-          </button>
-    
-          <button
-            type="button"
-            disabled={busy || isSelf}
-            onClick={() => setConfirming({ kind: "delete", user })}
-            aria-label={`Xóa tài khoản ${user.username}`}
-            title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
-            className={`${ICON_BTN} text-neutral-500 hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400`}
-          >
-            <Trash2 size={13} />
-          </button>
-        </div>
+    <div className="flex items-center gap-1.5">
+      <Link
+        href={`/admin/users/${user.uid}`}
+        aria-label={`Hồ sơ chi tiết của ${user.username}`}
+        title="Mở hồ sơ chi tiết"
+        className={`${ICON_BTN} text-zinc-400 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900`}
+      >
+        <Eye size={14} />
+      </Link>
+
+      <button
+        type="button"
+        disabled={busy || isSelf}
+        aria-label={
+          user.role === "ADMIN"
+            ? `Thu hồi quyền quản trị của ${user.username}`
+            : `Cấp quyền quản trị cho ${user.username}`
+        }
+        title={
+          isSelf
+            ? "Không thể tự đổi quyền của mình"
+            : user.role === "ADMIN"
+              ? "Thu hồi quyền quản trị"
+              : "Cấp quyền quản trị"
+        }
+        onClick={() => setConfirming({ kind: "role", user })}
+        className={`${ICON_BTN} ${
+          user.role === "ADMIN"
+            ? "text-violet-600 hover:border-violet-200 hover:bg-violet-50"
+            : "text-zinc-400 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900"
+        }`}
+      >
+        <Shield size={13} />
+      </button>
+
+      <button
+        type="button"
+        disabled={busy || isSelf}
+        aria-label={
+          user.blockedAt
+            ? `Mở khóa ${user.username}`
+            : `Khóa ${user.username}`
+        }
+        title={
+          isSelf
+            ? "Không thể tự khóa tài khoản của mình"
+            : user.blockedAt
+              ? "Mở khóa tài khoản"
+              : "Khóa tài khoản"
+        }
+        onClick={() => setConfirming({ kind: "block", user })}
+        className={`${ICON_BTN} ${
+          user.blockedAt
+            ? "text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50"
+            : "text-zinc-400 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
+        }`}
+      >
+        {user.blockedAt ? <Unlock size={13} /> : <Ban size={13} />}
+      </button>
+
+      <button
+        type="button"
+        disabled={busy || isSelf}
+        onClick={() => setConfirming({ kind: "delete", user })}
+        aria-label={`Xóa tài khoản ${user.username}`}
+        title={isSelf ? "Không thể tự xóa tài khoản của mình" : "Xóa tài khoản"}
+        className={`${ICON_BTN} text-zinc-400 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600`}
+      >
+        <Trash2 size={13} />
+      </button>
+    </div>
   );
 
   return (
@@ -281,49 +293,47 @@ export function AdminUsers({
           {visible.map((user) => {
             const isSelf = user.username === selfUsername;
             return (
-              <article key={user.username} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+              <article key={user.username} className="rounded-xl border border-zinc-200 bg-white p-3.5">
                 <div className="flex items-start justify-between gap-3">
                   <Link href={`/admin/users/${user.uid}`} className="flex min-w-0 items-center gap-3">
-                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
-                      user.blockedAt ? "border-red-500/40" : user.role === "ADMIN" ? "border-violet-500/50" : user.role === "AGENCY" ? "border-amber-500/50" : "border-white/10"
-                    }`}>
+                    <span className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-zinc-100 ${avatarRing(user)}`}>
                       {user.avatarUrl ? (
                         <Image src={user.avatarUrl} alt="" width={36} height={36} className={`h-full w-full object-cover ${user.blockedAt ? "opacity-50 grayscale" : ""}`} />
                       ) : (
-                        <span aria-hidden className="text-[15px] font-semibold text-neutral-500">{user.username.slice(0, 1)}</span>
+                        <span aria-hidden className="text-[15px] font-semibold text-zinc-500">{user.username.slice(0, 1).toUpperCase()}</span>
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-[13px] font-bold text-white">{user.username}</span>
-                      <span className="block text-[11px] text-neutral-500 tabular-nums">UID {user.uid}{user.email ? ` · ${user.email}` : ""}</span>
+                      <span className="block truncate text-[13px] font-bold text-zinc-900">{user.username}</span>
+                      <span className="block truncate text-[11px] tabular-nums text-zinc-400">UID {user.uid}{user.email ? ` · ${user.email}` : ""}</span>
                     </span>
                   </Link>
                   {statusPill(user)}
                 </div>
                 <dl className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
                   <div>
-                    <dt className="text-[12px] font-semibold text-neutral-500">Số dư</dt>
-                    <dd className={`mt-0.5 font-bold tabular-nums ${user.balance > 0 ? "text-emerald-400" : "text-neutral-500"}`}>{formatVnd(user.balance)}đ</dd>
+                    <dt className="text-[12px] text-zinc-500">Số dư</dt>
+                    <dd className={`mt-0.5 font-bold tabular-nums ${user.balance > 0 ? "text-emerald-600" : "text-zinc-400"}`}>{formatVnd(user.balance)}đ</dd>
                   </div>
                   <div>
-                    <dt className="text-[12px] font-semibold text-neutral-500">Hạng</dt>
-                    <dd className={`mt-0.5 font-semibold ${TIER_COLOR[user.tier] ?? "text-neutral-300"}`}>{user.tier}</dd>
+                    <dt className="text-[12px] text-zinc-500">Hạng</dt>
+                    <dd className={`mt-0.5 font-semibold ${TIER_COLOR[user.tier] ?? "text-zinc-600"}`}>{user.tier}</dd>
                   </div>
                   <div>
-                    <dt className="text-[12px] font-semibold text-neutral-500">Đơn</dt>
-                    <dd className="mt-0.5 tabular-nums text-neutral-300">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "-"}</dd>
+                    <dt className="text-[12px] text-zinc-500">Đơn</dt>
+                    <dd className="mt-0.5 tabular-nums text-zinc-700">{user.orderCount > 0 ? `${user.orderCount} · ${formatVnd(user.totalSpent)}đ` : "-"}</dd>
                   </div>
                 </dl>
-                <div className="mt-3 border-t border-white/[0.06] pt-3">{actions(user, isSelf)}</div>
+                <div className="mt-3 border-t border-zinc-100 pt-3">{actions(user, isSelf)}</div>
               </article>
             );
           })}
         </div>
 
-        <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] sm:block">
-          <table className="w-full min-w-[1000px] text-left">
+        <div className="admin-list hidden w-full overflow-x-auto rounded-xl border border-zinc-200 bg-white sm:block">
+          <table className="w-full min-w-[1000px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-white/[0.06]">
+              <tr className="border-b border-zinc-200">
                 {[
                   "Người dùng",
                   "Email",
@@ -336,7 +346,7 @@ export function AdminUsers({
                 ].map((head) => (
                   <th
                     key={head}
-                    className={`px-4 py-3.5 text-[12px] font-semibold text-neutral-500 whitespace-nowrap ${
+                    className={`whitespace-nowrap px-4 py-3 text-left text-[12.5px] font-semibold text-zinc-500 ${
                       head === "Thao tác" ? STICKY_ACTIONS : ""
                     }`}
                   >
@@ -354,26 +364,15 @@ export function AdminUsers({
             return (
                 <tr
                   key={user.username}
-                  className="border-b border-white/[0.04] last:border-0 transition-colors hover:bg-white/[0.015]"
+                  className="border-b border-zinc-100 transition-colors last:border-0 hover:bg-zinc-50/70"
                 >
                   <td className="px-4 py-3">
                     <Link
                       href={`/admin/users/${user.uid}`}
                       className="group flex items-center gap-3"
                     >
-                      {/* The face makes the list read as customers instead of
-                          rows; the ring repeats the status chip's color so a
-                          blocked or privileged account is visible at a glance. */}
                       <span
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-neutral-900 ${
-                          user.blockedAt
-                            ? "border-red-500/40"
-                            : user.role === "ADMIN"
-                              ? "border-violet-500/50"
-                              : user.role === "AGENCY"
-                                ? "border-amber-500/50"
-                                : "border-white/10"
-                        }`}
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 bg-zinc-100 ${avatarRing(user)}`}
                       >
                         {user.avatarUrl ? (
                           <Image
@@ -388,27 +387,27 @@ export function AdminUsers({
                         ) : (
                           <span
                             aria-hidden
-                            className="text-[15px] font-semibold text-neutral-500"
+                            className="text-[15px] font-semibold text-zinc-500"
                           >
-                            {user.username.slice(0, 1)}
+                            {user.username.slice(0, 1).toUpperCase()}
                           </span>
                         )}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-bold text-white group-hover:text-rose-400 transition-colors">
+                        <p className="truncate text-[13px] font-bold text-zinc-900 underline-offset-4 transition-colors group-hover:underline">
                           {user.username}
                         </p>
-                        <p className="mt-0.5 text-[11px] text-neutral-500 tabular-nums">
+                        <p className="mt-0.5 text-[11px] tabular-nums text-zinc-400">
                           UID {user.uid}
                         </p>
                       </div>
                     </Link>
                   </td>
 
-                  <td className="px-4 py-3 max-w-[190px]">
+                  <td className="max-w-[190px] px-4 py-3">
                     <span
                       className={`block truncate text-[13px] ${
-                        user.email ? "text-neutral-300" : "text-neutral-700"
+                        user.email ? "text-zinc-700" : "text-zinc-300"
                       }`}
                     >
                       {user.email ?? "-"}
@@ -416,17 +415,17 @@ export function AdminUsers({
                   </td>
 
                   <td
-                    className={`px-4 py-3 text-[13px] font-bold tabular-nums whitespace-nowrap ${
-                      user.balance > 0 ? "text-emerald-400" : "text-neutral-600"
+                    className={`whitespace-nowrap px-4 py-3 text-[13px] font-bold tabular-nums ${
+                      user.balance > 0 ? "text-emerald-600" : "text-zinc-400"
                     }`}
                   >
                     {formatVnd(user.balance)}đ
                   </td>
 
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="whitespace-nowrap px-4 py-3">
                     <span
                       className={`inline-flex items-center gap-1.5 text-[13px] font-semibold ${
-                        TIER_COLOR[user.tier] ?? "text-neutral-300"
+                        TIER_COLOR[user.tier] ?? "text-zinc-600"
                       }`}
                     >
                       <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -434,18 +433,18 @@ export function AdminUsers({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 text-[12px] tabular-nums whitespace-nowrap">
+                  <td className="whitespace-nowrap px-4 py-3 text-[12px] tabular-nums">
                     {user.orderCount > 0 ? (
-                      <span className="text-neutral-300">
-                        <span className="font-bold text-white">{user.orderCount}</span> đơn ·{" "}
+                      <span className="text-zinc-600">
+                        <span className="font-bold text-zinc-900">{user.orderCount}</span> đơn ·{" "}
                         {formatVnd(user.totalSpent)}đ
                       </span>
                     ) : (
-                      <span className="text-neutral-700">-</span>
+                      <span className="text-zinc-300">-</span>
                     )}
                   </td>
 
-                  <td className="px-4 py-3 text-[12px] text-neutral-500 tabular-nums whitespace-nowrap">
+                  <td className="whitespace-nowrap px-4 py-3 text-[12px] tabular-nums text-zinc-500">
                     {user.lastOrderAt ?? "-"}
                   </td>
 

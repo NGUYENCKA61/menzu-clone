@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { AdminOperations } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminOperations";
 import { formatVnd } from "@/components/sites/menzu-lol-f7ae197a/shared/productData";
-import { AdminShell } from "@/components/sites/menzu-lol-f7ae197a/shared/AdminShell";
+import { AdminChrome } from "@/components/sites/menzu-lol-f7ae197a/admin/AdminChrome";
 import { getAdmin } from "@/lib/admin";
 import { db } from "@/lib/db";
 import { listFeedback, listTopUps } from "@/lib/queries";
@@ -92,7 +92,7 @@ export default async function AdminOperationsPage({
   ]);
 
   return (
-    <AdminShell
+    <AdminChrome
       title="Vận hành"
       subtitle="Đánh giá khách hàng, quà vòng quay và lịch sử nạp tiền"
       username={admin.username}
@@ -144,6 +144,6 @@ export default async function AdminOperationsPage({
             : undefined
         }
       />
-    </AdminShell>
+    </AdminChrome>
   );
 }
