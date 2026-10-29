@@ -397,7 +397,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                 type="button"
                 onClick={() => pickFilter(key)}
                 className={`relative px-2.5 pb-2.5 pt-1 text-[12.5px] font-semibold transition-colors ${
-                  filter === key ? "text-red-700" : "text-zinc-500 hover:text-zinc-800"
+                  filter === key ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-800"
                 }`}
               >
                 {label}
@@ -407,7 +407,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                   </span>
                 ) : null}
                 {filter === key ? (
-                  <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-red-600" />
+                  <span className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-zinc-900" />
                 ) : null}
               </button>
             ))}
@@ -456,7 +456,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                   type="button"
                   onClick={() => void open(row.id)}
                   className={`flex w-full items-start gap-3 border-b border-zinc-100 px-4 py-3 text-left transition-colors ${
-                    active ? "bg-red-50/70" : "hover:bg-zinc-50"
+                    active ? "bg-zinc-100" : "hover:bg-zinc-50"
                   }`}
                 >
                   <span className="relative mt-0.5 shrink-0">
@@ -694,7 +694,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                               setQrMenuOpen(false);
                               setQrEditOpen(true);
                             }}
-                            className="mt-1 block w-full rounded-lg border-t border-zinc-100 px-2.5 py-2 text-left text-[12px] font-semibold text-red-700 hover:bg-red-50"
+                            className="mt-1 block w-full rounded-lg border-t border-zinc-100 px-2.5 py-2 text-left text-[12px] font-semibold text-zinc-900 hover:bg-zinc-100"
                           >
                             Sửa bộ câu mẫu…
                           </button>
@@ -736,12 +736,12 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                       rows={2}
                       maxLength={detail.kind === "WARRANTY" ? 500 : 2000}
                       placeholder={`Trả lời ${customerName}…`}
-                      className="min-h-[44px] flex-1 resize-y rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                      className="min-h-[44px] flex-1 resize-y rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-[13.5px] outline-none transition-colors placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
                     />
                     <button
                       type="submit"
                       disabled={sending || !reply.trim()}
-                      className="flex h-10 items-center gap-2 rounded-xl bg-red-600 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+                      className="flex h-10 items-center gap-2 rounded-xl bg-zinc-900 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-40"
                     >
                       {sending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                       Gửi
@@ -856,7 +856,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                         }
                       }}
                       placeholder={tags.length === 0 ? "VIP, hay hỏi giá…" : "Thêm nhãn"}
-                      className="h-7 min-w-[90px] flex-1 rounded-full border border-dashed border-zinc-300 px-2.5 text-[11.5px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+                      className="h-7 min-w-[90px] flex-1 rounded-full border border-dashed border-zinc-300 px-2.5 text-[11.5px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
                     />
                   </div>
                 </div>
@@ -874,7 +874,7 @@ export function CrmInbox({ initial }: { initial: CrmInboxInitial }) {
                     rows={3}
                     maxLength={2000}
                     placeholder="Khách không thấy phần này."
-                    className="resize-y rounded-lg border border-zinc-300 px-3 py-2 text-[12.5px] outline-none placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                    className="resize-y rounded-lg border border-zinc-300 px-3 py-2 text-[12.5px] outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
                   />
                   <div className="flex items-center gap-2">
                     <button
@@ -956,7 +956,7 @@ function ChatLine({
       <div
         className={`whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-[13.5px] leading-relaxed ${
           message.role === "ADMIN"
-            ? "rounded-br-md bg-red-600 text-white"
+            ? "rounded-br-md bg-zinc-900 text-white"
             : message.role === "BOT"
               ? "rounded-br-md bg-zinc-200/70 text-zinc-700"
               : "rounded-bl-md border border-zinc-200 bg-white text-zinc-800 shadow-sm"
@@ -1046,7 +1046,7 @@ function QuickReplyEditor({
                 }
                 maxLength={40}
                 placeholder="Tên ngắn (ví dụ: Chào hỏi)"
-                className="h-8 flex-1 rounded-lg border border-zinc-300 px-2.5 text-[12.5px] outline-none focus:border-red-400"
+                className="h-8 flex-1 rounded-lg border border-zinc-300 px-2.5 text-[12.5px] outline-none focus:border-zinc-500"
               />
               <button
                 type="button"
@@ -1065,7 +1065,7 @@ function QuickReplyEditor({
               rows={2}
               maxLength={1000}
               placeholder="Nội dung gửi cho khách…"
-              className="resize-y rounded-lg border border-zinc-300 px-2.5 py-2 text-[12.5px] outline-none focus:border-red-400"
+              className="resize-y rounded-lg border border-zinc-300 px-2.5 py-2 text-[12.5px] outline-none focus:border-zinc-500"
             />
           </div>
         ))}
@@ -1082,7 +1082,7 @@ function QuickReplyEditor({
             type="button"
             onClick={() => void save()}
             disabled={saving}
-            className="h-8 rounded-lg bg-red-600 px-4 text-[12px] font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            className="h-8 rounded-lg bg-zinc-900 px-4 text-[12px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
           >
             {saving ? "Đang lưu…" : "Lưu bộ câu mẫu"}
           </button>

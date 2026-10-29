@@ -134,7 +134,7 @@ export function CrmPost({
             <select
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
-              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[13px] outline-none focus:border-red-400"
+              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 bg-white px-2.5 text-[13px] outline-none focus:border-zinc-500"
             >
               <option value="">Chọn sản phẩm…</option>
               {products.map((product) => (
@@ -148,13 +148,13 @@ export function CrmPost({
               onChange={(event) => setHint(event.target.value)}
               maxLength={300}
               placeholder="Dặn thêm (không bắt buộc): nhấn vào giá rẻ, giọng nhẹ cho Facebook…"
-              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-2.5 text-[13px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-2.5 text-[13px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
             />
             <button
               type="button"
               onClick={() => void draft()}
               disabled={!productId || drafting}
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3.5 text-[13px] font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-40"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-100 px-3.5 text-[13px] font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-40"
             >
               {drafting ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
               Viết nháp
@@ -172,7 +172,7 @@ export function CrmPost({
             <select
               value={type}
               onChange={(event) => setType(event.target.value)}
-              className="h-9 w-full rounded-lg border border-zinc-300 bg-white px-2.5 text-[13px] outline-none focus:border-red-400 sm:w-[160px]"
+              className="h-9 w-full rounded-lg border border-zinc-300 bg-white px-2.5 text-[13px] outline-none focus:border-zinc-500 sm:w-[160px]"
             >
               {TYPE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -185,7 +185,7 @@ export function CrmPost({
               onChange={(event) => setTitle(event.target.value)}
               maxLength={120}
               placeholder="Tiêu đề…"
-              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13.5px] font-semibold outline-none placeholder:font-normal placeholder:text-zinc-400 focus:border-red-400"
+              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13.5px] font-semibold outline-none placeholder:font-normal placeholder:text-zinc-400 focus:border-zinc-500"
             />
           </div>
           <textarea
@@ -194,7 +194,7 @@ export function CrmPost({
             rows={8}
             maxLength={2000}
             placeholder="Nội dung bài đăng…"
-            className="resize-y rounded-lg border border-zinc-300 px-3 py-2.5 text-[13.5px] leading-relaxed outline-none placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+            className="resize-y rounded-lg border border-zinc-300 px-3 py-2.5 text-[13.5px] leading-relaxed outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
           />
 
           <div className="flex flex-col gap-1.5">
@@ -202,7 +202,7 @@ export function CrmPost({
               Đăng lên
             </p>
             <label className="flex items-center gap-2 text-[13px]">
-              <input type="checkbox" checked disabled className="h-4 w-4 accent-red-600" />
+              <input type="checkbox" checked disabled className="h-4 w-4 accent-zinc-900" />
               Bảng thông báo trên web (luôn đăng)
             </label>
             <label
@@ -213,7 +213,7 @@ export function CrmPost({
                 checked={toTelegram}
                 disabled={!ready.telegram}
                 onChange={(event) => setToTelegram(event.target.checked)}
-                className="h-4 w-4 accent-red-600"
+                className="h-4 w-4 accent-zinc-900"
               />
               Kênh Telegram
               {ready.telegram ? (
@@ -232,7 +232,7 @@ export function CrmPost({
                 checked={toZalo}
                 disabled={ready.zaloGroups === 0}
                 onChange={(event) => setToZalo(event.target.checked)}
-                className="h-4 w-4 accent-red-600"
+                className="h-4 w-4 accent-zinc-900"
               />
               Nhóm Zalo
               <span className="text-[11px]">
@@ -249,7 +249,7 @@ export function CrmPost({
                 checked={toFacebook}
                 disabled={!ready.facebook}
                 onChange={(event) => setToFacebook(event.target.checked)}
-                className="h-4 w-4 accent-red-600"
+                className="h-4 w-4 accent-zinc-900"
               />
               Facebook Page
               {ready.facebook ? null : (
@@ -263,7 +263,7 @@ export function CrmPost({
               type="button"
               onClick={() => void post()}
               disabled={posting || !title.trim() || !body.trim()}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-red-600 px-5 text-[13.5px] font-semibold text-white transition-colors hover:bg-red-700 disabled:opacity-40"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-zinc-900 px-5 text-[13.5px] font-semibold text-white transition-colors hover:bg-zinc-700 disabled:opacity-40"
             >
               {posting ? <Loader2 size={15} className="animate-spin" /> : <Megaphone size={15} />}
               Đăng bài

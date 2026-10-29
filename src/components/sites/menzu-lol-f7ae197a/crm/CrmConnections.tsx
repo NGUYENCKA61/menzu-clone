@@ -104,7 +104,7 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
           </p>
         </div>
         {error ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[12.5px] text-red-700">
+          <p className="rounded-xl border border-zinc-300 bg-zinc-100 px-3.5 py-2.5 text-[12.5px] text-zinc-900">
             {error}
           </p>
         ) : null}
@@ -129,11 +129,11 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
           </p>
           <p className="text-[12px] text-zinc-500">
             Đổi nhà cung cấp hoặc dán khóa dịch vụ miễn phí trong{" "}
-            <Link href="/admin/settings" className="font-semibold text-red-700 hover:underline">
+            <Link href="/admin/settings" className="font-semibold text-zinc-900 hover:underline">
               Admin, Cấu hình
             </Link>
             ; khóa Claude đặt trong .env lúc deploy. Bot học thêm từ{" "}
-            <Link href="/crm/so-tay" className="font-semibold text-red-700 hover:underline">
+            <Link href="/crm/so-tay" className="font-semibold text-zinc-900 hover:underline">
               Sổ tay bot
             </Link>
             .
@@ -149,7 +149,7 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
           <p className="text-[12.5px] leading-relaxed text-zinc-600">
             Báo ca cần xử lý về Telegram admin, đăng bài lên kênh, bot shop cho
             khách. Token và kênh chỉnh trong{" "}
-            <Link href="/admin/settings" className="font-semibold text-red-700 hover:underline">
+            <Link href="/admin/settings" className="font-semibold text-zinc-900 hover:underline">
               Admin, Cấu hình
             </Link>
             .
@@ -189,14 +189,14 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
               value={fbPageId}
               onChange={(event) => setFbPageId(event.target.value)}
               placeholder="Page ID"
-              className="h-9 w-full rounded-lg border border-zinc-300 px-3 text-[13px] outline-none focus:border-red-400 sm:w-[200px]"
+              className="h-9 w-full rounded-lg border border-zinc-300 px-3 text-[13px] outline-none focus:border-zinc-500 sm:w-[200px]"
             />
             <input
               value={fbToken}
               onChange={(event) => setFbToken(event.target.value)}
               type="password"
               placeholder={state.facebook.tokenSet ? "Token: đã đặt, nhập để thay" : "Page Access Token"}
-              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
             />
             <button
               type="button"
@@ -255,7 +255,7 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
               onChange={(event) => setMcKey(event.target.value)}
               type="password"
               placeholder={state.manychat.keySet ? "API key: đã đặt, nhập để thay" : "ManyChat API key"}
-              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+              className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
             />
             <div className="flex min-w-0 flex-1 items-center gap-1.5">
               <input
@@ -264,7 +264,7 @@ export function CrmConnections({ initial }: { initial: ConnectionsState }) {
                 placeholder={
                   state.manychat.secretSet ? "Secret: đã đặt, nhập để thay" : "Mã bí mật webhook (32+ ký tự)"
                 }
-                className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+                className="h-9 min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-[13px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
               />
               <button
                 type="button"

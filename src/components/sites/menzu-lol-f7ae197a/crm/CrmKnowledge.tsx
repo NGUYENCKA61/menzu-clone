@@ -100,7 +100,7 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
           <button
             type="button"
             onClick={() => setDraft({ id: null, title: "", body: "", internal: false })}
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-red-600 px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-red-700"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-zinc-700"
           >
             <Plus size={14} />
             Thêm mục
@@ -119,7 +119,7 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
               event.preventDefault();
               void search();
             }}
-            className="flex h-9 w-full max-w-[300px] items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 focus-within:border-red-400"
+            className="flex h-9 w-full max-w-[300px] items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 focus-within:border-zinc-500"
           >
             <Search size={14} className="shrink-0 text-zinc-400" />
             <input
@@ -172,7 +172,7 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
                     internal: entry.internal,
                   })
                 }
-                className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left transition-colors hover:border-red-300"
+                className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-left transition-colors hover:border-zinc-400"
               >
                 <span className="flex items-center gap-2">
                   <span className="truncate text-[13.5px] font-semibold">{entry.title}</span>
@@ -224,7 +224,7 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
               onChange={(event) => setDraft({ ...draft, title: event.target.value })}
               maxLength={150}
               placeholder="Tiêu đề, cũng là từ khóa để bot tìm thấy (ví dụ: Lỗi thiếu file .dll)"
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-[13.5px] outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+              className="h-10 rounded-lg border border-zinc-300 px-3 text-[13.5px] outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
             />
             <textarea
               value={draft.body}
@@ -232,14 +232,14 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
               rows={8}
               maxLength={4000}
               placeholder="Nội dung bot nên biết hoặc câu trả lời chuẩn của shop…"
-              className="resize-y rounded-lg border border-zinc-300 px-3 py-2.5 text-[13px] leading-relaxed outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+              className="resize-y rounded-lg border border-zinc-300 px-3 py-2.5 text-[13px] leading-relaxed outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
             />
             <label className="flex items-start gap-2 rounded-lg bg-zinc-50 px-3 py-2.5 text-[12.5px] text-zinc-600">
               <input
                 type="checkbox"
                 checked={draft.internal}
                 onChange={(event) => setDraft({ ...draft, internal: event.target.checked })}
-                className="mt-0.5 h-4 w-4 accent-red-600"
+                className="mt-0.5 h-4 w-4 accent-zinc-900"
               />
               <span>
                 <span className="font-semibold">Chỉ nội bộ.</span> Bot không bao giờ
@@ -251,7 +251,7 @@ export function CrmKnowledge({ initial }: { initial: Entry[] }) {
                 type="button"
                 onClick={() => void save()}
                 disabled={saving}
-                className="h-9 rounded-lg bg-red-600 px-4 text-[13px] font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                className="h-9 rounded-lg bg-zinc-900 px-4 text-[13px] font-semibold text-white hover:bg-zinc-700 disabled:opacity-50"
               >
                 {saving ? <Loader2 size={14} className="animate-spin" /> : "Lưu"}
               </button>

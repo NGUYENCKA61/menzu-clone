@@ -54,7 +54,7 @@ export function CrmShell({
       {/* ----- desktop sidebar ----- */}
       <aside className="hidden w-[216px] shrink-0 flex-col border-r border-zinc-200 bg-white lg:flex">
         <div className="flex items-center gap-2.5 px-4 pb-5 pt-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white">
             <Headset size={17} />
           </span>
           <span className="leading-tight">
@@ -73,11 +73,11 @@ export function CrmShell({
               aria-current={active(href) ? "page" : undefined}
               className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] font-semibold transition-colors ${
                 active(href)
-                  ? "bg-red-50 text-red-700"
+                  ? "bg-zinc-100 text-zinc-900"
                   : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
               }`}
             >
-              <Icon size={16} className={active(href) ? "text-red-600" : "text-zinc-400"} />
+              <Icon size={16} className={active(href) ? "text-zinc-900" : "text-zinc-400"} />
               {label}
             </Link>
           ))}
@@ -108,7 +108,7 @@ export function CrmShell({
       {/* ----- phone top bar ----- */}
       <header className="flex flex-col border-b border-zinc-200 bg-white lg:hidden">
         <div className="flex h-14 items-center gap-2.5 px-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
             <Headset size={15} />
           </span>
           <span className="text-[13px] font-black tracking-wide">THICHTHIHACK CRM</span>
@@ -126,7 +126,7 @@ export function CrmShell({
               aria-current={active(href) ? "page" : undefined}
               className={`shrink-0 whitespace-nowrap border-b-2 px-3 pb-2 pt-1 text-[13px] font-semibold ${
                 active(href)
-                  ? "border-red-600 text-red-700"
+                  ? "border-zinc-900 text-zinc-900"
                   : "border-transparent text-zinc-500"
               }`}
             >

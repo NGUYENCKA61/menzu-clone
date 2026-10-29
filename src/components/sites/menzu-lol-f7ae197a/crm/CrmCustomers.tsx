@@ -166,7 +166,7 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
               event.preventDefault();
               void search();
             }}
-            className="flex h-9 w-full max-w-[320px] items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 focus-within:border-red-400 focus-within:ring-2 focus-within:ring-red-100"
+            className="flex h-9 w-full max-w-[320px] items-center gap-2 rounded-lg border border-zinc-300 bg-white px-3 focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200"
           >
             <Search size={14} className="shrink-0 text-zinc-400" />
             <input
@@ -369,7 +369,7 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                     }
                   }}
                   placeholder={tags.length === 0 ? "VIP, đại lý cũ…" : "Thêm nhãn"}
-                  className="h-7 min-w-[90px] flex-1 rounded-full border border-dashed border-zinc-300 px-2.5 text-[11.5px] outline-none placeholder:text-zinc-400 focus:border-red-400"
+                  className="h-7 min-w-[90px] flex-1 rounded-full border border-dashed border-zinc-300 px-2.5 text-[11.5px] outline-none placeholder:text-zinc-400 focus:border-zinc-500"
                 />
               </div>
             </div>
@@ -387,7 +387,7 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                 rows={3}
                 maxLength={2000}
                 placeholder="Khách không thấy phần này."
-                className="resize-y rounded-lg border border-zinc-300 px-3 py-2 text-[12.5px] outline-none placeholder:text-zinc-400 focus:border-red-400 focus:ring-2 focus:ring-red-100"
+                className="resize-y rounded-lg border border-zinc-300 px-3 py-2 text-[12.5px] outline-none placeholder:text-zinc-400 focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
               />
               <div className="flex items-center gap-2">
                 <button
@@ -422,7 +422,7 @@ export function CrmCustomers({ initial }: { initial: CustomerRow[] }) {
                     <Link
                       key={thread.id}
                       href={`/crm?thread=${thread.id}`}
-                      className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 transition-colors hover:border-red-300 hover:bg-red-50/40"
+                      className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-2 transition-colors hover:border-zinc-400 hover:bg-zinc-100/40"
                     >
                       <span
                         className={`shrink-0 rounded-md border px-1.5 py-[1px] text-[10px] font-bold ${badge.cls}`}

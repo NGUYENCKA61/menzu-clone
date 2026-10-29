@@ -214,7 +214,7 @@ export function CrmReport({ data }: { data: CrmReportData }) {
               Chat cần xử lý
             </p>
             <p className="text-xl font-black tabular-nums">{chat.needAdmin}</p>
-            <Link href="/crm" className="text-[11px] font-semibold text-red-700 hover:underline">
+            <Link href="/crm" className="text-[11px] font-semibold text-zinc-900 hover:underline">
               Mở hộp thư
             </Link>
           </div>
@@ -222,14 +222,14 @@ export function CrmReport({ data }: { data: CrmReportData }) {
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-4">
           <h2 className="text-[14px] font-bold">Doanh thu theo ngày</h2>
-          <Bars days={data.days} pick={(d) => d.revenue} color="#dc2626" money />
+          <Bars days={data.days} pick={(d) => d.revenue} color="#18181b" money />
           <NumberTable days={data.days} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-2xl border border-zinc-200 bg-white p-4">
             <h2 className="text-[14px] font-bold">Khách đăng ký mới theo ngày</h2>
-            <Bars days={data.days} pick={(d) => d.newUsers} color="#0284c7" />
+            <Bars days={data.days} pick={(d) => d.newUsers} color="#52525b" />
           </div>
 
           <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4">
@@ -287,7 +287,7 @@ export function CrmReport({ data }: { data: CrmReportData }) {
                     <td className="py-2">
                       <Link
                         href={`/admin/users/${customer.uid}`}
-                        className="font-semibold hover:text-red-700"
+                        className="font-semibold hover:text-zinc-900"
                       >
                         {customer.username}
                       </Link>
